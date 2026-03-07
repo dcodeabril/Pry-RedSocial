@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Facebook Local - Muro</title>
+    <link rel="stylesheet" href="css/general.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>Facebook Local</h1>
+        <nav>
+            <a href="perfil.html">Mi Perfil</a>
+            <a href="ajustes.html">Ajustes</a>
+            <a href="admin_panel.html">Admin</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="create-post">
+            <textarea id="post-contenido" placeholder="¿Qué estás pensando, Diego?"></textarea>
+            <div class="post-actions">
+                <select id="post-privacidad">
+                    <option value="publica">Pública</option>
+                    <option value="amigos">Amigos</option>
+                    <option value="solo_yo">Solo yo</option>
+                </select>
+                <button id="btn-publicar">Publicar</button>
+            </div>
+        </section>
+
+        <section id="feed">
+            </section>
+    </main>
+
+    <script src="js/publicaciones.js"></script>
+</body>
+</html>
