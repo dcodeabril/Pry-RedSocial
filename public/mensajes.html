@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Facebook Local - Mensajes</title>
+    <link rel="stylesheet" href="css/general.css">
+    <style>
+        .chat-layout { display: flex; height: 80vh; gap: 20px; }
+        .sidebar-amigos { width: 30%; border-right: 1px solid #ddd; padding: 10px; background: white; }
+        .chat-window { width: 70%; display: flex; flex-direction: column; background: white; padding: 15px; }
+        .mensajes-lista { flex-grow: 1; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .msg-emisor { text-align: right; color: blue; }
+        .msg-receptor { text-align: left; color: green; }
+    </style>
+</head>
+<body>
+    <header><h1>Mis Mensajes</h1></header>
+    <div class="container chat-layout">
+        <aside class="sidebar-amigos">
+            <h3>Amigos</h3>
+            <ul id="lista-amigos"></ul>
+        </aside>
+        <section class="chat-window">
+            <div id="chat-header">Selecciona un amigo para chatear</div>
+            <div id="mensajes-body" class="mensajes-lista"></div>
+            <div class="chat-input">
+                <input type="text" id="input-msj" placeholder="Escribe un mensaje...">
+                <button id="btn-enviar">Enviar</button>
+            </div>
+        </section>
+    </div>
+    <script src="js/mensajes.js"></script>
+</body>
+</html>
