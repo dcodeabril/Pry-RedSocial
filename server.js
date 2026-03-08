@@ -13,15 +13,14 @@ const app = express();
 
 // --- 🛠️ MIDDLEWARES ---
 app.use(cors());
-app.use(express.json()); // Vital para procesar mensajes, publicaciones y bloqueos
-
-// Servidor de archivos estáticos (HTML, CSS, JS Nativo de tus 5 compañeros)
+app.use(express.json()); 
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- 🗄️ CONEXIÓN A LA BASE DE DATOS ---
 const db = require('./db/base_datos');
 
 // --- 🛣️ IMPORTACIÓN DE RUTAS ---
+
 // Persona 1: Seguridad y Gestión
 const usuariosRoutes = require('./rutas/usuarios.routes.js');
 const seguridadRoutes = require('./rutas/seguridad.routes.js');
@@ -30,21 +29,30 @@ const adminRoutes = require('./rutas/admin.routes.js');
 // Persona 2: El Muro Social
 const publicacionesRoutes = require('./rutas/publicaciones.routes.js'); 
 
-// Persona 3: Comunicación Personal y Seguridad [FINALIZADO]
+// Persona 3: Comunicación Personal
 const amistadesRoutes = require('./rutas/amistades.routes.js');
 const chatsRoutes = require('./rutas/chats.routes.js');
-const bloqueosRoutes = require('./rutas/bloqueos.routes.js'); // [NUEVO]
+const bloqueosRoutes = require('./rutas/bloqueos.routes.js');
+
+// Persona 4: Utilidades y Mantenimiento
+const notificacionesRoutes = require('./rutas/notificaciones.routes.js');
+const eventosRoutes = require('./rutas/eventos.routes.js');
+const reportesRoutes = require('./rutas/reportes.routes.js');
 
 // --- 🔗 USO DE RUTAS ---
+
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/seguridad', seguridadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/publicaciones', publicacionesRoutes);
-
-// Activación de módulos de la Persona 3
 app.use('/api/amistades', amistadesRoutes);
 app.use('/api/chats', chatsRoutes);
-app.use('/api/bloqueos', bloqueosRoutes); // [NUEVO] Activa el escudo de privacidad
+app.use('/api/bloqueos', bloqueosRoutes);
+
+// Activación Módulos Persona 4
+app.use('/api/notificaciones', notificacionesRoutes);
+app.use('/api/eventos', eventosRoutes);
+app.use('/api/reportes', reportesRoutes);
 
 // --- 📡 RUTAS DE ESTADO Y PRUEBA ---
 app.get('/api/estado', (req, res) => {
@@ -53,27 +61,46 @@ app.get('/api/estado', (req, res) => {
         arquitecto: "Diego Abril",
         estado_db: "Conectada a facebook_local",
         modulos_activos: [
-            "Seguridad", 
-            "Usuarios", 
-            "Admin", 
-            "Publicaciones", 
-            "Amistades", 
-            "Chats",
-            "Bloqueos" // Confirmación de módulo 3 completo
+            "Seguridad (P1)", 
+            "Usuarios (P1)", 
+            "Admin (P1)", 
+            "Publicaciones (P2)", 
+            "Amistades (P3)", 
+            "Chats (P3)",
+            "Bloqueos (P3)",
+            "Notificaciones (P4)",
+            "Eventos (P4)",
+            "Reportes (P4)"
         ]
     });
 });
 
-// --- 🚀 ARRANQUE DEL SERVIDOR ---
+// --- 🚀 ARRANQUE DEL SERVIDOR CON VERIFICACIÓN ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`
-    =============================================
-    📡 SERVIDOR INICIADO - ROL ARQUITECTO
-    🔗 URL: http://localhost:${PORT}
-    🏠 Directorio Público: /public
-    🗄️ Base de Datos: MySQL (Local)
-    ✅ Módulos: Persona 1, Persona 2, Persona 3 (OK)
-    =============================================
-    `);
+
+app.listen(PORT, async () => {
+    try {
+        // Intento de consulta real para verificar credenciales
+        await db.query('SELECT 1'); 
+        
+        console.log(`
+        =============================================
+        📡 SERVIDOR INICIADO - ROL ARQUITECTO
+        🔗 URL: http://localhost:${PORT}
+        🏠 Directorio Público: /public
+        🗄️ Base de Datos: MySQL (CONEXIÓN VERIFICADA ✅)
+        ✅ Módulos: P1, P2, P3 y P4 (100% Operativos)
+        =============================================
+        `);
+    } catch (error) {
+        console.error(`
+        =============================================
+        ❌ ERROR CRÍTICO: FALLO DE CONEXIÓN A MYSQL
+        Detalle: ${error.message}
+        ---------------------------------------------
+        Revisa tu archivo .env y asegúrate de que 
+        el usuario y la contraseña sean correctos.
+        =============================================
+        `);
+    }
 });

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Notificaciones - Facebook Local</title>
+    <link rel="stylesheet" href="css/general.css">
+    <style>
+        .notif-container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .notif-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f0f2f5; transition: background 0.3s; }
+        .notif-item.no-leido { background-color: #e7f3ff; }
+        .notif-item:hover { background-color: #f2f2f2; cursor: pointer; }
+        .notif-avatar { width: 45px; height: 45px; background: #ddd; border-radius: 50%; margin-right: 12px; }
+        .notif-content { flex-grow: 1; }
+        .notif-text { font-size: 0.95em; color: #050505; }
+        .notif-time { font-size: 0.8em; color: #65676b; margin-top: 4px; }
+        .status-dot { width: 10px; height: 10px; background: #1877f2; border-radius: 50%; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <h1>Notificaciones</h1>
+        <nav><a href="index.html">Volver al Muro</a></nav>
+    </header>
+
+    <div class="notif-container" id="lista-notificaciones">
+        <p style="padding: 20px; text-align: center;">Cargando tus alertas...</p>
+    </div>
+
+    <script src="js/notificaciones.js"></script>
+</body>
+</html>
