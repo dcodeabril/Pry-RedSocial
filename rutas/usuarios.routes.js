@@ -1,13 +1,18 @@
-// rutas/usuarios.routes.js
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (INTEGRACIÓN TOTAL P1 + P5)
+// ARCHIVO: rutas/usuarios.routes.js
+// =============================================
+
 const express = require('express');
-const router = express.Router(); // <--- ¡ESTA ES LA LÍNEA QUE FALTABA!
+const router = express.Router();
 const db = require('../db/base_datos');
 
-// 1. REGISTRAR un nuevo usuario (Persona 1)
+// --- 1. REGISTRO DE USUARIOS (Persona 1: Seguridad) ---
 router.post('/registro', async (req, res) => {
     const { email, password } = req.body;
 
-    // Validación: Contraseña de exactamente 12 caracteres
+    // 🛡️ Regla de Oro: Contraseña de exactamente 12 caracteres
     if (password.length !== 12) {
         return res.status(400).json({ error: "La contraseña debe tener exactamente 12 caracteres." });
     }
@@ -23,29 +28,59 @@ router.post('/registro', async (req, res) => {
     }
 });
 
-// 2. ACTUALIZAR perfil (Persona 1 - Continuación)
-router.put('/perfil/:id', async (req, res) => {
+// --- 2. OBTENER AJUSTES Y PERFIL (Persona 1 y 5) ---
+// Recupera todos los datos para cargar el formulario de Ajustes
+router.get('/ajustes/:id', async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, bio, password } = req.body;
-
-    if (password && password.length !== 12) {
-        return res.status(400).json({ error: "La nueva contraseña debe tener exactamente 12 caracteres." });
-    }
-
     try {
-        if (password) {
-            await db.query('UPDATE usuarios SET password = ? WHERE id = ?', [password, id]);
+        const query = `
+            SELECT u.email, u.preferencia_tema, p.nombre, p.apellido, p.bio, p.foto_url 
+            FROM usuarios u 
+            JOIN perfiles p ON u.id = p.usuario_id 
+            WHERE u.id = ?`;
+        
+        const [rows] = await db.query(query, [id]);
+        
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: "Usuario no encontrado" });
         }
-        // Nota: Asegúrate de que la tabla 'perfiles' exista en tu DB
-        await db.query(
-            'UPDATE perfiles SET nombre = ?, apellido = ?, bio = ? WHERE usuario_id = ?',
-            [nombre, apellido, bio, id]
-        );
-        res.json({ mensaje: "Perfil actualizado correctamente" });
     } catch (err) {
-        res.status(500).json({ error: "Error al actualizar el perfil" });
+        res.status(500).json({ error: "Error al obtener los datos del servidor" });
     }
 });
 
-// ¡No olvides exportarlo!
+// --- 3. SUPER-UPDATE: PERFIL Y AJUSTES (Persona 1 y 5) ---
+// Esta ruta unificada actualiza Seguridad, Estética y Datos Personales a la vez
+router.put('/actualizar-ajustes/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nombre, apellido, bio, foto_url, tema, password } = req.body;
+
+    try {
+        // A. Actualización en Tabla Usuarios (Password y Tema)
+        if (password) {
+            if (password.length !== 12) {
+                return res.status(400).json({ error: "La contraseña debe ser de 12 caracteres." });
+            }
+            await db.query('UPDATE usuarios SET password = ?, preferencia_tema = ? WHERE id = ?', [password, tema, id]);
+        } else {
+            await db.query('UPDATE usuarios SET preferencia_tema = ? WHERE id = ?', [tema, id]);
+        }
+
+        // B. Actualización en Tabla Perfiles (Datos Visuales)
+        await db.query(
+            `UPDATE perfiles 
+             SET nombre = ?, apellido = ?, bio = ?, foto_url = ? 
+             WHERE usuario_id = ?`,
+            [nombre, apellido, bio, foto_url, id]
+        );
+
+        res.json({ mensaje: "¡Perfil y ajustes actualizados correctamente! ✅" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error crítico al guardar en la base de datos." });
+    }
+});
+
 module.exports = router;

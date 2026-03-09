@@ -1,6 +1,60 @@
-/* public/css/general.css */
-.post-card {
-    background: white;
+/* =============================================
+   PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+   ROL: PERSONA 5 (DISEÑO Y UI/UX)
+   ARCHIVO: general.css
+   ============================================= */
+
+/* --- 📋 VARIABLES DE COLORES GLOBALES --- */
+:root {
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-color: #050505;
+    --text-muted: #65676b;
+    --primary: #1877f2;
+    --header-bg: #ffffff;
+    --border-color: #eeeeee;
+}
+
+/* --- 🌙 COLORES PARA MODO OSCURO --- */
+body.dark-mode {
+    --bg-color: #18191a;
+    --card-bg: #242526;
+    --text-color: #e4e6eb;
+    --text-muted: #b0b3b8;
+    --header-bg: #242526;
+    --border-color: #3e4042;
+}
+
+/* --- 🏗️ ESTILOS BASE Y CONTENEDORES --- */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: Segoe UI, Helvetica, Arial, sans-serif;
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+}
+
+.main-header {
+    background: var(--header-bg);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 15px;
+}
+
+/* --- 📄 DISEÑO DE TARJETAS (POSTS, NOTIF, EVENTOS) --- */
+.card, .post-card {
+    background: var(--card-bg);
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 20px;
@@ -8,14 +62,83 @@
     text-align: left;
 }
 
-.post-header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
-.post-body { font-size: 1.1em; margin-bottom: 15px; }
-.post-footer { display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+/* --- 📝 ESTILOS ESPECÍFICOS DEL MURO (PERSONA 2) --- */
+.post-header { 
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 10px; 
+    margin-bottom: 10px; 
+}
 
+.post-body { 
+    font-size: 1.1em; 
+    margin-bottom: 15px; 
+}
+
+.post-footer { 
+    display: flex; 
+    gap: 10px; 
+    border-top: 1px solid var(--border-color); 
+    padding-top: 10px; 
+}
+
+/* --- 💬 ESTILOS DE COMENTARIOS --- */
 .comment-box {
-    background: #f0f2f5;
-    padding: 8px;
+    background: var(--bg-color); /* Se adapta al modo oscuro */
+    color: var(--text-color);
+    padding: 10px;
     border-radius: 15px;
-    margin-top: 5px;
+    margin-top: 8px;
     font-size: 0.9em;
+}
+
+/* --- 📱 ADAPTABILIDAD PARA MÓVILES --- */
+@media (max-width: 768px) {
+    .main-header h1 { font-size: 1.2em; }
+    .container { padding: 10px; }
+    .post-card { border-radius: 0; margin-bottom: 10px; }
+}
+/* --- 🔘 BOTONES Y ACCIONES ESTILIZADAS --- */
+button, .btn-secundario {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+button:hover {
+    filter: brightness(0.9);
+}
+
+.btn-secundario {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+/* --- 📝 CAMPOS DE ENTRADA --- */
+textarea, input, select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- 🔗 ENLACES DE NAVEGACIÓN --- */
+nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-right: 15px;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: var(--primary);
 }

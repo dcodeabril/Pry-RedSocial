@@ -7,16 +7,18 @@
 </head>
 <body>
     <header class="main-header">
-        <h1>Facebook Local</h1>
+        <div class="logo"><h1>Facebook Local</h1></div>
         <nav>
-            <a href="perfil.html">Mi Perfil</a>
-            <a href="ajustes.html">Ajustes</a>
-            <a href="admin_panel.html">Admin</a>
+            <a href="index.html">Muro</a>
+            <a href="mensajes.html">Mensajes</a>
+            <a href="notificaciones.html">Notificaciones</a>
+            <a href="eventos.html">Eventos</a>
+            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
     <main class="container">
-        <section class="create-post">
+        <section class="card create-post">
             <textarea id="post-contenido" placeholder="¿Qué estás pensando, Diego?"></textarea>
             <div class="post-actions">
                 <select id="post-privacidad">
@@ -33,5 +35,6 @@
     </main>
 
     <script src="js/publicaciones.js"></script>
+    <script src="js/tema.js"></script>
 </body>
 </html>

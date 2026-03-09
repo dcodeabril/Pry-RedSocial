@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración - Facebook Local</title>
+    <link rel="stylesheet" href="css/general.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo"><h1>Configuración</h1></div>
+        <nav>
+            <a href="index.html">Volver al Muro</a>
+            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <h2>Ajustes de Cuenta y Perfil</h2>
+            <form id="form-ajustes">
+                
+                <div class="form-group">
+                    <label for="edit-nombre">Nombre:</label>
+                    <input type="text" id="edit-nombre" placeholder="Tu nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-apellido">Apellido:</label>
+                    <input type="text" id="edit-apellido" placeholder="Tu apellido" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-bio">Biografía (BIO):</label>
+                    <textarea id="edit-bio" rows="3" placeholder="Cuéntanos sobre ti..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-password">Nueva Contraseña (12 caracteres):</label>
+                    <input type="password" id="edit-password" placeholder="Dejar en blanco para no cambiar">
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
+
+                <div class="form-group">
+                    <label for="adj-foto-url">URL de Foto de Perfil:</label>
+                    <input type="text" id="adj-foto-url" placeholder="https://ejemplo.com/foto.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="adj-tema">Tema del Sistema:</label>
+                    <select id="adj-tema">
+                        <option value="claro">☀️ Modo Claro</option>
+                        <option value="oscuro">🌙 Modo Oscuro</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="btn-guardar-ajustes" style="margin-top: 20px; width: 100%;">
+                    Guardar Cambios Permanentes
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/tema.js"></script>
+    <script src="js/ajustes.js"></script>
+</body>
+</html>

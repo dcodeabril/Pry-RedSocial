@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - Facebook Local</title>
+    <link rel="stylesheet" href="css/general.css">
+    <style>
+        .profile-header { background: var(--card-bg); border-radius: 0 0 8px 8px; overflow: hidden; }
+        .cover-photo { height: 200px; background: #ddd; }
+        .user-info-bar { display: flex; align-items: flex-end; padding: 0 30px 20px; margin-top: -60px; }
+        .profile-pic { width: 150px; height: 150px; border-radius: 50%; border: 5px solid var(--card-bg); background: #eee; }
+        .user-names { margin-left: 20px; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <h1>Facebook Local</h1>
+        <nav><a href="index.html">Volver al Muro</a></nav>
+    </header>
+
+    <div class="container">
+        <div class="profile-header card">
+            <div class="cover-photo"></div>
+            <div class="user-info-bar">
+                <div class="profile-pic"></div>
+                <div class="user-names">
+                    <h2 id="prof-nombre">Diego Abril</h2>
+                    <p id="prof-bio">Arquitecto del Sistema</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/tema.js"></script>
+</body>
+</html>
