@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (INTEGRACIÓN TOTAL)
+// ROL: ARQUITECTO (INTEGRACIÓN TOTAL P1-P5)
 // ARCHIVO: server.js
 // =============================================
 
@@ -11,10 +11,12 @@ require('dotenv').config();
 
 const app = express();
 
-// --- 🛠️ MIDDLEWARES ---
+/// --- 🛠️ MIDDLEWARES (CORREGIDO) ---
 app.use(cors());
 app.use(express.json()); 
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Le decimos a Express que NO sirva index.html automáticamente
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // --- 🗄️ CONEXIÓN A LA BASE DE DATOS ---
 const db = require('./db/base_datos');
@@ -39,7 +41,7 @@ const notificacionesRoutes = require('./rutas/notificaciones.routes.js');
 const eventosRoutes = require('./rutas/eventos.routes.js');
 const reportesRoutes = require('./rutas/reportes.routes.js');
 
-// --- 🔗 USO DE RUTAS ---
+// --- 🔗 USO DE RUTAS API ---
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/seguridad', seguridadRoutes);
@@ -48,29 +50,27 @@ app.use('/api/publicaciones', publicacionesRoutes);
 app.use('/api/amistades', amistadesRoutes);
 app.use('/api/chats', chatsRoutes);
 app.use('/api/bloqueos', bloqueosRoutes);
-
-// Activación Módulos Persona 4
 app.use('/api/notificaciones', notificacionesRoutes);
 app.use('/api/eventos', eventosRoutes);
 app.use('/api/reportes', reportesRoutes);
 
-// --- 📡 RUTAS DE ESTADO Y PRUEBA ---
+// --- 🚪 RUTA DE ENTRADA PRINCIPAL (NUEVA) ---
+// Cuando entres a http://localhost:3000/ verás el Login
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'auth.html'));
+});
+
+// --- 📡 RUTA DE ESTADO Y PRUEBA ---
 app.get('/api/estado', (req, res) => {
     res.json({ 
         mensaje: "Servidor de Facebook Local funcionando 🚀",
-        arquitecto: "Diego Abril",
+        arquitecto: "Israel Díaz", // Nombre actualizado
         estado_db: "Conectada a facebook_local",
         modulos_activos: [
-            "Seguridad (P1)", 
-            "Usuarios (P1)", 
-            "Admin (P1)", 
-            "Publicaciones (P2)", 
-            "Amistades (P3)", 
-            "Chats (P3)",
-            "Bloqueos (P3)",
-            "Notificaciones (P4)",
-            "Eventos (P4)",
-            "Reportes (P4)"
+            "Seguridad (P1)", "Admin (P1)", "Publicaciones (P2)", 
+            "Amistades (P3)", "Chats (P3)", "Bloqueos (P3)",
+            "Notificaciones (P4)", "Eventos (P4)", "Reportes (P4)",
+            "Estética y UX (P5)"
         ]
     });
 });
@@ -80,16 +80,14 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, async () => {
     try {
-        // Intento de consulta real para verificar credenciales
         await db.query('SELECT 1'); 
-        
         console.log(`
         =============================================
-        📡 SERVIDOR INICIADO - ROL ARQUITECTO
+        📡 SERVIDOR INICIADO - ARQUITECTO ISRAEL DÍAZ
         🔗 URL: http://localhost:${PORT}
-        🏠 Directorio Público: /public
+        🏠 Acceso: Redireccionado a /auth.html
         🗄️ Base de Datos: MySQL (CONEXIÓN VERIFICADA ✅)
-        ✅ Módulos: P1, P2, P3 y P4 (100% Operativos)
+        ✅ Sistema: P1, P2, P3, P4 y P5 Operativos
         =============================================
         `);
     } catch (error) {
@@ -97,9 +95,6 @@ app.listen(PORT, async () => {
         =============================================
         ❌ ERROR CRÍTICO: FALLO DE CONEXIÓN A MYSQL
         Detalle: ${error.message}
-        ---------------------------------------------
-        Revisa tu archivo .env y asegúrate de que 
-        el usuario y la contraseña sean correctos.
         =============================================
         `);
     }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido - Facebook Local</title>
+    <script src="js/guardia.js"></script>
+    <link rel="stylesheet" href="css/general.css">
+    <style>
+        .auth-container { max-width: 400px; margin: 100px auto; text-align: center; }
+        .auth-box { padding: 30px; }
+        .toggle-link { color: var(--primary); cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="auth-container">
+        <h1>Facebook Local</h1>
+        <div class="card auth-box" id="login-section">
+            <h2>Iniciar Sesión</h2>
+            <input type="email" id="login-email" placeholder="Correo electrónico" class="margin-v">
+            <input type="password" id="login-pass" placeholder="Contraseña (12 caracteres)" class="margin-v">
+            <button id="btn-entrar" style="width: 100%;">Entrar</button>
+            <p style="margin-top:15px;">¿No tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Regístrate</span></p>
+        </div>
+
+        <div class="card auth-box" id="register-section" style="display: none;">
+            <h2>Crear Cuenta</h2>
+            <input type="email" id="reg-email" placeholder="Tu correo electrónico" class="margin-v">
+            <input type="password" id="reg-pass" placeholder="Crea tu clave (12 caracteres)" class="margin-v">
+            <button id="btn-registrar" style="width: 100%;">Registrarme</button>
+            <p style="margin-top:15px;">¿Ya tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Inicia Sesión</span></p>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

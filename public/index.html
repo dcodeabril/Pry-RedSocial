@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Facebook Local - Muro</title>
+    <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="css/general.css">
 </head>
 <body>
@@ -10,16 +11,18 @@
         <div class="logo"><h1>Facebook Local</h1></div>
         <nav>
             <a href="index.html">Muro</a>
+            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
             <a href="mensajes.html">Mensajes</a>
             <a href="notificaciones.html">Notificaciones</a>
             <a href="eventos.html">Eventos</a>
-            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
+            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
     <main class="container">
         <section class="card create-post">
-            <textarea id="post-contenido" placeholder="¿Qué estás pensando, Diego?"></textarea>
+            <textarea id="post-contenido" placeholder="¿Qué estás pensando?"></textarea>
             <div class="post-actions">
                 <select id="post-privacidad">
                     <option value="publica">Pública</option>
@@ -36,5 +39,16 @@
 
     <script src="js/publicaciones.js"></script>
     <script src="js/tema.js"></script>
+    <script src="js/usuario_global.js"></script>
+
+    <script>
+        document.getElementById('btn-salir').addEventListener('click', (e) => {
+            e.preventDefault(); // Evita que el enlace recargue la página innecesariamente
+            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                localStorage.removeItem('usuarioId'); // Destruimos la llave de acceso
+                window.location.href = '/'; // Redirección inmediata a la Aduana (Login)
+            }
+        });
+    </script>
 </body>
 </html>

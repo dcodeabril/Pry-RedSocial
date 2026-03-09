@@ -28,8 +28,39 @@ router.post('/registro', async (req, res) => {
     }
 });
 
-// --- 2. OBTENER AJUSTES Y PERFIL (Persona 1 y 5) ---
-// Recupera todos los datos para cargar el formulario de Ajustes
+// --- 2. LOGIN DE USUARIOS (NUEVO - Persona 1) ---
+// Valida el acceso y permite la entrada al muro
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Buscamos al usuario por su email
+        const [usuarios] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+
+        if (usuarios.length === 0) {
+            return res.status(401).json({ error: "El correo no está registrado." });
+        }
+
+        const usuario = usuarios[0];
+
+        // Verificamos la regla de los 12 caracteres
+        if (usuario.password !== password) {
+            return res.status(401).json({ error: "Contraseña incorrecta." });
+        }
+
+        // Si todo es correcto, enviamos el ID para el localStorage del frontend
+        res.json({ 
+            mensaje: "¡Bienvenido de nuevo!", 
+            usuarioId: usuario.id,
+            email: usuario.email 
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: "Error en el servidor al intentar entrar." });
+    }
+});
+
+// --- 3. OBTENER AJUSTES Y PERFIL (Persona 1 y 5) ---
 router.get('/ajustes/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -51,14 +82,12 @@ router.get('/ajustes/:id', async (req, res) => {
     }
 });
 
-// --- 3. SUPER-UPDATE: PERFIL Y AJUSTES (Persona 1 y 5) ---
-// Esta ruta unificada actualiza Seguridad, Estética y Datos Personales a la vez
+// --- 4. SUPER-UPDATE: PERFIL Y AJUSTES (Persona 1 y 5) ---
 router.put('/actualizar-ajustes/:id', async (req, res) => {
     const { id } = req.params;
     const { nombre, apellido, bio, foto_url, tema, password } = req.body;
 
     try {
-        // A. Actualización en Tabla Usuarios (Password y Tema)
         if (password) {
             if (password.length !== 12) {
                 return res.status(400).json({ error: "La contraseña debe ser de 12 caracteres." });
@@ -68,7 +97,6 @@ router.put('/actualizar-ajustes/:id', async (req, res) => {
             await db.query('UPDATE usuarios SET preferencia_tema = ? WHERE id = ?', [tema, id]);
         }
 
-        // B. Actualización en Tabla Perfiles (Datos Visuales)
         await db.query(
             `UPDATE perfiles 
              SET nombre = ?, apellido = ?, bio = ?, foto_url = ? 
