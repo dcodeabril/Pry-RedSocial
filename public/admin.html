@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Admin - Facebook Local</title>
+    <script src="js/guardia.js"></script>
+    <link rel="stylesheet" href="css/general.css">
+    <style>
+        .admin-section { margin-bottom: 50px; }
+        .tab-header { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .tab-btn { cursor: pointer; padding: 10px 20px; border-radius: 5px; border: none; font-weight: bold; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        
+        /* Estilos Usuarios */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; }
+
+        /* Estilos Reportes */
+        .report-card { 
+            display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; 
+            align-items: center; padding: 20px; margin-bottom: 15px;
+            border-left: 6px solid #ffa500; background: white; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo"><h1>Admin Control Center</h1></div>
+        <nav>
+            <a href="index.html">Ver Muro</a>
+            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="admin-section">
+            <div class="header-notif">
+                <h2>🚩 Reportes de la Comunidad</h2>
+                <span id="contador-reportes" class="badge">0 pendientes</span>
+            </div>
+            <div id="lista-reportes-admin" style="margin-top: 20px;">
+                <p>Cargando denuncias...</p>
+            </div>
+        </section>
+
+        <hr style="margin: 40px 0;">
+
+        <section class="admin-section">
+            <h2>👥 Control de Usuarios</h2>
+            <div id="msg"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-usuarios">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/tema.js"></script>
+    <script src="js/admin.js"></script> </body>
+</html>

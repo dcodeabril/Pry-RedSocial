@@ -8,23 +8,29 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos');
 
-// --- 1. OBTENER TODAS LAS NOTIFICACIONES ---
+// --- 1. OBTENER NOTIFICACIONES FILTRADAS (P4) ---
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        // Unimos la Tabla 9 (notificaciones) con la Tabla 2 (perfiles)
-        // para saber quién es el emisor y mostrar su foto y nombre
+        // 🛡️ Filtro de Arquitecto:
+        // Traemos las notificaciones, PERO ignoramos las de usuarios bloqueados
+        // (tanto los que yo bloqueé como los que me bloquearon)
         const query = `
             SELECT n.*, p.nombre, p.apellido, p.foto_url 
             FROM notificaciones n
             JOIN perfiles p ON n.emisor_id = p.usuario_id
             WHERE n.usuario_id = ?
+            AND n.emisor_id NOT IN (
+                SELECT usuario_bloqueado_id FROM bloqueos WHERE usuario_id = ?
+            )
+            AND n.emisor_id NOT IN (
+                SELECT usuario_id FROM bloqueos WHERE usuario_bloqueado_id = ?
+            )
             ORDER BY n.fecha DESC LIMIT 20`;
             
-        const [alertas] = await db.query(query, [id]);
+        const [alertas] = await db.query(query, [id, id, id]);
         res.json(alertas);
     } catch (err) {
-        // Imprime el error real en la terminal para depuración (Mantenimiento P4)
         console.error("❌ ERROR AL CARGAR NOTIFICACIONES:", err); 
         res.status(500).json({ error: "Error interno al obtener los avisos." });
     }
@@ -34,7 +40,6 @@ router.get('/:id', async (req, res) => {
 router.put('/leer-todas/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        // Cambiamos el estado leido de 0 a 1 (TINYINT)
         await db.query(
             'UPDATE notificaciones SET leido = 1 WHERE usuario_id = ?', 
             [id]
@@ -46,7 +51,7 @@ router.put('/leer-todas/:id', async (req, res) => {
     }
 });
 
-// --- 3. [EXTRA] ELIMINAR UNA NOTIFICACIÓN ESPECÍFICA ---
+// --- 3. ELIMINAR UNA NOTIFICACIÓN ESPECÍFICA ---
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {

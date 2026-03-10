@@ -1,12 +1,11 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (LÓGICA DE NOTIFICACIONES P4)
+// ROL: ARQUITECTO (LÓGICA DE NOTIFICACIONES P3 + P4)
 // ARCHIVO: public/js/notificaciones.js
 // =============================================
 
 const lista = document.getElementById('lista-notificaciones');
 const btnMarcarTodas = document.getElementById('btn-marcar-leidas');
-// 🛡️ Identidad dinámica: Recuperamos el ID de quien inició sesión
 const miId = localStorage.getItem('usuarioId');
 
 // --- 1. CARGAR NOTIFICACIONES DESDE LA API ---
@@ -26,22 +25,39 @@ async function cargarNotificaciones() {
 
         data.forEach(n => {
             const item = document.createElement('div');
-            // Aplicamos las clases de estilo definidas en el HTML (P5)
             item.className = `notif-item ${n.leido ? '' : 'no-leido'}`;
             
+            // 🛡️ Lógica de botones para Solicitud de Amistad (Persona 3)
+            let botonesAmistad = '';
+            if (n.tipo === 'amistad') {
+                // Usamos n.referencia_id para apuntar a la fila de la tabla 'amistades'
+                // Si no existe, usamos el id de la notificación como fallback
+                const idVínculo = n.referencia_id || n.id; 
+                botonesAmistad = `
+                    <div class="notif-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button onclick="responderSolicitud(${idVínculo}, 'aceptada')" class="btn-primario" style="padding: 5px 12px; font-size: 0.85rem;">Aceptar</button>
+                        <button onclick="responderSolicitud(${idVínculo}, 'rechazada')" class="btn-secundario" style="padding: 5px 12px; font-size: 0.85rem;">Rechazar</button>
+                    </div>
+                `;
+            }
+
             item.innerHTML = `
                 <img src="${n.foto_url || 'img/default.png'}" class="notif-avatar" alt="Avatar">
-                <div class="notif-content">
+                <div class="notif-content" style="flex-grow: 1;">
                     <div class="notif-text">
                         <strong>${n.nombre} ${n.apellido}</strong> ${interpretarTipo(n.tipo)}
                     </div>
                     <div class="notif-time">${new Date(n.fecha).toLocaleString()}</div>
+                    ${botonesAmistad}
                 </div>
                 ${n.leido ? '' : '<div class="status-dot"></div>'}
+                <button onclick="borrarNotificacion(${n.id})" style="background:none; border:none; cursor:pointer; margin-left:10px; opacity:0.5;">🗑️</button>
             `;
 
-            // Al hacer clic, se marca como leída solo esta notificación
-            item.onclick = () => marcarUnaComoLeida(n.id, item);
+            // Al hacer clic en el cuerpo (fuera de los botones), marcar como leída
+            item.onclick = (e) => {
+                if(e.target.tagName !== 'BUTTON') marcarUnaComoLeida(n.id, item);
+            };
             
             lista.appendChild(item);
         });
@@ -58,42 +74,64 @@ function interpretarTipo(tipo) {
         case 'reaccion': return "reaccionó a tu publicación 👍";
         case 'comentario': return "comentó tu post 💬";
         case 'mensaje': return "te envió un mensaje privado ✉️";
-        case 'amistad': return "te envió una solicitud de amistad 🤝";
+        case 'amistad': return "te envió una <b>solicitud de amistad</b> 🤝";
         default: return "realizó una acción en tu cuenta.";
     }
 }
 
-// --- 3. MARCAR UNA NOTIFICACIÓN COMO LEÍDA ---
+// --- 3. [NUEVO] RESPONDER SOLICITUD DE AMISTAD (Persona 3) ---
+window.responderSolicitud = async function(idReferencia, estado) {
+    try {
+        const res = await fetch('/api/amistades/responder', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                solicitud_id: idReferencia,
+                nuevo_estado: estado
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert("🤝 " + data.mensaje);
+            location.reload(); // Recargar para limpiar el buzón
+        } else {
+            alert("❌ " + data.error);
+        }
+    } catch (err) {
+        console.error("Error al responder solicitud:", err);
+    }
+};
+
+// --- 4. MARCAR UNA NOTIFICACIÓN COMO LEÍDA ---
 async function marcarUnaComoLeida(id, elemento) {
     try {
-        // Usamos el endpoint de borrar o uno específico de 'leer'
-        // En este caso, simulamos la actualización visual inmediata
         elemento.classList.remove('no-leido');
         const dot = elemento.querySelector('.status-dot');
         if (dot) dot.remove();
-
-        // [OPCIONAL] Avisar al servidor que esta ID ya se leyó
-        // await fetch(`/api/notificaciones/leer-una/${id}`, { method: 'PUT' });
+        // Opcional: Llamada al servidor para persistir el estado 'leido'
     } catch (err) {
         console.error("Error al marcar como leída:", err);
     }
 }
 
-// --- 4. MARCAR TODAS COMO LEÍDAS (BOTÓN GLOBAL) ---
+// --- 5. BORRAR NOTIFICACIÓN ---
+window.borrarNotificacion = async function(id) {
+    try {
+        const res = await fetch(`/api/notificaciones/${id}`, { method: 'DELETE' });
+        if (res.ok) cargarNotificaciones();
+    } catch (err) {
+        console.error("Error al borrar:", err);
+    }
+}
+
+// --- 6. MARCAR TODAS COMO LEÍDAS ---
 if (btnMarcarTodas) {
     btnMarcarTodas.onclick = async () => {
         try {
             const res = await fetch(`/api/notificaciones/leer-todas/${miId}`, { method: 'PUT' });
-            if (res.ok) {
-                // Actualización visual masiva (P5)
-                const noLeidas = document.querySelectorAll('.notif-item.no-leido');
-                noLeidas.forEach(el => {
-                    el.classList.remove('no-leido');
-                    const dot = el.querySelector('.status-dot');
-                    if (dot) dot.remove();
-                });
-                console.log("Notificaciones limpias ✅");
-            }
+            if (res.ok) location.reload();
         } catch (err) {
             alert("No se pudieron marcar todas como leídas.");
         }

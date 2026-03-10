@@ -60,10 +60,13 @@
             <div class="info-perfil">
                 <h2 id="perf-nombre-completo">Cargando identidad...</h2>
                 <p id="perf-bio">Cargando biografía...</p>
+                
+                <div id="zona-acciones-perfil" style="margin-top: 15px; display: flex; gap: 10px;"></div>
             </div>
         </div>
 
         <section class="muro-propio">
+            <hr>
             <h3>Mis Publicaciones</h3>
             <div id="mis-posts">
                 <p class="text-center">Buscando tus historias en la base de datos...</p>
@@ -79,7 +82,7 @@
         document.getElementById('btn-salir').addEventListener('click', (e) => {
             e.preventDefault();
             if(confirm("¿Estás seguro de que deseas salir de tu perfil?")) {
-                localStorage.removeItem('usuarioId');
+                localStorage.clear(); // Limpiamos todo por seguridad
                 window.location.href = '/';
             }
         });

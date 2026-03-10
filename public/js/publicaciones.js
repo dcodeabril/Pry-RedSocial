@@ -9,7 +9,7 @@ const btnPublicar = document.getElementById('btn-publicar');
 // 🛡️ Identidad dinámica: Recuperamos el ID del usuario logueado
 const miId = localStorage.getItem('usuarioId');
 
-// --- 1. CARGAR POSTS DEL MURO (Con Privacidad y Control) ---
+// --- 1. CARGAR POSTS DEL MURO (Con Privacidad, Borrado y Reportes) ---
 async function cargarMuro() {
     if (!miId) return;
 
@@ -30,11 +30,19 @@ async function cargarMuro() {
             div.className = 'post-card card';
             div.style.marginBottom = "20px";
             
-            // 🛡️ Lógica de Control: El botón de eliminar solo aparece para el dueño del post
+            // 🛡️ Lógica de Control 1: Solo el dueño ve el botón de ELIMINAR
             const btnBorrarPost = (post.usuario_id == miId) 
                 ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario" 
                     style="color: #dc3545; border-color: #dc3545; font-size: 0.8rem; margin-left: auto;">
                     Eliminar 🗑️
+                   </button>` 
+                : '';
+
+            // 🛡️ Lógica de Control 2: Solo se reportan posts AJENOS
+            const btnReportar = (post.usuario_id != miId) 
+                ? `<button onclick="abrirReporte(${post.id})" class="btn-secundario" 
+                    style="color: #ffa500; border-color: #ffa500; font-size: 0.8rem; margin-left: auto;">
+                    Reportar 🚩
                    </button>` 
                 : '';
 
@@ -51,9 +59,8 @@ async function cargarMuro() {
                 <div class="post-footer" style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; align-items: center;">
                     <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')">👍 Me gusta</button>
                     <button class="btn-secundario">💬 Comentar</button>
-                    <button class="btn-secundario">↪️ Compartir</button>
                     
-                    ${btnBorrarPost} <small style="margin-left: 10px; opacity: 0.5;">🔒 ${post.privacidad}</small>
+                    ${btnReportar} ${btnBorrarPost} <small style="margin-left: 10px; opacity: 0.5;">🔒 ${post.privacidad}</small>
                 </div>
             `;
             feed.appendChild(div);
@@ -112,24 +119,50 @@ window.reaccionar = async function(postId, tipo) {
     }
 };
 
-// --- 4. [NUEVO] FUNCIÓN PARA BORRAR PUBLICACIÓN ---
+// --- 4. ELIMINAR PUBLICACIÓN ---
 window.eliminarPublicacion = async function(id) {
-    if (!confirm("¿Deseas eliminar esta publicación permanentemente? Esta acción no se puede deshacer.")) return;
+    if (!confirm("¿Deseas eliminar esta publicación permanentemente?")) return;
 
     try {
-        // Enviamos el usuario_id en la query para que el servidor valide la propiedad
         const res = await fetch(`/api/publicaciones/${id}?usuario_id=${miId}`, {
             method: 'DELETE'
         });
 
         if (res.ok) {
-            cargarMuro(); // Refrescamos el feed inmediatamente (UX fluida)
+            cargarMuro(); 
         } else {
             const err = await res.json();
             alert("❌ " + err.error);
         }
     } catch (err) {
         console.error("Error al conectar para borrar post:", err);
+    }
+};
+
+// --- 5. [NUEVO] FUNCIÓN PARA ENVIAR REPORTE ---
+window.abrirReporte = async function(postId) {
+    const motivo = prompt("¿Por qué deseas reportar esta publicación?\n(Spam, Contenido Inapropiado, Acoso, etc.)");
+    
+    if (!motivo) return; 
+
+    try {
+        const res = await fetch('/api/reportes/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                denunciante_id: miId,
+                publicacion_id: postId,
+                motivo: motivo
+            })
+        });
+
+        if (res.ok) {
+            alert("✅ Publicación reportada con éxito. El equipo de moderación la revisará.");
+        } else {
+            alert("❌ No se pudo enviar el reporte.");
+        }
+    } catch (err) {
+        console.error("Error al reportar post:", err);
     }
 };
 
