@@ -1,56 +1,104 @@
-// public/js/notificaciones.js
-const container = document.getElementById('lista-notificaciones');
-const miUsuarioId = 1; // ID del Arquitecto para pruebas
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (LÓGICA DE NOTIFICACIONES P4)
+// ARCHIVO: public/js/notificaciones.js
+// =============================================
 
+const lista = document.getElementById('lista-notificaciones');
+const btnMarcarTodas = document.getElementById('btn-marcar-leidas');
+// 🛡️ Identidad dinámica: Recuperamos el ID de quien inició sesión
+const miId = localStorage.getItem('usuarioId');
+
+// --- 1. CARGAR NOTIFICACIONES DESDE LA API ---
 async function cargarNotificaciones() {
-    try {
-        const response = await fetch(`/api/notificaciones/${miUsuarioId}`);
-        const notificaciones = await response.json();
+    if (!miId) return;
 
-        if (notificaciones.length === 0) {
-            container.innerHTML = '<p style="padding: 20px; text-align: center;">No tienes notificaciones nuevas.</p>';
+    try {
+        const res = await fetch(`/api/notificaciones/${miId}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            lista.innerHTML = '<p style="padding: 20px; text-align: center; opacity: 0.6;">No tienes notificaciones por ahora. ✨</p>';
             return;
         }
 
-        container.innerHTML = ''; // Limpiar mensaje de carga
+        lista.innerHTML = ''; // Limpiar mensaje de carga
 
-        notificaciones.forEach(n => {
+        data.forEach(n => {
             const item = document.createElement('div');
+            // Aplicamos las clases de estilo definidas en el HTML (P5)
             item.className = `notif-item ${n.leido ? '' : 'no-leido'}`;
             
-            // Construir el mensaje según el tipo de alerta
-            let mensaje = `<strong>${n.nombre} ${n.apellido}</strong> `;
-            //if (n.tipo === 'like') mensaje += "reaccionó a tu publicación.";
-            // Cambia 'like' por 'reaccion' para que coincida con Tabla 9
-            if (n.tipo === 'reaccion') mensaje += "reaccionó a tu publicación.";
-            if (n.tipo === 'comentario') mensaje += "comentó tu post.";
-            if (n.tipo === 'amistad') mensaje += "te envió una solicitud de amistad.";
-
             item.innerHTML = `
-                <div class="notif-avatar"></div>
+                <img src="${n.foto_url || 'img/default.png'}" class="notif-avatar" alt="Avatar">
                 <div class="notif-content">
-                    <div class="notif-text">${mensaje}</div>
+                    <div class="notif-text">
+                        <strong>${n.nombre} ${n.apellido}</strong> ${interpretarTipo(n.tipo)}
+                    </div>
                     <div class="notif-time">${new Date(n.fecha).toLocaleString()}</div>
                 </div>
                 ${n.leido ? '' : '<div class="status-dot"></div>'}
             `;
 
-            // Al hacer clic, marcar como leída en la DB
-            item.onclick = () => marcarComoLeida(n.id, item);
+            // Al hacer clic, se marca como leída solo esta notificación
+            item.onclick = () => marcarUnaComoLeida(n.id, item);
             
-            container.appendChild(item);
+            lista.appendChild(item);
         });
-    } catch (error) {
-        container.innerHTML = '<p style="padding: 20px; color: red;">Error al conectar con el servidor.</p>';
+
+    } catch (err) {
+        console.error("Error al cargar notificaciones:", err);
+        lista.innerHTML = '<p style="padding: 20px; color: red; text-align: center;">Error de conexión con el servidor.</p>';
     }
 }
 
-async function marcarComoLeida(id, elemento) {
-    await fetch(`/api/notificaciones/leer/${id}`, { method: 'PATCH' });
-    elemento.classList.remove('no-leido');
-    const dot = elemento.querySelector('.status-dot');
-    if (dot) dot.remove();
+// --- 2. TRADUCTOR DE TIPOS (Persona 4) ---
+function interpretarTipo(tipo) {
+    switch(tipo) {
+        case 'reaccion': return "reaccionó a tu publicación 👍";
+        case 'comentario': return "comentó tu post 💬";
+        case 'mensaje': return "te envió un mensaje privado ✉️";
+        case 'amistad': return "te envió una solicitud de amistad 🤝";
+        default: return "realizó una acción en tu cuenta.";
+    }
 }
 
-// Iniciar carga
+// --- 3. MARCAR UNA NOTIFICACIÓN COMO LEÍDA ---
+async function marcarUnaComoLeida(id, elemento) {
+    try {
+        // Usamos el endpoint de borrar o uno específico de 'leer'
+        // En este caso, simulamos la actualización visual inmediata
+        elemento.classList.remove('no-leido');
+        const dot = elemento.querySelector('.status-dot');
+        if (dot) dot.remove();
+
+        // [OPCIONAL] Avisar al servidor que esta ID ya se leyó
+        // await fetch(`/api/notificaciones/leer-una/${id}`, { method: 'PUT' });
+    } catch (err) {
+        console.error("Error al marcar como leída:", err);
+    }
+}
+
+// --- 4. MARCAR TODAS COMO LEÍDAS (BOTÓN GLOBAL) ---
+if (btnMarcarTodas) {
+    btnMarcarTodas.onclick = async () => {
+        try {
+            const res = await fetch(`/api/notificaciones/leer-todas/${miId}`, { method: 'PUT' });
+            if (res.ok) {
+                // Actualización visual masiva (P5)
+                const noLeidas = document.querySelectorAll('.notif-item.no-leido');
+                noLeidas.forEach(el => {
+                    el.classList.remove('no-leido');
+                    const dot = el.querySelector('.status-dot');
+                    if (dot) dot.remove();
+                });
+                console.log("Notificaciones limpias ✅");
+            }
+        } catch (err) {
+            alert("No se pudieron marcar todas como leídas.");
+        }
+    };
+}
+
+// --- 🚀 INICIO ---
 cargarNotificaciones();

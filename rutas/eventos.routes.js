@@ -1,28 +1,72 @@
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (GESTIÓN DE EVENTOS P4)
+// ARCHIVO: rutas/eventos.routes.js
+// =============================================
+
 const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos');
 
-// Crear un evento
+// --- 1. OBTENER EVENTOS FUTUROS (Cartelera) ---
+router.get('/', async (req, res) => {
+    try {
+        const query = `
+            SELECT e.*, p.nombre, p.apellido 
+            FROM eventos e
+            JOIN perfiles p ON e.creador_id = p.usuario_id
+            WHERE e.fecha_evento >= CURDATE()
+            ORDER BY e.fecha_evento ASC`;
+            
+        const [eventos] = await db.query(query);
+        res.json(eventos);
+    } catch (err) {
+        console.error("🚨 Error al listar eventos:", err);
+        res.status(500).json({ error: "No se pudieron cargar los eventos del servidor." });
+    }
+});
+
+// --- 2. CREAR UN NUEVO EVENTO ---
 router.post('/crear', async (req, res) => {
     const { creador_id, titulo, descripcion, fecha_evento } = req.body;
+    
+    if (!creador_id || !titulo || !fecha_evento) {
+        return res.status(400).json({ error: "Faltan datos obligatorios para el evento." });
+    }
+
     try {
         await db.query(
             'INSERT INTO eventos (creador_id, titulo, descripcion, fecha_evento) VALUES (?, ?, ?, ?)',
             [creador_id, titulo, descripcion, fecha_evento]
         );
-        res.status(201).json({ mensaje: "Evento organizado con éxito" });
+        res.status(201).json({ mensaje: "Evento organizado con éxito 📅" });
     } catch (err) {
-        res.status(500).json({ error: "Error al crear el evento" });
+        console.error("🚨 Error al crear evento:", err);
+        res.status(500).json({ error: "Error interno al procesar el evento." });
     }
 });
 
-// Listar eventos futuros
-router.get('/', async (req, res) => {
+// --- 3. [NUEVO] ELIMINAR UN EVENTO (Con Validación de Autor) ---
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { usuario_id } = req.query; // Recibimos quién quiere borrar para validar
+
     try {
-        const [eventos] = await db.query('SELECT * FROM eventos WHERE fecha_evento >= CURDATE() ORDER BY fecha_evento ASC');
-        res.json(eventos);
+        // Ejecutamos el borrado solo si el creador_id coincide con quien solicita
+        const [resultado] = await db.query(
+            'DELETE FROM eventos WHERE id = ? AND creador_id = ?', 
+            [id, usuario_id]
+        );
+
+        if (resultado.affectedRows > 0) {
+            res.json({ mensaje: "Evento eliminado correctamente 🗑️" });
+        } else {
+            // Si no se borró nada, es porque el ID no existe o el usuario no es el dueño
+            res.status(403).json({ error: "No tienes permiso para borrar este evento o el evento no existe." });
+        }
     } catch (err) {
-        res.status(500).json({ error: "Error al listar eventos" });
+        console.error("🚨 Error al borrar evento:", err);
+        res.status(500).json({ error: "Error interno al intentar eliminar el evento." });
     }
 });
 

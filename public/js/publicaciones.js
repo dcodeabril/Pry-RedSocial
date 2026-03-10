@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (GESTIÓN DE MURO CON PRIVACIDAD P2)
+// ROL: ARQUITECTO (GESTIÓN DE MURO DINÁMICO P2 + P4)
 // ARCHIVO: publicaciones.js
 // =============================================
 
@@ -9,17 +9,14 @@ const btnPublicar = document.getElementById('btn-publicar');
 // 🛡️ Identidad dinámica: Recuperamos el ID del usuario logueado
 const miId = localStorage.getItem('usuarioId');
 
-// --- 1. CARGAR POSTS DEL MURO (Con filtro de Visor) ---
+// --- 1. CARGAR POSTS DEL MURO (Con Privacidad y Control) ---
 async function cargarMuro() {
-    // Si no hay ID, el Guardia ya debería haber actuado, pero protegemos la función
     if (!miId) return;
 
     try {
-        // 🛡️ Enviamos nuestro ID en la URL para que el servidor aplique las reglas de privacidad
         const res = await fetch(`/api/publicaciones/${miId}`);
         const posts = await res.json();
 
-        // Blindaje: Verificamos que sea una lista antes de procesar
         if (!Array.isArray(posts)) {
             console.error("El servidor no devolvió una lista válida:", posts);
             feed.innerHTML = `<p class="card" style="text-align:center;">⚠️ No se pudo cargar el muro personalizado.</p>`;
@@ -33,6 +30,14 @@ async function cargarMuro() {
             div.className = 'post-card card';
             div.style.marginBottom = "20px";
             
+            // 🛡️ Lógica de Control: El botón de eliminar solo aparece para el dueño del post
+            const btnBorrarPost = (post.usuario_id == miId) 
+                ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario" 
+                    style="color: #dc3545; border-color: #dc3545; font-size: 0.8rem; margin-left: auto;">
+                    Eliminar 🗑️
+                   </button>` 
+                : '';
+
             div.innerHTML = `
                 <div class="post-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
                     <strong>${post.nombre} ${post.apellido}</strong>
@@ -47,13 +52,14 @@ async function cargarMuro() {
                     <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')">👍 Me gusta</button>
                     <button class="btn-secundario">💬 Comentar</button>
                     <button class="btn-secundario">↪️ Compartir</button>
-                    <small style="margin-left: auto; opacity: 0.5;">🔒 ${post.privacidad}</small>
+                    
+                    ${btnBorrarPost} <small style="margin-left: 10px; opacity: 0.5;">🔒 ${post.privacidad}</small>
                 </div>
             `;
             feed.appendChild(div);
         });
     } catch (err) {
-        console.error("🚨 Error técnico al conectar con el muro filtrado:", err);
+        console.error("🚨 Error técnico al conectar con el muro:", err);
         feed.innerHTML = '<p class="card text-center">Error de conexión con el servidor.</p>';
     }
 }
@@ -65,7 +71,7 @@ btnPublicar.addEventListener('click', async () => {
     const contenido = inputContenido.value.trim();
     
     if (!contenido || !miId) {
-        alert("⚠️ El Arquitecto sugiere escribir algo antes de publicar.");
+        alert("⚠️ Escribe algo antes de publicar.");
         return;
     }
 
@@ -82,7 +88,7 @@ btnPublicar.addEventListener('click', async () => {
 
         if (res.ok) {
             inputContenido.value = '';
-            cargarMuro(); // Recarga el muro respetando el nuevo post
+            cargarMuro(); 
         } else {
             alert("❌ Error al publicar.");
         }
@@ -98,15 +104,32 @@ window.reaccionar = async function(postId, tipo) {
         await fetch('/api/publicaciones/reaccionar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                publicacion_id: postId, 
-                usuario_id: miId, 
-                tipo: tipo 
-            })
+            body: JSON.stringify({ publicacion_id: postId, usuario_id: miId, tipo: tipo })
         });
         cargarMuro(); 
     } catch (err) {
         console.error("Error al reaccionar:", err);
+    }
+};
+
+// --- 4. [NUEVO] FUNCIÓN PARA BORRAR PUBLICACIÓN ---
+window.eliminarPublicacion = async function(id) {
+    if (!confirm("¿Deseas eliminar esta publicación permanentemente? Esta acción no se puede deshacer.")) return;
+
+    try {
+        // Enviamos el usuario_id en la query para que el servidor valide la propiedad
+        const res = await fetch(`/api/publicaciones/${id}?usuario_id=${miId}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            cargarMuro(); // Refrescamos el feed inmediatamente (UX fluida)
+        } else {
+            const err = await res.json();
+            alert("❌ " + err.error);
+        }
+    } catch (err) {
+        console.error("Error al conectar para borrar post:", err);
     }
 };
 

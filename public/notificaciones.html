@@ -6,27 +6,63 @@
     <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="css/general.css">
     <style>
-        .notif-container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .notif-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f0f2f5; transition: background 0.3s; }
-        .notif-item.no-leido { background-color: #e7f3ff; }
-        .notif-item:hover { background-color: #f2f2f2; cursor: pointer; }
-        .notif-avatar { width: 45px; height: 45px; background: #ddd; border-radius: 50%; margin-right: 12px; }
+        /* Estilos detallados (Persona 5) */
+        .notif-container { max-width: 650px; margin: 20px auto; }
+        
+        .notif-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            transition: background 0.3s; 
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        /* Efecto para resaltar lo no leído */
+        .notif-item.no-leido { background-color: rgba(24, 119, 242, 0.08); }
+        .notif-item:hover { background-color: rgba(0, 0, 0, 0.05); cursor: pointer; }
+        
+        .notif-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; border: 1px solid #ddd; }
         .notif-content { flex-grow: 1; }
-        .notif-text { font-size: 0.95em; color: #050505; }
-        .notif-time { font-size: 0.8em; color: #65676b; margin-top: 4px; }
-        .status-dot { width: 10px; height: 10px; background: #1877f2; border-radius: 50%; margin-left: 10px; }
+        .notif-text { font-size: 1rem; line-height: 1.4; }
+        .notif-text strong { color: var(--primary); }
+        .notif-time { font-size: 0.8rem; opacity: 0.6; margin-top: 5px; }
+        
+        /* El puntito azul de "Nuevo" */
+        .status-dot { width: 12px; height: 12px; background: #1877f2; border-radius: 50%; margin-left: 10px; flex-shrink: 0; }
+        
+        .header-notif { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <header class="main-header">
-        <h1>Notificaciones</h1>
-        <nav><a href="index.html">Volver al Muro</a></nav>
+        <div class="logo"><h1>Facebook Local</h1></div>
+        <nav>
+            <a href="index.html">Muro</a>
+            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
+            <a href="mensajes.html">Mensajes</a>
+            <a href="notificaciones.html" class="active">Notificaciones</a>
+            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+        </nav>
     </header>
 
-    <div class="notif-container" id="lista-notificaciones">
-        <p style="padding: 20px; text-align: center;">Cargando tus alertas...</p>
-    </div>
+    <main class="container">
+        <div class="card notif-container">
+            <div class="header-notif">
+                <h2>Actividad Reciente</h2>
+                <button id="btn-marcar-leidas" class="btn-secundario" style="font-size: 0.8rem;">Marcar todo como leído</button>
+            </div>
+            <hr>
+            
+            <div id="lista-notificaciones" style="margin-top: 10px;">
+                <p style="padding: 20px; text-align: center;">Buscando tus alertas en la base de datos...</p>
+            </div>
+        </div>
+    </main>
 
+    <script src="js/tema.js"></script>
+    <script src="js/usuario_global.js"></script>
     <script src="js/notificaciones.js"></script>
 </body>
 </html>

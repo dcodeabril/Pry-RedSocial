@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (GESTIÓN DE CONTENIDOS Y PRIVACIDAD P2)
+// ROL: ARQUITECTO (GESTIÓN DE CONTENIDOS Y NOTIFICACIONES P2 + P4)
 // ARCHIVO: rutas/publicaciones.routes.js
 // =============================================
 
@@ -9,19 +9,17 @@ const router = express.Router();
 const db = require('../db/base_datos');
 
 // --- [1] OBTENER EL MURO FILTRADO POR PRIVACIDAD ---
-// Sustituye al GET / anterior para que Lucero no vea lo que no debe
 router.get('/:visorId', async (req, res) => {
     const { visorId } = req.params; 
-
     try {
         const query = `
             SELECT p.*, perf.nombre, perf.apellido 
             FROM publicaciones p
             JOIN perfiles perf ON p.usuario_id = perf.usuario_id
             WHERE 
-                p.usuario_id = ? -- 1. Mis propias publicaciones (Siempre las veo)
-                OR p.privacidad = 'publica' -- 2. Publicaciones de otros marcadas como públicas
-                OR (p.privacidad = 'amigos' AND p.usuario_id IN ( -- 3. Solo de amigos aceptados
+                p.usuario_id = ? 
+                OR p.privacidad = 'publica' 
+                OR (p.privacidad = 'amigos' AND p.usuario_id IN ( 
                     SELECT CASE 
                         WHEN usuario_envia_id = ? THEN usuario_recibe_id 
                         ELSE usuario_envia_id 
@@ -40,18 +38,14 @@ router.get('/:visorId', async (req, res) => {
     }
 });
 
-// --- [2] OBTENER POSTS DE UN USUARIO (Para el Perfil Personal) ---
+// --- [2] OBTENER POSTS DE UN USUARIO (Para el Perfil) ---
 router.get('/usuario/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const query = `
-            SELECT * FROM publicaciones 
-            WHERE usuario_id = ? 
-            ORDER BY id DESC`;
+        const query = `SELECT * FROM publicaciones WHERE usuario_id = ? ORDER BY id DESC`;
         const [posts] = await db.query(query, [id]);
         res.json(posts);
     } catch (err) {
-        console.error("🚨 Error SQL en Perfil:", err);
         res.status(500).json({ error: "Error al cargar las publicaciones del perfil." });
     }
 });
@@ -66,24 +60,35 @@ router.post('/crear', async (req, res) => {
         );
         res.status(201).json({ mensaje: "Publicación creada con éxito ✅" });
     } catch (err) {
-        console.error("🚨 Error SQL al crear post:", err);
         res.status(500).json({ error: "No se pudo guardar la publicación." });
     }
 });
 
-// --- [4] REACCIONAR A UN POST (Me gusta) ---
+// --- [4] REACCIONAR Y NOTIFICAR ---
 router.post('/reaccionar', async (req, res) => {
     const { publicacion_id, usuario_id, tipo } = req.body;
     try {
         await db.query(
             `INSERT INTO reacciones (publicacion_id, usuario_id, tipo) 
-             VALUES (?, ?, ?) 
-             ON DUPLICATE KEY UPDATE tipo = ?`,
+             VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE tipo = ?`,
             [publicacion_id, usuario_id, tipo, tipo]
         );
-        res.json({ mensaje: "Reacción procesada" });
+
+        const [post] = await db.query('SELECT usuario_id FROM publicaciones WHERE id = ?', [publicacion_id]);
+        
+        if (post.length > 0) {
+            const receptorId = post[0].usuario_id;
+            if (receptorId != usuario_id) {
+                await db.query(
+                    `INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id) 
+                     VALUES (?, ?, 'reaccion', ?)`,
+                    [receptorId, usuario_id, publicacion_id]
+                );
+            }
+        }
+        res.json({ mensaje: "Reacción y notificación enviadas ✅" });
     } catch (err) {
-        res.status(500).json({ error: "Error al procesar la reacción." });
+        res.status(500).json({ error: "Error al procesar interacción." });
     }
 });
 
@@ -92,7 +97,7 @@ router.get('/:id/comentarios', async (req, res) => {
     const { id } = req.params;
     try {
         const query = `
-            SELECT c.*, p.nombre 
+            SELECT c.*, p.nombre, p.apellido 
             FROM comentarios c 
             JOIN perfiles p ON c.usuario_id = p.usuario_id 
             WHERE c.publicacion_id = ?
@@ -104,7 +109,7 @@ router.get('/:id/comentarios', async (req, res) => {
     }
 });
 
-// --- [6] CREAR NUEVO COMENTARIO ---
+// --- [6] COMENTAR Y NOTIFICAR ---
 router.post('/comentar', async (req, res) => {
     const { publicacion_id, usuario_id, contenido } = req.body;
     try {
@@ -112,9 +117,45 @@ router.post('/comentar', async (req, res) => {
             'INSERT INTO comentarios (publicacion_id, usuario_id, contenido) VALUES (?, ?, ?)', 
             [publicacion_id, usuario_id, contenido]
         );
-        res.json({ mensaje: "Comentario publicado" });
+
+        const [post] = await db.query('SELECT usuario_id FROM publicaciones WHERE id = ?', [publicacion_id]);
+        
+        if (post.length > 0) {
+            const receptorId = post[0].usuario_id;
+            if (receptorId != usuario_id) {
+                await db.query(
+                    `INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id) 
+                     VALUES (?, ?, 'comentario', ?)`,
+                    [receptorId, usuario_id, publicacion_id]
+                );
+            }
+        }
+        res.json({ mensaje: "Comentario publicado y notificación enviada ✅" });
     } catch (err) { 
         res.status(500).json({ error: "Error al guardar el comentario." }); 
+    }
+});
+
+// --- [7] [NUEVO] ELIMINAR PUBLICACIÓN (Control de Autor P2) ---
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { usuario_id } = req.query; // Validamos quién solicita el borrado
+
+    try {
+        // Ejecutamos el borrado solo si el usuario_id es el dueño del post
+        const [resultado] = await db.query(
+            'DELETE FROM publicaciones WHERE id = ? AND usuario_id = ?', 
+            [id, usuario_id]
+        );
+
+        if (resultado.affectedRows > 0) {
+            res.json({ mensaje: "Publicación eliminada correctamente 🗑️" });
+        } else {
+            res.status(403).json({ error: "No tienes permiso para eliminar esta publicación." });
+        }
+    } catch (err) {
+        console.error("🚨 Error al borrar publicación:", err);
+        res.status(500).json({ error: "Error interno al intentar eliminar el post." });
     }
 });
 
