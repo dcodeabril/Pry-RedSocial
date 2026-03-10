@@ -8,7 +8,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos');
 
-// --- 1. REGISTRO DE USUARIOS (Persona 1: Seguridad) ---
+// --- 1. REGISTRO MAESTRO (Persona 1 y 5) ---
+// Crea Usuario, Perfil y envía Mensaje de Bienvenida
 router.post('/registro', async (req, res) => {
     const { email, password } = req.body;
 
@@ -18,23 +19,44 @@ router.post('/registro', async (req, res) => {
     }
 
     try {
+        // A. Insertamos en la Tabla 1: usuarios
         const [resultado] = await db.query(
             'INSERT INTO usuarios (email, password) VALUES (?, ?)',
             [email, password]
         );
-        res.status(201).json({ mensaje: "Usuario creado con éxito", id: resultado.insertId });
+        
+        const nuevoId = resultado.insertId;
+
+        // B. [NUEVO] Insertamos automáticamente en la Tabla 2: perfiles
+        // Esto evita errores cuando el usuario nuevo intente ver su muro o perfil
+        await db.query(
+            'INSERT INTO perfiles (usuario_id, nombre, apellido) VALUES (?, ?, ?)',
+            [nuevoId, 'Nuevo', 'Usuario']
+        );
+
+        // C. [NUEVO] Mensaje de Bienvenida Automático del Arquitecto (ID 1)
+        const saludo = `¡Hola! Soy Israel Díaz, el Arquitecto de esta red social. ¡Bienvenida a bordo!`;
+        await db.query(
+            'INSERT INTO mensajes (emisor_id, receptor_id, contenido) VALUES (?, ?, ?)',
+            [1, nuevoId, saludo]
+        );
+
+        res.status(201).json({ 
+            mensaje: "¡Cuenta creada con éxito! Ya puedes iniciar sesión.", 
+            id: nuevoId 
+        });
+
     } catch (err) {
-        res.status(500).json({ error: "Error al registrar: el email ya podría existir." });
+        console.error(err);
+        res.status(500).json({ error: "Error al registrar: el email ya existe o hay un fallo en la base de datos." });
     }
 });
 
-// --- 2. LOGIN DE USUARIOS (NUEVO - Persona 1) ---
-// Valida el acceso y permite la entrada al muro
+// --- 2. LOGIN DE USUARIOS (Persona 1: Seguridad) ---
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Buscamos al usuario por su email
         const [usuarios] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
 
         if (usuarios.length === 0) {
@@ -43,12 +65,10 @@ router.post('/login', async (req, res) => {
 
         const usuario = usuarios[0];
 
-        // Verificamos la regla de los 12 caracteres
         if (usuario.password !== password) {
             return res.status(401).json({ error: "Contraseña incorrecta." });
         }
 
-        // Si todo es correcto, enviamos el ID para el localStorage del frontend
         res.json({ 
             mensaje: "¡Bienvenido de nuevo!", 
             usuarioId: usuario.id,

@@ -1,80 +1,114 @@
-// public/js/publicaciones.js
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (GESTIÓN DE MURO CON PRIVACIDAD P2)
+// ARCHIVO: publicaciones.js
+// =============================================
+
 const feed = document.getElementById('feed');
 const btnPublicar = document.getElementById('btn-publicar');
+// 🛡️ Identidad dinámica: Recuperamos el ID del usuario logueado
+const miId = localStorage.getItem('usuarioId');
 
-// Cargar posts al iniciar
+// --- 1. CARGAR POSTS DEL MURO (Con filtro de Visor) ---
 async function cargarMuro() {
-    const res = await fetch('/api/publicaciones');
-    const posts = await res.json();
-    
-    feed.innerHTML = '';
-    posts.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'post-card';
-        div.innerHTML = `
-            <div class="post-header">
-                <strong>${post.nombre} ${post.apellido}</strong>
-                <span>${new Date(post.fecha).toLocaleString()}</span>
-            </div>
-            <div class="post-body">${post.contenido}</div>
-            <div class="post-footer">
-                <button onclick="reaccionar(${post.id}, 'like')">👍 Me gusta</button>
-                <button>💬 Comentar</button>
-                <button>↪️ Compartir</button>
-            </div>
-        `;
-        feed.appendChild(div);
-    });
+    // Si no hay ID, el Guardia ya debería haber actuado, pero protegemos la función
+    if (!miId) return;
+
+    try {
+        // 🛡️ Enviamos nuestro ID en la URL para que el servidor aplique las reglas de privacidad
+        const res = await fetch(`/api/publicaciones/${miId}`);
+        const posts = await res.json();
+
+        // Blindaje: Verificamos que sea una lista antes de procesar
+        if (!Array.isArray(posts)) {
+            console.error("El servidor no devolvió una lista válida:", posts);
+            feed.innerHTML = `<p class="card" style="text-align:center;">⚠️ No se pudo cargar el muro personalizado.</p>`;
+            return;
+        }
+
+        feed.innerHTML = '';
+        
+        posts.forEach(post => {
+            const div = document.createElement('div');
+            div.className = 'post-card card';
+            div.style.marginBottom = "20px";
+            
+            div.innerHTML = `
+                <div class="post-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                    <strong>${post.nombre} ${post.apellido}</strong>
+                    <span style="font-size: 0.8rem; opacity: 0.6; float: right;">
+                        ${new Date(post.fecha_creacion || post.fecha).toLocaleString()}
+                    </span>
+                </div>
+                <div class="post-body" style="font-size: 1.1rem; margin-bottom: 15px;">
+                    ${post.contenido}
+                </div>
+                <div class="post-footer" style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; align-items: center;">
+                    <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')">👍 Me gusta</button>
+                    <button class="btn-secundario">💬 Comentar</button>
+                    <button class="btn-secundario">↪️ Compartir</button>
+                    <small style="margin-left: auto; opacity: 0.5;">🔒 ${post.privacidad}</small>
+                </div>
+            `;
+            feed.appendChild(div);
+        });
+    } catch (err) {
+        console.error("🚨 Error técnico al conectar con el muro filtrado:", err);
+        feed.innerHTML = '<p class="card text-center">Error de conexión con el servidor.</p>';
+    }
 }
 
+// --- 2. CREAR NUEVA PUBLICACIÓN ---
 btnPublicar.addEventListener('click', async () => {
-    const contenido = document.getElementById('post-contenido').value;
+    const inputContenido = document.getElementById('post-contenido');
     const privacidad = document.getElementById('post-privacidad').value;
+    const contenido = inputContenido.value.trim();
     
-    await fetch('/api/publicaciones', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            usuario_id: 1, // ID temporal del Arquitecto
-            contenido,
-            privacidad
-        })
-    });
-    
-    document.getElementById('post-contenido').value = '';
-    cargarMuro();
+    if (!contenido || !miId) {
+        alert("⚠️ El Arquitecto sugiere escribir algo antes de publicar.");
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/publicaciones/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuario_id: miId,
+                contenido: contenido,
+                privacidad: privacidad
+            })
+        });
+
+        if (res.ok) {
+            inputContenido.value = '';
+            cargarMuro(); // Recarga el muro respetando el nuevo post
+        } else {
+            alert("❌ Error al publicar.");
+        }
+    } catch (err) {
+        console.error("Error al enviar post:", err);
+    }
 });
 
-cargarMuro();
-// Función para REACCIONAR (Me gusta)
-async function reaccionar(postId, tipo) {
-    const usuarioId = 1; // ID temporal de Diego (Arquitecto)
+// --- 3. REACCIONAR (Me gusta) ---
+window.reaccionar = async function(postId, tipo) {
+    if (!miId) return;
     try {
         await fetch('/api/publicaciones/reaccionar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ publicacion_id: postId, usuario_id: usuarioId, tipo })
+            body: JSON.stringify({ 
+                publicacion_id: postId, 
+                usuario_id: miId, 
+                tipo: tipo 
+            })
         });
-        cargarMuro(); // Refrescar para ver cambios
+        cargarMuro(); 
     } catch (err) {
-        console.error("Error al reaccionar");
+        console.error("Error al reaccionar:", err);
     }
-}
+};
 
-// Función para COMENTAR
-async function enviarComentario(postId) {
-    const input = document.getElementById(`input-comentario-${postId}`);
-    const contenido = input.value;
-    const usuarioId = 1;
-
-    if (!contenido) return;
-
-    await fetch('/api/publicaciones/comentar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publicacion_id: postId, usuario_id: usuarioId, contenido })
-    });
-
-    input.value = '';
-    cargarMuro();
-}
+// --- 🚀 ARRANQUE INICIAL ---
+cargarMuro();

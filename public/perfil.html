@@ -2,35 +2,87 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Perfil - Facebook Local</title>
+    <title>Mi Perfil - Facebook Local</title>
     <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="css/general.css">
     <style>
-        .profile-header { background: var(--card-bg); border-radius: 0 0 8px 8px; overflow: hidden; }
-        .cover-photo { height: 200px; background: #ddd; }
-        .user-info-bar { display: flex; align-items: flex-end; padding: 0 30px 20px; margin-top: -60px; }
-        .profile-pic { width: 150px; height: 150px; border-radius: 50%; border: 5px solid var(--card-bg); background: #eee; }
-        .user-names { margin-left: 20px; padding-bottom: 10px; }
+        /* --- Estética de Portada (Persona 5) --- */
+        .perfil-header { position: relative; margin-bottom: 80px; padding: 0; overflow: visible; }
+        
+        .portada-container { 
+            width: 100%; height: 250px; 
+            background: linear-gradient(45deg, #007bff, #00d4ff); 
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .portada-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .foto-perfil-container {
+            position: absolute; bottom: -60px; left: 30px;
+            width: 150px; height: 150px;
+            border-radius: 50%; border: 5px solid var(--bg-card);
+            background: #eee; overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .foto-perfil-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .info-perfil { margin-top: 10px; padding: 15px 30px 20px 200px; }
+        .info-perfil h2 { font-size: 2.2rem; margin-bottom: 5px; color: var(--text-color); }
+        .info-perfil p { opacity: 0.8; font-style: italic; font-size: 1.1rem; }
+
+        .muro-propio { margin-top: 40px; }
+        .muro-propio h3 { margin-bottom: 20px; border-bottom: 2px solid var(--primary); display: inline-block; }
     </style>
 </head>
 <body>
     <header class="main-header">
-        <h1>Facebook Local</h1>
-        <nav><a href="index.html">Volver al Muro</a></nav>
+        <div class="logo"><h1>Facebook Local</h1></div>
+        <nav>
+            <a href="index.html">Muro</a>
+            <a href="perfil.html" class="active">Mi Perfil</a> 
+            <a href="mensajes.html">Mensajes</a>
+            <a href="ajustes.html">Ajustes</a>
+            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+        </nav>
     </header>
 
-    <div class="container">
-        <div class="profile-header card">
-            <div class="cover-photo"></div>
-            <div class="user-info-bar">
-                <div class="profile-pic"></div>
-                <div class="user-names">
-                    <h2 id="prof-nombre">Diego Abril</h2>
-                    <p id="prof-bio">Arquitecto del Sistema</p>
-                </div>
+    <main class="container">
+        <div class="card perfil-header">
+            <div class="portada-container">
+                <img src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200" alt="Portada">
+            </div>
+            <div class="foto-perfil-container">
+                <img id="perf-foto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Foto de perfil">
+            </div>
+            <div class="info-perfil">
+                <h2 id="perf-nombre-completo">Cargando identidad...</h2>
+                <p id="perf-bio">Cargando biografía...</p>
             </div>
         </div>
-    </div>
+
+        <section class="muro-propio">
+            <h3>Mis Publicaciones</h3>
+            <div id="mis-posts">
+                <p class="text-center">Buscando tus historias en la base de datos...</p>
+            </div>
+        </section>
+    </main>
+
     <script src="js/tema.js"></script>
+    <script src="js/usuario_global.js"></script>
+    <script src="js/perfil.js"></script>
+
+    <script>
+        document.getElementById('btn-salir').addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm("¿Estás seguro de que deseas salir de tu perfil?")) {
+                localStorage.removeItem('usuarioId');
+                window.location.href = '/';
+            }
+        });
+    </script>
 </body>
 </html>

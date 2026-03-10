@@ -1,21 +1,24 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: PERSONA 5 (UI/UX) & PERSONA 1 (SEGURIDAD)
+// ROL: ARQUITECTO (GESTIÓN DE IDENTIDAD P1 & P5)
 // ARCHIVO: ajustes.js
 // =============================================
 
 const form = document.getElementById('form-ajustes');
-const idUsuario = 1; // ID del Arquitecto para pruebas locales
+// 🛡️ Identidad dinámica: Recuperamos el ID de la sesión activa
+const miId = localStorage.getItem('usuarioId');
 
 // --- 1. CARGAR DATOS ACTUALES AL ENTRAR ---
 async function cargarAjustes() {
+    if (!miId) return;
+
     try {
-        // Obtenemos los datos actuales (Unión de usuarios y perfiles)
-        const res = await fetch(`/api/usuarios/ajustes/${idUsuario}`);
+        // Obtenemos los datos actuales desde la API (Unión de usuarios y perfiles)
+        const res = await fetch(`/api/usuarios/ajustes/${miId}`);
         const datos = await res.json();
         
-        if (datos) {
-            // Llenamos los campos del formulario
+        if (res.ok) {
+            // Llenamos los campos del formulario con la info de la DB
             document.getElementById('edit-nombre').value = datos.nombre || '';
             document.getElementById('edit-apellido').value = datos.apellido || '';
             document.getElementById('edit-bio').value = datos.bio || '';
@@ -31,8 +34,8 @@ async function cargarAjustes() {
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Recolectamos todos los datos del Arquitecto y Lucero
-    const datos = {
+    // Recolectamos los datos del formulario
+    const datosNuevos = {
         nombre: document.getElementById('edit-nombre').value,
         apellido: document.getElementById('edit-apellido').value,
         bio: document.getElementById('edit-bio').value,
@@ -42,24 +45,24 @@ form.addEventListener('submit', async (e) => {
     };
 
     // --- 🛡️ VALIDACIÓN DE SEGURIDAD (PERSONA 1) ---
-    // La contraseña debe ser exactamente de 12 caracteres si se intenta cambiar
-    if (datos.password && datos.password.length !== 12) {
-        alert("⚠️ Error: La contraseña debe tener exactamente 12 caracteres.");
+    // Si se intenta cambiar la contraseña, debe cumplir la Regla de Oro
+    if (datosNuevos.password && datosNuevos.password.length !== 12) {
+        alert("⚠️ Error: El Arquitecto exige que la nueva contraseña tenga exactamente 12 caracteres.");
         return;
     }
 
     try {
-        const res = await fetch(`/api/usuarios/actualizar-ajustes/${idUsuario}`, {
+        const res = await fetch(`/api/usuarios/actualizar-ajustes/${miId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
+            body: JSON.stringify(datosNuevos)
         });
 
         const result = await res.json();
 
         if (res.ok) {
-            alert("✅ " + (result.mensaje || "¡Ajustes guardados permanentemente!"));
-            // Recargamos para aplicar el nuevo tema y cambios visuales
+            alert("✅ " + (result.mensaje || "¡Perfil actualizado correctamente!"));
+            // Recargamos para que usuario_global.js actualice el nombre en el menú
             location.reload(); 
         } else {
             alert("❌ " + (result.error || "Error al actualizar."));
@@ -69,5 +72,5 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
-// Iniciar carga de datos
+// Iniciamos la carga de datos al abrir la página
 cargarAjustes();

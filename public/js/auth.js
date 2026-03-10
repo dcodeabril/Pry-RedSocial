@@ -51,13 +51,14 @@ document.getElementById('btn-entrar').addEventListener('click', async () => {
     }
 });
 
-// --- 📝 3. LÓGICA DE REGISTRO (PERSONA 1) ---
+// --- 📝 3. LÓGICA DE REGISTRO ACTUALIZADA (PERSONA 1 y 5) ---
 document.getElementById('btn-registrar').addEventListener('click', async () => {
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-pass').value;
 
-    if (pass.length !== 12) {
-        alert("⚠️ La seguridad del Arquitecto exige exactamente 12 caracteres.");
+    // 🛡️ Validación estricta del Arquitecto
+    if (!email || pass.length !== 12) {
+        alert("⚠️ Recuerda: Email válido y clave de exactamente 12 caracteres.");
         return;
     }
 
@@ -71,12 +72,19 @@ document.getElementById('btn-registrar').addEventListener('click', async () => {
         const data = await res.json();
 
         if (res.ok) {
-            alert("✅ ¡Cuenta creada! Ahora inicia sesión.");
-            toggleAuth(); // Regresamos al login automáticamente
+            alert("✅ " + data.mensaje);
+            
+            // 🧹 Limpiamos los campos para una mejor experiencia (UX)
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-pass').value = '';
+            
+            // 🔄 Regresamos automáticamente al Login para que el usuario entre
+            toggleAuth(); 
         } else {
-            alert("Error: " + data.error);
+            alert("❌ " + data.error);
         }
     } catch (err) {
-        alert("🚨 No se pudo completar el registro.");
+        console.error(err);
+        alert("🚨 Error de conexión con el servidor.");
     }
 });

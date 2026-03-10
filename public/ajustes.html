@@ -8,16 +8,23 @@
 </head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Configuración</h1></div>
+        <div class="logo"><h1>Facebook Local</h1></div>
         <nav>
-            <a href="index.html">Volver al Muro</a>
-            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
+            <a href="index.html">Muro</a>
+            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
+            <a href="mensajes.html">Mensajes</a>
+            <a href="ajustes.html" class="active">Ajustes</a>
+            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
     <main class="container">
         <div class="card">
             <h2>Ajustes de Cuenta y Perfil</h2>
+            <p>Modifica tu información personal y preferencias de seguridad.</p>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
+            
             <form id="form-ajustes">
                 
                 <div class="form-group">
@@ -36,8 +43,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="edit-password">Nueva Contraseña (12 caracteres):</label>
+                    <label for="edit-password">Nueva Contraseña (Exactamente 12 caracteres):</label>
                     <input type="password" id="edit-password" placeholder="Dejar en blanco para no cambiar">
+                    <small style="display: block; margin-top: 5px; opacity: 0.7;">
+                        La regla del Arquitecto exige 12 caracteres si deseas actualizarla.
+                    </small>
                 </div>
 
                 <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
@@ -55,14 +65,25 @@
                     </select>
                 </div>
 
-                <button type="submit" id="btn-guardar-ajustes" style="margin-top: 20px; width: 100%;">
-                    Guardar Cambios Permanentes
+                <button type="submit" id="btn-guardar-ajustes" class="btn-primario" style="margin-top: 20px; width: 100%;">
+                    Guardar Cambios Permanentes ✅
                 </button>
             </form>
         </div>
     </main>
 
     <script src="js/tema.js"></script>
+    <script src="js/usuario_global.js"></script>
     <script src="js/ajustes.js"></script>
+
+    <script>
+        document.getElementById('btn-salir').addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                localStorage.removeItem('usuarioId');
+                window.location.href = '/';
+            }
+        });
+    </script>
 </body>
 </html>
