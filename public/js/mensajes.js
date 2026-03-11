@@ -10,25 +10,32 @@ const inputMsj = document.getElementById('input-msj');
 const btnEnviar = document.getElementById('btn-enviar');
 const chatHeader = document.getElementById('chat-header');
 
-// 🛡️ Identidad dinámica: Recuperamos el ID de quien inició sesión
+// 🛡️ Identidad dinámica
 const miId = parseInt(localStorage.getItem('usuarioId')); 
 let amigoSeleccionadoId = null;
 
-// --- 👥 1. CARGAR LISTA DE CONTACTOS ---
+// --- 👥 1. CARGAR LISTA DE CONTACTOS (Amigos Aceptados) ---
 async function cargarListaAmigos() {
+    if (!miId) return;
     try {
-        // Esta ruta debe devolver los amigos aceptados de la Tabla 6 (amistades)
+        // 🎯 Ruta maestra de amistades que ya sincronizamos
         const res = await fetch(`/api/amistades/lista/${miId}`);
         const amigos = await res.json();
         
         if (amigos.length === 0) {
-            listaAmigos.innerHTML = '<li class="text-muted">Aún no tienes amigos.</li>';
+            listaAmigos.innerHTML = '<li class="text-muted" style="padding:15px;">Aún no tienes amigos aceptados. 🌐</li>';
             return;
         }
 
         listaAmigos.innerHTML = amigos.map(a => `
-            <li class="amigo-item card" onclick="seleccionarAmigo(${a.usuario_id}, '${a.nombre} ${a.apellido}')">
-                <strong>${a.nombre} ${a.apellido}</strong>
+            <li class="amigo-item card" 
+                id="item-amigo-${a.usuario_id}"
+                style="cursor:pointer; margin-bottom:10px; padding:10px; transition: 0.3s;"
+                onclick="seleccionarAmigo(${a.usuario_id}, '${a.nombre} ${a.apellido}')">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${a.foto_url || 'img/default.png'}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
+                    <strong>${a.nombre} ${a.apellido}</strong>
+                </div>
             </li>
         `).join('');
     } catch (err) {
@@ -37,33 +44,44 @@ async function cargarListaAmigos() {
 }
 
 // --- 🎯 2. SELECCIONAR AMIGO Y ABRIR CHAT ---
-window.seleccionarAmigo = async function(id, nombreCompleto) {
+window.seleccionarAmigo = function(id, nombreCompleto) {
     amigoSeleccionadoId = id;
     chatHeader.innerText = `Chat con ${nombreCompleto}`;
     
-    // Limpiamos la ventana y cargamos la conversación
-    mensajesBody.innerHTML = '<p class="text-center">Cargando mensajes...</p>';
-    await cargarMensajes();
+    // Resaltar visualmente en la lista (Persona 5)
+    document.querySelectorAll('.amigo-item').forEach(el => el.style.background = 'white');
+    const itemActivo = document.getElementById(`item-amigo-${id}`);
+    if (itemActivo) itemActivo.style.background = '#e7f3ff';
+
+    cargarMensajes();
 };
 
-// --- 💬 3. OBTENER CONVERSACIÓN (PERSONA 3) ---
+// --- 💬 3. OBTENER CONVERSACIÓN (Burbujas Dinámicas) ---
 async function cargarMensajes() {
     if (!amigoSeleccionadoId) return;
 
     try {
-        // Consultamos la Tabla 7 (mensajes) filtrando por emisor y receptor
         const res = await fetch(`/api/chats/conversacion/${miId}/${amigoSeleccionadoId}`);
         const mensajes = await res.json();
 
         if (mensajes.length === 0) {
-            mensajesBody.innerHTML = '<p class="text-muted text-center">No hay mensajes. ¡Di hola!</p>';
+            mensajesBody.innerHTML = '<p class="text-muted text-center" style="margin-top:20px;">No hay mensajes. ¡Di hola! 👋</p>';
             return;
         }
 
         mensajesBody.innerHTML = mensajes.map(m => `
-            <div class="msg ${m.emisor_id === miId ? 'msg-emisor' : 'msg-receptor'} card">
-                <p>${m.contenido}</p>
-                <small style="font-size: 0.7rem; opacity: 0.7;">
+            <div class="msg ${m.emisor_id === miId ? 'msg-emisor' : 'msg-receptor'}" 
+                 style="display: flex; flex-direction: column; margin-bottom: 15px;
+                        align-items: ${m.emisor_id === miId ? 'flex-end' : 'flex-start'};">
+                
+                <div class="card" style="padding: 10px 15px; border-radius: 18px; max-width: 75%;
+                                       background: ${m.emisor_id === miId ? 'var(--primary)' : '#f0f2f5'};
+                                       color: ${m.emisor_id === miId ? 'white' : 'black'};
+                                       border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <p style="margin:0;">${m.contenido}</p>
+                </div>
+                
+                <small style="font-size: 0.65rem; opacity: 0.6; margin-top: 4px; padding: 0 5px;">
                     ${new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </small>
             </div>
@@ -80,7 +98,6 @@ async function cargarMensajes() {
 // --- 🚀 4. ENVIAR NUEVO MENSAJE ---
 async function enviarMensaje() {
     const contenido = inputMsj.value.trim();
-    
     if (!contenido || !amigoSeleccionadoId) return;
 
     try {
@@ -96,10 +113,10 @@ async function enviarMensaje() {
 
         if (res.ok) {
             inputMsj.value = '';
-            await cargarMensajes(); // Refrescar chat
+            cargarMensajes(); 
         }
     } catch (err) {
-        alert("🚨 No se pudo enviar el mensaje.");
+        console.error("Error al enviar:", err);
     }
 }
 
@@ -109,5 +126,13 @@ inputMsj.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') enviarMensaje();
 });
 
-// Iniciamos la carga de amigos al abrir la página
+// --- 🔄 SINCRONIZACIÓN AUTOMÁTICA ---
+// Consultamos nuevos mensajes cada 4 segundos si hay un chat abierto
+setInterval(() => {
+    if (amigoSeleccionadoId) {
+        cargarMensajes();
+    }
+}, 4000);
+
+// Iniciamos la carga de amigos
 cargarListaAmigos();

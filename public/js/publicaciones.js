@@ -1,25 +1,30 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (GESTIÓN DE MURO DINÁMICO P2 + P4)
+// ROL: ARQUITECTO (GESTIÓN DE MURO DINÁMICO P2, P3 Y P4)
 // ARCHIVO: publicaciones.js
 // =============================================
 
 const feed = document.getElementById('feed');
 const btnPublicar = document.getElementById('btn-publicar');
-// 🛡️ Identidad dinámica: Recuperamos el ID del usuario logueado
 const miId = localStorage.getItem('usuarioId');
 
-// --- 1. CARGAR POSTS DEL MURO (Con Privacidad, Borrado y Reportes) ---
+// --- 1. CARGAR POSTS DEL MURO (Con Filtro de Amigos y Bloqueos) ---
 async function cargarMuro() {
     if (!miId) return;
 
     try {
-        const res = await fetch(`/api/publicaciones/${miId}`);
+        // 🎯 🛡️ LLAMADA MAESTRA: El servidor filtrará por privacidad y bloqueos
+        const res = await fetch(`/api/publicaciones/muro/${miId}`);
         const posts = await res.json();
 
         if (!Array.isArray(posts)) {
             console.error("El servidor no devolvió una lista válida:", posts);
             feed.innerHTML = `<p class="card" style="text-align:center;">⚠️ No se pudo cargar el muro personalizado.</p>`;
+            return;
+        }
+
+        if (posts.length === 0) {
+            feed.innerHTML = `<p class="card" style="text-align:center; padding: 20px;">Tu muro está vacío. ¡Sigue a más personas para ver contenido! 🌐</p>`;
             return;
         }
 
@@ -30,7 +35,7 @@ async function cargarMuro() {
             div.className = 'post-card card';
             div.style.marginBottom = "20px";
             
-            // 🛡️ Lógica de Control 1: Solo el dueño ve el botón de ELIMINAR
+            // 🛡️ Lógica de Control: Botón borrar solo para el autor
             const btnBorrarPost = (post.usuario_id == miId) 
                 ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario" 
                     style="color: #dc3545; border-color: #dc3545; font-size: 0.8rem; margin-left: auto;">
@@ -38,7 +43,7 @@ async function cargarMuro() {
                    </button>` 
                 : '';
 
-            // 🛡️ Lógica de Control 2: Solo se reportan posts AJENOS
+            // 🛡️ Lógica de Control: Botón reportar solo para posts ajenos
             const btnReportar = (post.usuario_id != miId) 
                 ? `<button onclick="abrirReporte(${post.id})" class="btn-secundario" 
                     style="color: #ffa500; border-color: #ffa500; font-size: 0.8rem; margin-left: auto;">
@@ -47,26 +52,28 @@ async function cargarMuro() {
                 : '';
 
             div.innerHTML = `
-                <div class="post-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                    <strong>${post.nombre} ${post.apellido}</strong>
-                    <span style="font-size: 0.8rem; opacity: 0.6; float: right;">
-                        ${new Date(post.fecha_creacion || post.fecha).toLocaleString()}
-                    </span>
+                <div class="post-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <img src="${post.foto_url || 'img/default.png'}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+                    <div style="flex-grow: 1;">
+                        <strong>${post.nombre} ${post.apellido}</strong>
+                        <small style="display: block; opacity: 0.6;">${new Date(post.fecha_creacion).toLocaleString()}</small>
+                    </div>
+                    <small title="Privacidad" style="opacity: 0.5;">${post.privacidad === 'amigos' ? '👥' : post.privacidad === 'publica' ? '🌎' : '🔒'}</small>
                 </div>
-                <div class="post-body" style="font-size: 1.1rem; margin-bottom: 15px;">
+                <div class="post-body" style="font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4;">
                     ${post.contenido}
                 </div>
                 <div class="post-footer" style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; align-items: center;">
                     <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')">👍 Me gusta</button>
-                    <button class="btn-secundario">💬 Comentar</button>
+                    <button class="btn-secundario" onclick="abrirComentarios(${post.id})">💬 Comentar</button>
                     
-                    ${btnReportar} ${btnBorrarPost} <small style="margin-left: 10px; opacity: 0.5;">🔒 ${post.privacidad}</small>
+                    ${btnReportar} ${btnBorrarPost}
                 </div>
             `;
             feed.appendChild(div);
         });
     } catch (err) {
-        console.error("🚨 Error técnico al conectar con el muro:", err);
+        console.error("🚨 Error técnico al cargar el muro:", err);
         feed.innerHTML = '<p class="card text-center">Error de conexión con el servidor.</p>';
     }
 }
@@ -108,12 +115,17 @@ btnPublicar.addEventListener('click', async () => {
 window.reaccionar = async function(postId, tipo) {
     if (!miId) return;
     try {
-        await fetch('/api/publicaciones/reaccionar', {
+        const res = await fetch('/api/publicaciones/reaccionar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ publicacion_id: postId, usuario_id: miId, tipo: tipo })
         });
-        cargarMuro(); 
+        
+        if (res.status === 403) {
+            alert("🚫 No puedes reaccionar debido a un bloqueo de privacidad.");
+        } else {
+            cargarMuro(); 
+        }
     } catch (err) {
         console.error("Error al reaccionar:", err);
     }
@@ -135,11 +147,11 @@ window.eliminarPublicacion = async function(id) {
             alert("❌ " + err.error);
         }
     } catch (err) {
-        console.error("Error al conectar para borrar post:", err);
+        console.error("Error al borrar post:", err);
     }
 };
 
-// --- 5. [NUEVO] FUNCIÓN PARA ENVIAR REPORTE ---
+// --- 5. REPORTAR CONTENIDO ---
 window.abrirReporte = async function(postId) {
     const motivo = prompt("¿Por qué deseas reportar esta publicación?\n(Spam, Contenido Inapropiado, Acoso, etc.)");
     
@@ -157,7 +169,7 @@ window.abrirReporte = async function(postId) {
         });
 
         if (res.ok) {
-            alert("✅ Publicación reportada con éxito. El equipo de moderación la revisará.");
+            alert("✅ Gracias. Tu reporte ha sido enviado al Arquitecto Israel Díaz para su revisión.");
         } else {
             alert("❌ No se pudo enviar el reporte.");
         }

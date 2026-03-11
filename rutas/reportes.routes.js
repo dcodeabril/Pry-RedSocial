@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (SISTEMA DE MODERACIÓN P4)
+// ROL: ARQUITECTO (MODERACIÓN Y JUSTICIA P4)
 // ARCHIVO: rutas/reportes.routes.js
 // =============================================
 
@@ -9,7 +9,6 @@ const router = express.Router();
 const db = require('../db/base_datos');
 
 // --- 1. ENVIAR UNA DENUNCIA (POST) ---
-// Se activa desde el muro cuando Lucero reporta un post ajeno
 router.post('/crear', async (req, res) => {
     const { denunciante_id, publicacion_id, motivo } = req.body;
 
@@ -18,48 +17,54 @@ router.post('/crear', async (req, res) => {
     }
 
     try {
-        const query = `
-            INSERT INTO reportes (denunciante_id, publicacion_id, motivo, estado) 
-            VALUES (?, ?, ?, 'pendiente')`;
-        
-        await db.query(query, [denunciante_id, publicacion_id, motivo]);
-        
-        res.status(201).json({ mensaje: "Reporte enviado a moderación con éxito ✅" });
+        await db.query(
+            'INSERT INTO reportes (denunciante_id, publicacion_id, motivo, estado) VALUES (?, ?, ?, "pendiente")',
+            [denunciante_id, publicacion_id, motivo]
+        );
+        res.status(201).json({ mensaje: "Denuncia recibida. El Arquitecto la revisará. 🚩" });
     } catch (err) {
         console.error("🚨 Error al insertar reporte:", err);
-        res.status(500).json({ error: "No se pudo procesar el reporte en la base de datos." });
+        res.status(500).json({ error: "Error al registrar la denuncia." });
     }
 });
 
 // --- 2. [ADMIN] LISTAR REPORTES PENDIENTES (GET) ---
-// Alimenta el nuevo Panel de Administración
-router.get('/lista', async (req, res) => {
+router.get('/admin/lista', async (req, res) => {
     try {
         const query = `
-            SELECT r.*, p.contenido as post_contenido, perf.nombre as denunciante_nombre 
+            SELECT 
+                r.id AS reporte_id, 
+                r.motivo, 
+                r.estado,
+                p.contenido AS post_contenido,
+                p.id AS post_id,
+                perf_den.nombre AS denunciante_nombre,
+                perf_den.apellido AS denunciante_apellido,
+                perf_autor.nombre AS autor_nombre,
+                perf_autor.apellido AS autor_apellido
             FROM reportes r
             JOIN publicaciones p ON r.publicacion_id = p.id
-            JOIN perfiles perf ON r.denunciante_id = perf.usuario_id
+            JOIN perfiles perf_den ON r.denunciante_id = perf_den.usuario_id
+            JOIN perfiles perf_autor ON p.usuario_id = perf_autor.usuario_id
             WHERE r.estado = 'pendiente'
-            ORDER BY r.fecha_reporte DESC`; // Ordenamos por la fecha que acabamos de crear
-            
-        const [rows] = await db.query(query);
-        res.json(rows);
+            ORDER BY r.id DESC`; // ✅ CORREGIDO: Usamos r.id para evitar errores de columna de fecha
+
+        const [reportes] = await db.query(query);
+        res.json(reportes);
     } catch (err) {
-        console.error("🚨 Error al cargar lista de reportes:", err);
+        console.error("🚨 Error al cargar lista de justicia:", err);
         res.status(500).json({ error: "Error al cargar la lista de moderación." });
     }
 });
 
-// --- 3. [ADMIN] MARCAR REPORTE COMO REVISADO (PUT) ---
-// Se activa desde el Panel Admin al "Archivar" o "Ignorar" un reporte
-router.put('/revisar/:id', async (req, res) => {
+// --- 3. [ADMIN] RESOLVER REPORTE (PATCH) ---
+router.patch('/admin/resolver/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        await db.query('UPDATE reportes SET estado = "revisado" WHERE id = ?', [id]);
-        res.json({ mensaje: "Reporte archivado correctamente ✅" });
+        await db.query('UPDATE reportes SET estado = "resuelto" WHERE id = ?', [id]);
+        res.json({ mensaje: "Caso cerrado con éxito ✅" });
     } catch (err) {
-        console.error("🚨 Error al archivar reporte:", err);
+        console.error("🚨 Error al resolver reporte:", err);
         res.status(500).json({ error: "No se pudo actualizar el reporte." });
     }
 });

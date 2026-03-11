@@ -9,6 +9,16 @@
 <body>
     <header class="main-header">
         <div class="logo"><h1>Facebook Local</h1></div>
+
+        <div class="buscador-contenedor" style="position: relative; width: 300px; margin-left: 20px;">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar personas..." 
+                   style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #ddd; outline: none;">
+            
+            <div id="resultados-busqueda" class="card" 
+                 style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                </div>
+        </div>
+
         <nav>
             <a href="index.html">Muro</a>
             <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
@@ -40,13 +50,12 @@
     <script src="js/publicaciones.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
-
-    <script>
+    <script src="js/buscar.js"></script> <script>
         document.getElementById('btn-salir').addEventListener('click', (e) => {
-            e.preventDefault(); // Evita que el enlace recargue la página innecesariamente
+            e.preventDefault(); 
             if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-                localStorage.removeItem('usuarioId'); // Destruimos la llave de acceso
-                window.location.href = '/'; // Redirección inmediata a la Aduana (Login)
+                localStorage.removeItem('usuarioId'); 
+                window.location.href = '/'; 
             }
         });
     </script>

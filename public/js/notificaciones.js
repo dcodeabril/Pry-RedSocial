@@ -27,11 +27,9 @@ async function cargarNotificaciones() {
             const item = document.createElement('div');
             item.className = `notif-item ${n.leido ? '' : 'no-leido'}`;
             
-            // 🛡️ Lógica de botones para Solicitud de Amistad (Persona 3)
+            // 🛡️ Lógica de botones: Solo para solicitudes nuevas (tipo 'amistad')
             let botonesAmistad = '';
             if (n.tipo === 'amistad') {
-                // Usamos n.referencia_id para apuntar a la fila de la tabla 'amistades'
-                // Si no existe, usamos el id de la notificación como fallback
                 const idVínculo = n.referencia_id || n.id; 
                 botonesAmistad = `
                     <div class="notif-actions" style="margin-top: 10px; display: flex; gap: 10px;">
@@ -54,7 +52,7 @@ async function cargarNotificaciones() {
                 <button onclick="borrarNotificacion(${n.id})" style="background:none; border:none; cursor:pointer; margin-left:10px; opacity:0.5;">🗑️</button>
             `;
 
-            // Al hacer clic en el cuerpo (fuera de los botones), marcar como leída
+            // Marcar como leída al hacer clic
             item.onclick = (e) => {
                 if(e.target.tagName !== 'BUTTON') marcarUnaComoLeida(n.id, item);
             };
@@ -71,15 +69,22 @@ async function cargarNotificaciones() {
 // --- 2. TRADUCTOR DE TIPOS (Persona 4) ---
 function interpretarTipo(tipo) {
     switch(tipo) {
-        case 'reaccion': return "reaccionó a tu publicación 👍";
-        case 'comentario': return "comentó tu post 💬";
-        case 'mensaje': return "te envió un mensaje privado ✉️";
-        case 'amistad': return "te envió una <b>solicitud de amistad</b> 🤝";
-        default: return "realizó una acción en tu cuenta.";
+        case 'amistad': 
+            return "te envió una <b>solicitud de amistad</b> 🤝";
+        case 'confirmacion_amistad': 
+            return "<b>aceptó tu solicitud de amistad</b>. ¡Ya pueden chatear! 🎉";
+        case 'reaccion': 
+            return "reaccionó a tu publicación 👍";
+        case 'comentario': 
+            return "comentó tu post 💬";
+        case 'mensaje': 
+            return "te envió un mensaje privado ✉️";
+        default: 
+            return "realizó una acción en tu cuenta.";
     }
 }
 
-// --- 3. [NUEVO] RESPONDER SOLICITUD DE AMISTAD (Persona 3) ---
+// --- 3. RESPONDER SOLICITUD DE AMISTAD (Persona 3) ---
 window.responderSolicitud = async function(idReferencia, estado) {
     try {
         const res = await fetch('/api/amistades/responder', {
@@ -95,7 +100,7 @@ window.responderSolicitud = async function(idReferencia, estado) {
 
         if (res.ok) {
             alert("🤝 " + data.mensaje);
-            location.reload(); // Recargar para limpiar el buzón
+            location.reload(); 
         } else {
             alert("❌ " + data.error);
         }
@@ -110,7 +115,7 @@ async function marcarUnaComoLeida(id, elemento) {
         elemento.classList.remove('no-leido');
         const dot = elemento.querySelector('.status-dot');
         if (dot) dot.remove();
-        // Opcional: Llamada al servidor para persistir el estado 'leido'
+        // Opcional: fetch a /api/notificaciones/leer-una/${id}
     } catch (err) {
         console.error("Error al marcar como leída:", err);
     }

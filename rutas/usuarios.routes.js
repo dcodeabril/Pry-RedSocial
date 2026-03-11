@@ -19,7 +19,7 @@ router.post('/registro', async (req, res) => {
     try {
         const [resultado] = await db.query(
             'INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)',
-            [email, password, 'usuario'] // Por defecto todos son usuarios
+            [email, password, 'usuario'] 
         );
         
         const nuevoId = resultado.insertId;
@@ -46,12 +46,11 @@ router.post('/registro', async (req, res) => {
     }
 });
 
-// --- 2. LOGIN DE USUARIOS (Corregido para enviar ROL y NOMBRE) ---
+// --- 2. LOGIN DE USUARIOS ---
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // 🛡️ Buscamos al usuario y traemos su nombre de perfil al mismo tiempo
         const query = `
             SELECT u.id, u.email, u.password, u.rol, p.nombre 
             FROM usuarios u
@@ -70,12 +69,11 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: "Contraseña incorrecta." });
         }
 
-        // ✅ RESPUESTA MAESTRA: Ahora enviamos el ROL y el NOMBRE
         res.json({ 
             mensaje: "¡Bienvenido de nuevo!", 
             usuarioId: usuario.id,
             nombre: usuario.nombre,
-            rol: usuario.rol, // 🔑 ¡Aquí está la llave del admin!
+            rol: usuario.rol, 
             email: usuario.email 
         });
 
@@ -85,7 +83,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// --- 3. OBTENER AJUSTES Y PERFIL (Añadido el ROL para el Global) ---
+// --- 3. OBTENER AJUSTES Y PERFIL ---
 router.get('/ajustes/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -133,6 +131,31 @@ router.put('/actualizar-ajustes/:id', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error crítico al guardar." });
+    }
+});
+
+// --- 5. [NUEVO] BUSCADOR DE USUARIOS (Radar P5) ---
+router.get('/buscar', async (req, res) => {
+    const { q, miId } = req.query; // Capturamos el texto y el ID del buscador
+
+    if (!q) return res.json([]);
+
+    try {
+        // Buscamos por nombre, apellido o la unión de ambos
+        const query = `
+            SELECT usuario_id, nombre, apellido, foto_url 
+            FROM perfiles 
+            WHERE (nombre LIKE ? OR apellido LIKE ? OR CONCAT(nombre, ' ', apellido) LIKE ?)
+            AND usuario_id != ?
+            LIMIT 10`;
+        
+        const busqueda = `%${q}%`;
+        const [usuarios] = await db.query(query, [busqueda, busqueda, busqueda, miId]);
+        
+        res.json(usuarios);
+    } catch (err) {
+        console.error("🚨 Error en el buscador SQL:", err);
+        res.status(500).json({ error: "No se pudo realizar la búsqueda." });
     }
 });
 
