@@ -39,13 +39,22 @@
 <body>
     <header class="main-header">
         <div class="logo"><h1>Facebook Local</h1></div>
-        <nav>
+        
+        <nav style="display: flex; align-items: center; gap: 10px;">
             <a href="index.html">Muro</a>
-            <a href="perfil.html" class="active">Mi Perfil</a> 
+            <a href="perfil.html" id="nav-nombre" class="active">Mi Perfil</a> 
             <a href="mensajes.html">Mensajes</a>
-            <a href="ajustes.html">Ajustes</a>
-            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+            <a href="notificaciones.html">Notificaciones</a>
+            <a href="eventos.html">Eventos</a>
+            
+            <a href="baul.html" style="color: #ffc107; font-weight: bold;">📂 Mis Tesoros</a>
+
+            <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold; text-decoration: none; margin-left: 10px;">
+                ⚙️ Panel Admin
+            </a>
+            
+            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 5px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
@@ -82,7 +91,7 @@
         document.getElementById('btn-salir').addEventListener('click', (e) => {
             e.preventDefault();
             if(confirm("¿Estás seguro de que deseas salir de tu perfil?")) {
-                localStorage.clear(); // Limpiamos todo por seguridad
+                localStorage.removeItem('usuarioId'); 
                 window.location.href = '/';
             }
         });

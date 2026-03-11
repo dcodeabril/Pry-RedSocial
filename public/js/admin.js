@@ -5,11 +5,11 @@
 // =============================================
 
 // 🚩 SEGURIDAD DE ROL (Blindaje de acceso)
-const miRol = localStorage.getItem('usuarioRol');
+const miRol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
 
 if (miRol !== 'admin') {
     alert("⚠️ Acceso denegado. No tienes permisos de administrador.");
-    window.location.href = 'index.html'; // Expulsar al usuario al muro
+    window.location.href = 'index.html'; 
 }
 
 // --- SELECTORES Y VARIABLES ---
@@ -19,13 +19,15 @@ const contenedorReportes = document.getElementById('lista-reportes-admin');
 const contadorReportes = document.getElementById('contador-reportes');
 const miId = localStorage.getItem('usuarioId');
 
-// --- 🛡️ SECCIÓN A: GESTIÓN DE USUARIOS (Identidad) ---
+// --- 🛡️ SECCIÓN A: GESTIÓN DE USUARIOS ---
 
 async function cargarUsuarios() {
     try {
         const res = await fetch('/api/admin/usuarios');
         const usuarios = await res.json();
         
+        if (!tablaUsuarios) return;
+
         tablaUsuarios.innerHTML = '';
         usuarios.forEach(user => {
             const tr = document.createElement('tr');
@@ -33,11 +35,14 @@ async function cargarUsuarios() {
                 <td>${user.id}</td>
                 <td>${user.email}</td>
                 <td>${user.rol}</td>
-                <td><strong>${user.estado}</strong></td>
+                <td><span style="color: ${user.estado === 'activo' ? '#28a745' : '#dc3545'}; font-weight: bold;">
+                    ${user.estado.toUpperCase()}
+                </span></td>
                 <td>
-                    <button class="${user.estado === 'activo' ? 'btn-suspender' : 'btn-activar'}" 
+                    <button class="btn-secundario" 
+                            style="border-color: ${user.estado === 'activo' ? '#dc3545' : '#28a745'}; color: ${user.estado === 'activo' ? '#dc3545' : '#28a745'};"
                             onclick="cambiarEstadoUsuario(${user.id}, '${user.estado}')">
-                        ${user.estado === 'activo' ? 'Suspender' : 'Activar'}
+                        ${user.estado === 'activo' ? 'Suspender 🚫' : 'Activar ✅'}
                     </button>
                 </td>
             `;
@@ -50,86 +55,71 @@ async function cargarUsuarios() {
 
 window.cambiarEstadoUsuario = async function(id, estadoActual) {
     const nuevo_estado = estadoActual === 'activo' ? 'suspendido' : 'activo';
+    if (!confirm(`¿Estás seguro de cambiar el estado a: ${nuevo_estado.toUpperCase()}?`)) return;
+
     try {
-        await fetch(`/api/admin/usuarios/estado/${id}`, {
+        const res = await fetch(`/api/admin/usuarios/estado/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nuevo_estado })
         });
-        cargarUsuarios(); 
+        
+        if (res.ok) {
+            cargarUsuarios(); 
+        }
     } catch (err) {
         alert("No se pudo cambiar el estado del usuario.");
     }
 }
 
-// --- 🚩 SECCIÓN B: GESTIÓN DE REPORTES (Contenido) ---
+// --- 🚩 SECCIÓN B: RESUMEN DE REPORTES (Integración Solicitada) ---
 
-async function cargarReportes() {
+async function cargarResumenReportes() {
     try {
-        const res = await fetch('/api/reportes/lista');
+        // 🎯 Usamos la ruta de administración detallada para el resumen
+        const res = await fetch('/api/reportes/admin/lista');
         const reportes = await res.json();
 
+        // 1. Actualizar el contador (Badge)
+        if (contadorReportes) {
+            contadorReportes.innerText = `${reportes.length} pendientes`;
+        }
+
+        // 2. Mostrar previsualización en el Dashboard
+        if (!contenedorReportes) return;
+
         if (reportes.length === 0) {
-            if (contenedorReportes) {
-                contenedorReportes.innerHTML = '<p style="text-align:center; opacity:0.6;">No hay reportes pendientes. ¡Paz total! ✨</p>';
-            }
-            if (contadorReportes) contadorReportes.innerText = "0 pendientes";
+            contenedorReportes.innerHTML = '<p style="text-align:center; opacity:0.6; padding: 20px;">No hay denuncias pendientes. ¡Paz total! ✨</p>';
             return;
         }
 
-        if (contadorReportes) contadorReportes.innerText = `${reportes.length} pendientes`;
-        
-        if (contenedorReportes) {
-            contenedorReportes.innerHTML = reportes.map(r => `
-                <div class="card report-card">
-                    <div class="report-info">
-                        <p><b>Denunciante:</b><br>${r.denunciante_nombre}</p>
-                        <p><b>Motivo:</b><br><span style="color: #dc3545;">${r.motivo}</span></p>
-                    </div>
-                    <div class="post-preview">
-                        <b>Post Reportado:</b><br>"${r.post_contenido}"
-                    </div>
-                    <div class="actions-admin">
-                        <button onclick="eliminarYResolver(${r.publicacion_id}, ${r.id})" class="btn-primario" style="background: #dc3545;">
-                            Eliminar Post 🗑️
-                        </button>
-                        <button onclick="archivarReporte(${r.id})" class="btn-secundario">
-                            Ignorar / Archivar
-                        </button>
-                    </div>
+        // Mostramos solo los últimos 3 como un "vistazo rápido"
+        const resumen = reportes.slice(0, 3);
+        contenedorReportes.innerHTML = resumen.map(r => `
+            <div class="report-card" style="border-left: 6px solid #dc3545; padding: 15px; margin-bottom: 10px; background: #fff5f5; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>🚩 Motivo: ${r.motivo}</strong>
+                    <small>${new Date(r.fecha_reporte).toLocaleDateString()}</small>
                 </div>
-            `).join('');
-        }
+                <p style="font-size: 0.9rem; margin: 5px 0;">
+                    <b>Post:</b> "${r.post_contenido.substring(0, 50)}..."
+                </p>
+                <small>Denunciado por: ${r.denunciante_nombre}</small>
+            </div>
+        `).join('') + (reportes.length > 3 ? `<p style="text-align:center; font-size: 0.8rem; color: #666;">Y ${reportes.length - 3} denuncias más...</p>` : '');
+
     } catch (err) {
-        if (contenedorReportes) contenedorReportes.innerHTML = '<p>Error al cargar reportes.</p>';
+        console.error("Error al cargar resumen:", err);
+        if (contadorReportes) contadorReportes.innerText = "Error";
+        if (contenedorReportes) contenedorReportes.innerHTML = '<p>Error al conectar con el servidor de justicia.</p>';
     }
 }
 
-window.eliminarYResolver = async function(postId, reporteId) {
-    if (!confirm("¿Borrar publicación reportada?")) return;
-    try {
-        const resPost = await fetch(`/api/publicaciones/${postId}?usuario_id=${miId}`, { method: 'DELETE' });
-        if (resPost.ok) {
-            await fetch(`/api/reportes/revisar/${reporteId}`, { method: 'PUT' });
-            alert("Contenido eliminado y reporte cerrado.");
-            cargarReportes();
-        }
-    } catch (err) { alert("Error en la operación."); }
-};
-
-window.archivarReporte = async function(id) {
-    try {
-        await fetch(`/api/reportes/revisar/${id}`, { method: 'PUT' });
-        cargarReportes();
-    } catch (err) { console.error(err); }
-};
-
 // --- 🚀 ARRANQUE INICIAL ---
 function init() {
-    // Solo ejecutamos la carga si el usuario es administrador
     if (miRol === 'admin') {
         cargarUsuarios();
-        cargarReportes();
+        cargarResumenReportes();
     }
 }
 

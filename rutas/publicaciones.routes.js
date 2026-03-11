@@ -155,21 +155,19 @@ router.post('/comentar', async (req, res) => {
     }
 });
 
-// --- [7] ELIMINAR PUBLICACIÓN (Versión con Permiso de Admin P4) ---
+// --- [7] ELIMINAR PUBLICACIÓN ---
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    const { usuario_id } = req.query; // ID del que intenta borrar (se envía desde el Panel Admin)
+    const { usuario_id } = req.query; 
 
     try {
         let queryBorrado;
         let params;
 
-        // 🛡️ Lógica de Poder: Si el ID es 1 (Israel Admin), borra cualquier post
         if (parseInt(usuario_id) === 1) {
             queryBorrado = 'DELETE FROM publicaciones WHERE id = ?';
             params = [id];
         } else {
-            // Si no es admin, solo borra si es el dueño
             queryBorrado = 'DELETE FROM publicaciones WHERE id = ? AND usuario_id = ?';
             params = [id, usuario_id];
         }
@@ -184,6 +182,48 @@ router.delete('/:id', async (req, res) => {
     } catch (err) {
         console.error("🚨 Error al borrar publicación:", err);
         res.status(500).json({ error: "Error interno al intentar eliminar el post." });
+    }
+});
+
+// --- [8] GUARDAR EN EL BAÚL (#8 - Usando tu tabla guardados_y_notas) ---
+router.post('/guardar-tesoro', async (req, res) => {
+    const { usuario_id, publicacion_id } = req.body;
+
+    try {
+        // 🎯 Insertamos en la tabla que ya existe en tu Dump
+        await db.query(
+            `INSERT INTO guardados_y_notas (usuario_id, referencia_id, tipo_entrada) 
+             VALUES (?, ?, 'guardado')`,
+            [usuario_id, publicacion_id]
+        );
+        res.json({ mensaje: "¡Publicación guardada en tu baúl de tesoros! 💾" });
+    } catch (err) {
+        // Manejo de duplicados por si ya está guardado
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: "Ya tienes este tesoro guardado en tu baúl." });
+        }
+        console.error(err);
+        res.status(500).json({ error: "No se pudo guardar el tesoro." });
+    }
+});
+
+// --- [8.1] OBTENER MI BAÚL DE TESOROS ---
+router.get('/baul/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+    try {
+        const query = `
+            SELECT p.*, perf.nombre, perf.apellido, perf.foto_url 
+            FROM publicaciones p
+            JOIN guardados_y_notas gn ON p.id = gn.referencia_id
+            JOIN perfiles perf ON p.usuario_id = perf.usuario_id
+            WHERE gn.usuario_id = ? AND gn.tipo_entrada = 'guardado'
+            ORDER BY gn.fecha DESC`;
+            
+        const [tesoros] = await db.query(query, [usuarioId]);
+        res.json(tesoros);
+    } catch (err) {
+        console.error("🚨 Error al abrir el baúl:", err);
+        res.status(500).json({ error: "No pudimos abrir tu baúl de tesoros." });
     }
 });
 

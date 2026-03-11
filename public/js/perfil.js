@@ -16,7 +16,7 @@ const fotoImg = document.getElementById('perf-foto');
 const contenedorPosts = document.getElementById('mis-posts');
 const zonaAcciones = document.getElementById('zona-acciones-perfil'); 
 
-// --- 1. CARGAR DATOS DE IDENTIDAD (Persona 1 y 5) ---
+// --- 1. CARGAR DATOS DE IDENTIDAD ---
 async function cargarDatosPerfil() {
     if (!perfilId) return;
 
@@ -33,21 +33,16 @@ async function cargarDatosPerfil() {
             }
 
             // 🛡️ Lógica de Botones Dinámicos (Solo si visitamos a OTRO usuario)
-            if (perfilId !== miId && zonaAcciones) {
-                // 🔍 Consultamos el estado de amistad antes de dibujar la interfaz
+            if (String(perfilId) !== String(miId) && zonaAcciones) {
                 const resAmistad = await fetch(`/api/amistades/estado/${miId}/${perfilId}`);
                 const relacion = await resAmistad.json();
 
                 let botonAmistad = '';
-
                 if (!relacion || relacion.vacio) {
-                    // Caso A: No hay ningún vínculo previo
                     botonAmistad = `<button onclick="enviarSolicitudAmistad(${perfilId})" class="btn-primario">Agregar Amigo ➕</button>`;
                 } else if (relacion.estado === 'pendiente') {
-                    // Caso B: Ya se envió la solicitud pero no ha sido aceptada
                     botonAmistad = `<button class="btn-secundario" style="background: #ccc; cursor: not-allowed;" disabled>Solicitud Enviada ⏳</button>`;
                 } else if (relacion.estado === 'aceptada') {
-                    // Caso C: Ya son amigos confirmados
                     botonAmistad = `<button class="btn-secundario" style="background: #28a745; color: white;" disabled>Amigos ✅</button>`;
                 }
 
@@ -59,6 +54,9 @@ async function cargarDatosPerfil() {
                         Bloquear 🚫
                     </button>
                 `;
+            } else {
+                // Si es mi propio perfil, limpiamos la zona de acciones para que se vea minimalista
+                if (zonaAcciones) zonaAcciones.innerHTML = '';
             }
         }
         
@@ -86,7 +84,7 @@ async function cargarMisPosts() {
         contenedorPosts.innerHTML = posts.map(p => `
             <div class="card" style="margin-bottom: 15px;">
                 <div style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 5px;">
-                    <small>Publicado el: ${new Date(p.fecha_creacion).toLocaleString()}</small>
+                    <small>Publicado el: ${new Date(p.fecha).toLocaleString()}</small>
                 </div>
                 <p style="font-size: 1.1rem;">${p.contenido}</p>
                 <div style="margin-top: 10px; color: var(--primary); font-size: 0.9rem;">
@@ -101,56 +99,28 @@ async function cargarMisPosts() {
     }
 }
 
-// --- 3. FUNCIÓN PARA ENVIAR SOLICITUD DE AMISTAD (Persona 3) ---
+// --- 3. FUNCIONES SOCIALES (Amistad y Bloqueo) ---
 window.enviarSolicitudAmistad = async function(idDestino) {
     try {
         const res = await fetch('/api/amistades/solicitar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                usuario_envia_id: miId,
-                usuario_recibe_id: idDestino
-            })
+            body: JSON.stringify({ usuario_envia_id: miId, usuario_recibe_id: idDestino })
         });
-
-        const data = await res.json();
-        if (res.ok) {
-            alert("✅ " + data.mensaje);
-            location.reload(); // Recargamos para que el botón pase a "Solicitud Enviada"
-        } else {
-            alert("❌ " + data.error);
-        }
-        
-    } catch (err) {
-        console.error("Error al enviar solicitud:", err);
-    }
+        if (res.ok) { alert("Solicitud enviada ✅"); location.reload(); }
+    } catch (err) { console.error(err); }
 };
 
-// --- 4. FUNCIÓN PARA BLOQUEAR USUARIO (Persona 4) ---
 window.bloquearEsteUsuario = async function(idABloquear) {
-    if (!confirm("¿Deseas bloquear a esta persona? No podrán ver sus publicaciones mutuamente.")) return;
-
+    if (!confirm("¿Bloquear a este usuario?")) return;
     try {
         const res = await fetch('/api/bloqueos/crear', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                usuario_id: miId,
-                usuario_bloqueado_id: idABloquear
-            })
+            body: JSON.stringify({ usuario_id: miId, usuario_bloqueado_id: idABloquear })
         });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            alert("🚫 " + data.mensaje);
-            window.location.href = 'index.html'; 
-        } else {
-            alert("❌ " + data.error);
-        }
-    } catch (err) {
-        console.error("Error al bloquear:", err);
-    }
+        if (res.ok) { alert("Usuario bloqueado 🚫"); window.location.href = 'index.html'; }
+    } catch (err) { console.error(err); }
 };
 
 // --- 🚀 INICIO DE CARGA ---

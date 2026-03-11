@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (INTEGRACIÓN TOTAL P1 + P5)
+// ROL: ARQUITECTO (INTEGRACIÓN TOTAL P1 + P5 + SEGURIDAD P4)
 // ARCHIVO: rutas/usuarios.routes.js
 // =============================================
 
@@ -46,13 +46,13 @@ router.post('/registro', async (req, res) => {
     }
 });
 
-// --- 2. LOGIN DE USUARIOS ---
+// --- 2. LOGIN DE USUARIOS (Con Filtro de Suspensión) ---
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
         const query = `
-            SELECT u.id, u.email, u.password, u.rol, p.nombre 
+            SELECT u.id, u.email, u.password, u.rol, u.estado, p.nombre 
             FROM usuarios u
             JOIN perfiles p ON u.id = p.usuario_id
             WHERE u.email = ?`;
@@ -64,6 +64,13 @@ router.post('/login', async (req, res) => {
         }
 
         const usuario = usuarios[0];
+
+        // 🛡️ FILTRO DE SEGURIDAD: Verificamos si la cuenta está suspendida
+        if (usuario.estado === 'suspendido') {
+            return res.status(403).json({ 
+                error: "Acceso denegado. Tu cuenta se encuentra suspendida por el Administrador. 🚫" 
+            });
+        }
 
         if (usuario.password !== password) {
             return res.status(401).json({ error: "Contraseña incorrecta." });
@@ -134,14 +141,13 @@ router.put('/actualizar-ajustes/:id', async (req, res) => {
     }
 });
 
-// --- 5. [NUEVO] BUSCADOR DE USUARIOS (Radar P5) ---
+// --- 5. BUSCADOR DE USUARIOS (Radar P5) ---
 router.get('/buscar', async (req, res) => {
-    const { q, miId } = req.query; // Capturamos el texto y el ID del buscador
+    const { q, miId } = req.query;
 
     if (!q) return res.json([]);
 
     try {
-        // Buscamos por nombre, apellido o la unión de ambos
         const query = `
             SELECT usuario_id, nombre, apellido, foto_url 
             FROM perfiles 
@@ -156,6 +162,25 @@ router.get('/buscar', async (req, res) => {
     } catch (err) {
         console.error("🚨 Error en el buscador SQL:", err);
         res.status(500).json({ error: "No se pudo realizar la búsqueda." });
+    }
+});
+
+// --- 🚫 6. SUSPENDER USUARIO (Solo Admin ID: 1 - Punto #20) ---
+router.patch('/suspendido/:id', async (req, res) => {
+    const { id } = req.params;
+    const { adminId } = req.body; 
+
+    // Verificamos autoridad del Arquitecto
+    if (parseInt(adminId) !== 1) {
+        return res.status(403).json({ error: "No tienes permisos de administrador." });
+    }
+
+    try {
+        await db.query('UPDATE usuarios SET estado = "suspendido" WHERE id = ?', [id]);
+        res.json({ mensaje: "La cuenta ha sido suspendida correctamente. 🚫" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error al actualizar el estado del usuario." });
     }
 });
 

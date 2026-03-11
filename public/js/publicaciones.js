@@ -8,12 +8,11 @@ const feed = document.getElementById('feed');
 const btnPublicar = document.getElementById('btn-publicar');
 const miId = localStorage.getItem('usuarioId');
 
-// --- 1. CARGAR POSTS DEL MURO (Con Filtro de Amigos y Bloqueos) ---
+// --- 1. CARGAR POSTS DEL MURO ---
 async function cargarMuro() {
     if (!miId) return;
 
     try {
-        // 🎯 🛡️ LLAMADA MAESTRA: El servidor filtrará por privacidad y bloqueos
         const res = await fetch(`/api/publicaciones/muro/${miId}`);
         const posts = await res.json();
 
@@ -35,7 +34,6 @@ async function cargarMuro() {
             div.className = 'post-card card';
             div.style.marginBottom = "20px";
             
-            // 🛡️ Lógica de Control: Botón borrar solo para el autor
             const btnBorrarPost = (post.usuario_id == miId) 
                 ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario" 
                     style="color: #dc3545; border-color: #dc3545; font-size: 0.8rem; margin-left: auto;">
@@ -43,7 +41,6 @@ async function cargarMuro() {
                    </button>` 
                 : '';
 
-            // 🛡️ Lógica de Control: Botón reportar solo para posts ajenos
             const btnReportar = (post.usuario_id != miId) 
                 ? `<button onclick="abrirReporte(${post.id})" class="btn-secundario" 
                     style="color: #ffa500; border-color: #ffa500; font-size: 0.8rem; margin-left: auto;">
@@ -56,16 +53,20 @@ async function cargarMuro() {
                     <img src="${post.foto_url || 'img/default.png'}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
                     <div style="flex-grow: 1;">
                         <strong>${post.nombre} ${post.apellido}</strong>
-                        <small style="display: block; opacity: 0.6;">${new Date(post.fecha_creacion).toLocaleString()}</small>
+                        <small style="display: block; opacity: 0.6;">${new Date(post.fecha).toLocaleString()}</small>
                     </div>
                     <small title="Privacidad" style="opacity: 0.5;">${post.privacidad === 'amigos' ? '👥' : post.privacidad === 'publica' ? '🌎' : '🔒'}</small>
                 </div>
                 <div class="post-body" style="font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4;">
                     ${post.contenido}
                 </div>
-                <div class="post-footer" style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; align-items: center;">
+                <div class="post-footer" style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; align-items: center; flex-wrap: wrap;">
                     <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')">👍 Me gusta</button>
                     <button class="btn-secundario" onclick="abrirComentarios(${post.id})">💬 Comentar</button>
+                    
+                    <button class="btn-secundario" onclick="guardarPost(${post.id})" style="color: #ffc107; border-color: #ffc107;">
+                        💾 Guardar
+                    </button>
                     
                     ${btnReportar} ${btnBorrarPost}
                 </div>
@@ -175,6 +176,29 @@ window.abrirReporte = async function(postId) {
         }
     } catch (err) {
         console.error("Error al reportar post:", err);
+    }
+};
+
+// --- 💾 6. FUNCIÓN PARA GUARDAR EN EL BAÚL ---
+window.guardarPost = async function(postId) {
+    if (!miId) return;
+
+    try {
+        const res = await fetch('/api/publicaciones/guardar-tesoro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario_id: miId, publicacion_id: postId })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert("¡Tesoro guardado! 💾 Lo encontrarás en tu baúl.");
+        } else {
+            alert("⚠️ " + (data.error || "No se pudo guardar."));
+        }
+    } catch (err) {
+        console.error("Error al guardar tesoro:", err);
     }
 };
 

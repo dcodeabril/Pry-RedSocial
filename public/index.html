@@ -16,17 +16,24 @@
             
             <div id="resultados-busqueda" class="card" 
                  style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                </div>
+            </div>
         </div>
 
-        <nav>
+        <nav style="display: flex; align-items: center; gap: 10px;">
             <a href="index.html">Muro</a>
             <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
             <a href="mensajes.html">Mensajes</a>
             <a href="notificaciones.html">Notificaciones</a>
             <a href="eventos.html">Eventos</a>
-            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+            
+            <a href="baul.html" style="color: #ffc107; font-weight: bold;">📂 Mis Tesoros</a>
+
+            <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold; text-decoration: none; margin-left: 10px;">
+                ⚙️ Panel Admin
+            </a>
+            
+            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 5px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
@@ -44,13 +51,14 @@
         </section>
 
         <section id="feed">
-            </section>
+        </section>
     </main>
 
     <script src="js/publicaciones.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
-    <script src="js/buscar.js"></script> <script>
+    <script src="js/buscar.js"></script> 
+    <script>
         document.getElementById('btn-salir').addEventListener('click', (e) => {
             e.preventDefault(); 
             if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {

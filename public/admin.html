@@ -3,13 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Master Admin - Facebook Local</title>
+    
+    <script>
+        (function() {
+            // Buscamos en todas las llaves posibles para no fallar
+            const rol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
+            const miId = localStorage.getItem('usuarioId');
+
+            console.log("Validando acceso Admin...", { rol, miId });
+
+            // El Arquitecto entra por rol O por su ID de creador (1)
+            if (rol !== 'admin' && miId !== '1') {
+                console.error("Acceso denegado. Redirigiendo al muro...");
+                window.location.href = 'index.html'; 
+            }
+        })();
+    </script>
+    
     <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="css/general.css">
+    
     <style>
         .admin-section { margin-bottom: 50px; }
-        .tab-header { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .tab-btn { cursor: pointer; padding: 10px 20px; border-radius: 5px; border: none; font-weight: bold; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        .header-notif { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
         /* Estilos Usuarios */
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
@@ -22,6 +38,7 @@
             align-items: center; padding: 20px; margin-bottom: 15px;
             border-left: 6px solid #ffa500; background: white; border-radius: 8px;
         }
+        .badge { background: #dc3545; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -34,22 +51,30 @@
     </header>
 
     <main class="container">
-        <section class="admin-section">
+        <section class="admin-section card">
             <div class="header-notif">
                 <h2>🚩 Reportes de la Comunidad</h2>
-                <span id="contador-reportes" class="badge">0 pendientes</span>
+                <span id="contador-reportes" class="badge">Cargando...</span>
             </div>
-            <div id="lista-reportes-admin" style="margin-top: 20px;">
+            
+            <div id="lista-reportes-admin" style="margin-top: 10px; margin-bottom: 20px;">
                 <p>Cargando denuncias...</p>
+            </div>
+
+            <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                <a href="admin_reportes.html" class="btn-primario" 
+                   style="background: #dc3545; color: white; text-decoration: none; padding: 12px 25px; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 1rem;">
+                    Gestionar Denuncias Detalladas ⚖️
+                </a>
             </div>
         </section>
 
-        <hr style="margin: 40px 0;">
+        <hr style="margin: 40px 0; border: 0; border-top: 2px solid #eee;">
 
-        <section class="admin-section">
+        <section class="admin-section card">
             <h2>👥 Control de Usuarios</h2>
             <div id="msg"></div>
-            <table>
+            <table style="margin-top: 20px;">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -60,11 +85,12 @@
                     </tr>
                 </thead>
                 <tbody id="tabla-usuarios">
-                    </tbody>
+                </tbody>
             </table>
         </section>
     </main>
 
     <script src="js/tema.js"></script>
-    <script src="js/admin.js"></script> </body>
+    <script src="js/admin.js"></script> 
+</body>
 </html>

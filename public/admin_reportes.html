@@ -3,6 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Moderación - Arquitecto Israel</title>
+    
+    <script>
+        (function() {
+            // Buscamos en todas las llaves posibles para evitar el bloqueo injusto
+            const rol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
+            const miId = localStorage.getItem('usuarioId');
+
+            console.log("Validando acceso a Justicia...", { rol, miId });
+
+            // El Arquitecto entra por su ROL o por ser el USUARIO ID 1 (Creador)
+            if (rol !== 'admin' && miId !== '1') {
+                alert("🛑 ACCESO DENEGADO: Solo el Arquitecto tiene permiso para entrar aquí.");
+                window.location.href = 'index.html'; 
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="css/general.css">
 </head>
 <body style="background: #f0f2f5;">
@@ -13,7 +30,11 @@
 
     <main class="container">
         <section class="card">
-            <h2>Denuncias Pendientes</h2>
+            <header style="border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2>Denuncias Pendientes</h2>
+                <p style="font-size: 0.9rem; opacity: 0.7;">Gestión de integridad y seguridad de la comunidad.</p>
+            </header>
+
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                 <thead>
                     <tr style="background: #e4e6eb; text-align: left;">

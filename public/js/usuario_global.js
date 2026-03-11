@@ -7,38 +7,25 @@
 async function cargarIdentidadGlobal() {
     // 🛡️ Recuperamos los datos de sesión desde el navegador
     const miId = localStorage.getItem('usuarioId');
-    const miRol = localStorage.getItem('usuarioRol'); // 🔑 Rol: 'admin' o 'usuario'
+    // Verificamos el rol en ambas llaves posibles para mayor seguridad
+    const miRol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol'); 
     
-    const nav = document.querySelector('nav');
     const navNombre = document.getElementById('nav-nombre');
     const postPlaceholder = document.getElementById('post-contenido');
-    const btnTema = document.getElementById('btn-tema');
+    const btnAdminNav = document.getElementById('btn-admin-nav');
 
-    // --- 1. [NUEVO] BOTÓN DINÁMICO PARA EL ADMINISTRADOR ---
-    // Si el rol es admin y estamos en una página con navegación
-    if (miRol === 'admin' && nav) {
-        // Evitamos crear el botón dos veces
-        if (!document.getElementById('link-admin-panel')) {
-            const linkAdmin = document.createElement('a');
-            linkAdmin.id = 'link-admin-panel';
-            linkAdmin.href = 'admin.html';
-            linkAdmin.innerHTML = '⚙️ Panel Admin';
-            linkAdmin.style.color = '#ff4757'; // Rojo suave para resaltar
-            linkAdmin.style.fontWeight = 'bold';
-            linkAdmin.style.marginRight = '15px';
-            linkAdmin.style.textDecoration = 'none';
-
-            // Lo insertamos justo antes del botón de modo oscuro
-            if (btnTema) {
-                nav.insertBefore(linkAdmin, btnTema);
-            } else {
-                nav.appendChild(linkAdmin);
-            }
+    // --- 1. ⚙️ CONTROL DE VISIBILIDAD ADMIN ---
+    // En lugar de crear un botón nuevo, controlamos el que ya existe en el HTML
+    if (btnAdminNav) {
+        if (miRol === 'admin') {
+            btnAdminNav.style.display = 'inline-block';
+            console.log("🛡️ Modo Administrador Activado");
+        } else {
+            btnAdminNav.style.display = 'none';
         }
     }
 
     // --- 2. CARGA DE NOMBRE Y PERSONALIZACIÓN (Persona 5) ---
-    // Si no hay ID de usuario, no intentamos consultar la base de datos
     if (!miId) return;
 
     try {
@@ -51,7 +38,7 @@ async function cargarIdentidadGlobal() {
                 navNombre.innerText = `${datos.nombre} ${datos.apellido}`;
             }
             
-            // Personalizamos el "Qué estás pensando" en el muro
+            // Personalizamos el placeholder en el muro (index.html)
             if (postPlaceholder) {
                 postPlaceholder.placeholder = `¿Qué estás pensando, ${datos.nombre}?`;
             }
@@ -64,5 +51,4 @@ async function cargarIdentidadGlobal() {
 }
 
 // Ejecutamos la función automáticamente al cargar el script
-// Usamos DOMContentLoaded para asegurar que el <nav> ya exista
 document.addEventListener('DOMContentLoaded', cargarIdentidadGlobal);
