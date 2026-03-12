@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos');
 
-// --- 1. OBTENER EVENTOS FUTUROS (Cartelera) ---
+// --- 1. OBTENER EVENTOS FUTUROS (Cartelera Dinámica) ---
 router.get('/', async (req, res) => {
     try {
         const query = `
@@ -16,8 +16,9 @@ router.get('/', async (req, res) => {
             FROM eventos e
             JOIN perfiles p ON e.creador_id = p.usuario_id
             WHERE e.fecha_evento >= CURDATE()
-            ORDER BY e.fecha_evento ASC`;
-            
+            ORDER BY e.fecha_evento ASC
+        `;
+        // Usamos desestructuración [eventos] porque tu DB usa Promesas
         const [eventos] = await db.query(query);
         res.json(eventos);
     } catch (err) {
@@ -26,27 +27,29 @@ router.get('/', async (req, res) => {
     }
 });
 
-// --- 2. CREAR UN NUEVO EVENTO ---
+// --- 2. CREAR UN NUEVO EVENTO (Incluye Ubicación) ---
 router.post('/crear', async (req, res) => {
-    const { creador_id, titulo, descripcion, fecha_evento } = req.body;
+    const { creador_id, titulo, descripcion, ubicacion, fecha_evento } = req.body;
     
     if (!creador_id || !titulo || !fecha_evento) {
         return res.status(400).json({ error: "Faltan datos obligatorios para el evento." });
     }
 
     try {
-        await db.query(
-            'INSERT INTO eventos (creador_id, titulo, descripcion, fecha_evento) VALUES (?, ?, ?, ?)',
-            [creador_id, titulo, descripcion, fecha_evento]
-        );
-        res.status(201).json({ mensaje: "Evento organizado con éxito 📅" });
+        const query = `
+            INSERT INTO eventos (creador_id, titulo, descripcion, ubicacion, fecha_evento) 
+            VALUES (?, ?, ?, ?, ?)
+        `;
+        await db.query(query, [creador_id, titulo, descripcion, ubicacion, fecha_evento]);
+        
+        res.status(201).json({ mensaje: "✅ Evento organizado con éxito 📅" });
     } catch (err) {
         console.error("🚨 Error al crear evento:", err);
         res.status(500).json({ error: "Error interno al procesar el evento." });
     }
 });
 
-// --- 3. [NUEVO] ELIMINAR UN EVENTO (Con Validación de Autor) ---
+// --- 3. ELIMINAR UN EVENTO (Con Validación de Autor) ---
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     const { usuario_id } = req.query; // Recibimos quién quiere borrar para validar

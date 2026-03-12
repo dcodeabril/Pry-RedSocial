@@ -52,38 +52,18 @@ body {
     padding: 15px;
 }
 
-/* --- 📄 DISEÑO DE TARJETAS (POSTS, NOTIF, EVENTOS) --- */
+/* --- 📄 DISEÑO DE TARJETAS --- */
 .card, .post-card {
     background: var(--card-bg);
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 20px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    text-align: left;
-}
-
-/* --- 📝 ESTILOS ESPECÍFICOS DEL MURO (PERSONA 2) --- */
-.post-header { 
-    border-bottom: 1px solid var(--border-color); 
-    padding-bottom: 10px; 
-    margin-bottom: 10px; 
-}
-
-.post-body { 
-    font-size: 1.1em; 
-    margin-bottom: 15px; 
-}
-
-.post-footer { 
-    display: flex; 
-    gap: 10px; 
-    border-top: 1px solid var(--border-color); 
-    padding-top: 10px; 
 }
 
 /* --- 💬 ESTILOS DE COMENTARIOS --- */
 .comment-box {
-    background: var(--bg-color); /* Se adapta al modo oscuro */
+    background: var(--bg-color);
     color: var(--text-color);
     padding: 10px;
     border-radius: 15px;
@@ -91,13 +71,7 @@ body {
     font-size: 0.9em;
 }
 
-/* --- 📱 ADAPTABILIDAD PARA MÓVILES --- */
-@media (max-width: 768px) {
-    .main-header h1 { font-size: 1.2em; }
-    .container { padding: 10px; }
-    .post-card { border-radius: 0; margin-bottom: 10px; }
-}
-/* --- 🔘 BOTONES Y ACCIONES ESTILIZADAS --- */
+/* --- 🔘 BOTONES Y ACCIONES --- */
 button, .btn-secundario {
     background-color: var(--primary);
     color: white;
@@ -109,9 +83,7 @@ button, .btn-secundario {
     transition: filter 0.2s;
 }
 
-button:hover {
-    filter: brightness(0.9);
-}
+button:hover { filter: brightness(0.9); }
 
 .btn-secundario {
     background-color: var(--bg-color);
@@ -127,18 +99,134 @@ textarea, input, select {
     border-radius: 6px;
     padding: 10px;
     width: 100%;
-    box-sizing: border-box;
 }
 
-/* --- 🔗 ENLACES DE NAVEGACIÓN --- */
+/* --- 🔗 NAVEGACIÓN --- */
 nav a {
     text-decoration: none;
     color: var(--text-muted);
     font-weight: 600;
     margin-right: 15px;
-    transition: color 0.2s;
 }
 
-nav a:hover {
-    color: var(--primary);
+/* --- 📝 ESTÉTICA DE NOTAS (#15) --- */
+.notas-wrapper {
+    padding-top: 25px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    overflow-x: auto;
+}
+
+.nota-burbuja {
+    background: var(--card-bg);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    position: relative;
+}
+
+.nota-burbuja:hover { transform: scale(1.05); }
+
+.nota-texto-preview {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: #333;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    white-space: nowrap;
+    z-index: 50;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- 📅 ESTILOS DEL MODAL DE EVENTOS (#14) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 500px;
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.btn-close {
+    background: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-body label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* --- 📅 ESTÉTICA DE TARJETAS DE EVENTOS (#14) --- */
+.event-card {
+    border-left: 5px solid var(--primary); /* Una franja azul para identificarlos */
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 4px; /* Un toque de redondeo */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.event-card h4 {
+    margin: 0 0 5px 0;
+    color: var(--text-color);
+}
+
+.event-card .meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* --- 📱 ADAPTABILIDAD --- */
+@media (max-width: 768px) {
+    .main-header h1 { font-size: 1.2em; }
+    .container { padding: 10px; }
 }
