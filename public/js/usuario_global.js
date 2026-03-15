@@ -1,31 +1,36 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (IDENTIDAD GLOBAL & ACCESO ADMIN P1)
+// ROL: ARQUITECTO (IDENTIDAD GLOBAL & FILTRADO POR ROL)
 // ARCHIVO: usuario_global.js
 // =============================================
 
 async function cargarIdentidadGlobal() {
     // 🛡️ Recuperamos los datos de sesión desde el navegador
     const miId = localStorage.getItem('usuarioId');
-    // Verificamos el rol en ambas llaves posibles para mayor seguridad
     const miRol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol'); 
     
     const navNombre = document.getElementById('nav-nombre');
     const postPlaceholder = document.getElementById('post-contenido');
     const btnAdminNav = document.getElementById('btn-admin-nav');
+    const enlaceEventos = document.getElementById('nav-eventos');
 
-    // --- 1. ⚙️ CONTROL DE VISIBILIDAD ADMIN ---
-    // En lugar de crear un botón nuevo, controlamos el que ya existe en el HTML
+    // --- 1. ⚙️ CONTROL DE NAVEGACIÓN SEGÚN ROL ---
+    
+    // A. Control del Panel de Administración (Botón de engranaje)
+    // Solo Israel (Admin) puede ver este acceso directo
     if (btnAdminNav) {
-        if (miRol === 'admin') {
-            btnAdminNav.style.display = 'inline-block';
-            console.log("🛡️ Modo Administrador Activado");
-        } else {
-            btnAdminNav.style.display = 'none';
-        }
+        btnAdminNav.style.display = (miRol === 'admin') ? 'inline-block' : 'none';
     }
 
-    // --- 2. CARGA DE NOMBRE Y PERSONALIZACIÓN (Persona 5) ---
+    // B. ✅ LIMPIEZA TOTAL DE EVENTOS EN LA NAV
+    // Ocultamos el enlace 'Eventos' para TODOS los roles. 
+    // La creación se gestiona ahora únicamente por el botón "➕ Crear Evento"
+    if (enlaceEventos) {
+        enlaceEventos.style.display = 'none';
+        console.log("🧹 Nav: Enlace de eventos oculto para simplificar la interfaz.");
+    }
+
+    // --- 2. 👤 CARGA DE NOMBRE Y PERSONALIZACIÓN (Persona 5) ---
     if (!miId) return;
 
     try {
@@ -33,12 +38,12 @@ async function cargarIdentidadGlobal() {
         const datos = await res.json();
 
         if (res.ok && datos.nombre) {
-            // Actualizamos el nombre en la cabecera
+            // Actualizamos el nombre en la cabecera (Navbar)
             if (navNombre) {
                 navNombre.innerText = `${datos.nombre} ${datos.apellido}`;
             }
             
-            // Personalizamos el placeholder en el muro (index.html)
+            // Personalizamos el saludo en la caja de publicaciones del muro
             if (postPlaceholder) {
                 postPlaceholder.placeholder = `¿Qué estás pensando, ${datos.nombre}?`;
             }
@@ -50,5 +55,5 @@ async function cargarIdentidadGlobal() {
     }
 }
 
-// Ejecutamos la función automáticamente al cargar el script
+// Ejecutamos la carga cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', cargarIdentidadGlobal);

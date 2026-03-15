@@ -1,7 +1,7 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
 // ROL: ARQUITECTO (GESTIÓN DE MURO DINÁMICO P2, P3 Y P4)
-// ARCHIVO: publicaciones.js
+// ARCHIVO: public/js/publicaciones.js
 // =============================================
 
 const feed = document.getElementById('feed');
@@ -32,8 +32,13 @@ async function cargarMuro() {
         posts.forEach(post => {
             const div = document.createElement('div');
             div.className = 'post-card card';
-            div.style.marginBottom = "20px";
             
+            // ✅ MEJORA: ID Único para navegación desde notificaciones
+            div.id = `post-${post.id}`; 
+            
+            div.style.marginBottom = "20px";
+            div.style.transition = "background-color 1s ease"; // Para efecto de resaltado
+
             const btnBorrarPost = (post.usuario_id == miId) 
                 ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario" 
                     style="color: #dc3545; border-color: #dc3545; font-size: 0.8rem; margin-left: auto;">
@@ -50,7 +55,7 @@ async function cargarMuro() {
 
             div.innerHTML = `
                 <div class="post-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <img src="${post.foto_url || 'img/default.png'}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+                    <img src="img/${post.foto_url || 'default.png'}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
                     <div style="flex-grow: 1;">
                         <strong>${post.nombre} ${post.apellido}</strong>
                         <small style="display: block; opacity: 0.6;">${new Date(post.fecha).toLocaleString()}</small>
@@ -73,44 +78,59 @@ async function cargarMuro() {
             `;
             feed.appendChild(div);
         });
+
+        // ✅ REVISAR ANCLA: Si venimos de una notificación, resaltamos el post
+        if (window.location.hash) {
+            const idAncla = window.location.hash.substring(1);
+            const elemento = document.getElementById(idAncla);
+            if (elemento) {
+                setTimeout(() => {
+                    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    elemento.style.backgroundColor = "var(--bg-highlight, #fff9c4)";
+                    setTimeout(() => elemento.style.backgroundColor = "transparent", 2000);
+                }, 500);
+            }
+        }
+
     } catch (err) {
         console.error("🚨 Error técnico al cargar el muro:", err);
-        feed.innerHTML = '<p class="card text-center">Error de conexión con el servidor.</p>';
     }
 }
 
 // --- 2. CREAR NUEVA PUBLICACIÓN ---
-btnPublicar.addEventListener('click', async () => {
-    const inputContenido = document.getElementById('post-contenido');
-    const privacidad = document.getElementById('post-privacidad').value;
-    const contenido = inputContenido.value.trim();
-    
-    if (!contenido || !miId) {
-        alert("⚠️ Escribe algo antes de publicar.");
-        return;
-    }
-
-    try {
-        const res = await fetch('/api/publicaciones/crear', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                usuario_id: miId,
-                contenido: contenido,
-                privacidad: privacidad
-            })
-        });
-
-        if (res.ok) {
-            inputContenido.value = '';
-            cargarMuro(); 
-        } else {
-            alert("❌ Error al publicar.");
+if (btnPublicar) {
+    btnPublicar.addEventListener('click', async () => {
+        const inputContenido = document.getElementById('post-contenido');
+        const privacidad = document.getElementById('post-privacidad').value;
+        const contenido = inputContenido.value.trim();
+        
+        if (!contenido || !miId) {
+            alert("⚠️ Escribe algo antes de publicar.");
+            return;
         }
-    } catch (err) {
-        console.error("Error al enviar post:", err);
-    }
-});
+
+        try {
+            const res = await fetch('/api/publicaciones/crear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usuario_id: miId,
+                    contenido: contenido,
+                    privacidad: privacidad
+                })
+            });
+
+            if (res.ok) {
+                inputContenido.value = '';
+                cargarMuro(); 
+            } else {
+                alert("❌ Error al publicar.");
+            }
+        } catch (err) {
+            console.error("Error al enviar post:", err);
+        }
+    });
+}
 
 // --- 3. REACCIONAR (Me gusta) ---
 window.reaccionar = async function(postId, tipo) {
@@ -127,80 +147,45 @@ window.reaccionar = async function(postId, tipo) {
         } else {
             cargarMuro(); 
         }
-    } catch (err) {
-        console.error("Error al reaccionar:", err);
-    }
+    } catch (err) { console.error("Error al reaccionar:", err); }
 };
 
 // --- 4. ELIMINAR PUBLICACIÓN ---
 window.eliminarPublicacion = async function(id) {
     if (!confirm("¿Deseas eliminar esta publicación permanentemente?")) return;
-
     try {
-        const res = await fetch(`/api/publicaciones/${id}?usuario_id=${miId}`, {
-            method: 'DELETE'
-        });
-
-        if (res.ok) {
-            cargarMuro(); 
-        } else {
-            const err = await res.json();
-            alert("❌ " + err.error);
-        }
-    } catch (err) {
-        console.error("Error al borrar post:", err);
-    }
+        const res = await fetch(`/api/publicaciones/${id}?usuario_id=${miId}`, { method: 'DELETE' });
+        if (res.ok) cargarMuro(); 
+    } catch (err) { console.error("Error al borrar post:", err); }
 };
 
 // --- 5. REPORTAR CONTENIDO ---
 window.abrirReporte = async function(postId) {
-    const motivo = prompt("¿Por qué deseas reportar esta publicación?\n(Spam, Contenido Inapropiado, Acoso, etc.)");
-    
+    const motivo = prompt("¿Por qué deseas reportar esta publicación?");
     if (!motivo) return; 
 
     try {
         const res = await fetch('/api/reportes/crear', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                denunciante_id: miId,
-                publicacion_id: postId,
-                motivo: motivo
-            })
+            body: JSON.stringify({ denunciante_id: miId, publicacion_id: postId, motivo: motivo })
         });
-
-        if (res.ok) {
-            alert("✅ Gracias. Tu reporte ha sido enviado al Arquitecto Israel Díaz para su revisión.");
-        } else {
-            alert("❌ No se pudo enviar el reporte.");
-        }
-    } catch (err) {
-        console.error("Error al reportar post:", err);
-    }
+        if (res.ok) alert("✅ Reporte enviado al Arquitecto Israel Díaz.");
+    } catch (err) { console.error("Error al reportar post:", err); }
 };
 
 // --- 💾 6. FUNCIÓN PARA GUARDAR EN EL BAÚL ---
 window.guardarPost = async function(postId) {
     if (!miId) return;
-
     try {
         const res = await fetch('/api/publicaciones/guardar-tesoro', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usuario_id: miId, publicacion_id: postId })
         });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            alert("¡Tesoro guardado! 💾 Lo encontrarás en tu baúl.");
-        } else {
-            alert("⚠️ " + (data.error || "No se pudo guardar."));
-        }
-    } catch (err) {
-        console.error("Error al guardar tesoro:", err);
-    }
+        if (res.ok) alert("¡Tesoro guardado! 💾");
+    } catch (err) { console.error("Error al guardar tesoro:", err); }
 };
 
 // --- 🚀 ARRANQUE INICIAL ---
-cargarMuro();
+document.addEventListener('DOMContentLoaded', cargarMuro);

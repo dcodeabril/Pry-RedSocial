@@ -6,8 +6,12 @@
     <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="css/general.css">
     <style>
-        /* Estilos detallados (Persona 5) */
-        .notif-container { max-width: 650px; margin: 20px auto; }
+        /* --- Estilos Detallados Persona 5 --- */
+        .notif-container { 
+            max-width: 650px; 
+            margin: 20px auto; 
+            animation: slideUp 0.4s ease;
+        }
         
         .notif-item { 
             display: flex; 
@@ -20,43 +24,97 @@
         }
         
         /* Efecto para resaltar lo no leído */
-        .notif-item.no-leido { background-color: rgba(24, 119, 242, 0.08); }
-        .notif-item:hover { background-color: rgba(0, 0, 0, 0.05); cursor: pointer; }
+        .notif-item.no-leido { 
+            background-color: rgba(24, 119, 242, 0.08); 
+        }
         
-        .notif-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; border: 1px solid #ddd; }
+        .notif-item:hover { 
+            background-color: rgba(0, 0, 0, 0.05); 
+            cursor: pointer; 
+        }
+        
+        .notif-avatar { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            margin-right: 15px; 
+            object-fit: cover; 
+            border: 1px solid var(--border-color); 
+        }
+        
         .notif-content { flex-grow: 1; }
-        .notif-text { font-size: 1rem; line-height: 1.4; }
-        .notif-text strong { color: var(--primary); }
-        .notif-time { font-size: 0.8rem; opacity: 0.6; margin-top: 5px; }
+        
+        .notif-text { 
+            font-size: 0.95rem; 
+            line-height: 1.4; 
+        }
+        
+        .notif-text strong { 
+            color: var(--primary); 
+        }
+        
+        .notif-time { 
+            font-size: 0.8rem; 
+            opacity: 0.6; 
+            margin-top: 5px; 
+        }
         
         /* El puntito azul de "Nuevo" */
-        .status-dot { width: 12px; height: 12px; background: #1877f2; border-radius: 50%; margin-left: 10px; flex-shrink: 0; }
+        .status-dot { 
+            width: 12px; 
+            height: 12px; 
+            background: var(--primary); 
+            border-radius: 50%; 
+            margin-left: 10px; 
+            flex-shrink: 0; 
+        }
         
-        .header-notif { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header-notif { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <header class="main-header">
         <div class="logo"><h1>Facebook Local</h1></div>
-        <nav>
+        
+        <nav style="display: flex; align-items: center; gap: 15px;">
             <a href="index.html">Muro</a>
             <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
             <a href="mensajes.html">Mensajes</a>
-            <a href="notificaciones.html" class="active">Notificaciones</a>
-            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+            
+            <a href="notificaciones.html" class="nav-notif-wrapper" style="color: var(--primary); font-weight: bold;">
+                Notificaciones
+                <span id="contador-notificaciones" class="badge-notif">0</span>
+            </a>
+            
+            <a href="#" onclick="abrirModalEvento()">Eventos</a>
+            
+            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 5px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
     <main class="container">
         <div class="card notif-container">
             <div class="header-notif">
-                <h2>Actividad Reciente</h2>
-                <button id="btn-marcar-leidas" class="btn-secundario" style="font-size: 0.8rem;">Marcar todo como leído</button>
+                <h2 style="margin: 0;">Actividad Reciente</h2>
+                <button id="btn-marcar-leidas" class="btn-secundario" style="font-size: 0.8rem;">
+                    Marcar todo como leído
+                </button>
             </div>
-            <hr>
+            <hr style="opacity: 0.1; margin-bottom: 10px;">
             
-            <div id="lista-notificaciones" style="margin-top: 10px;">
-                <p style="padding: 20px; text-align: center;">Buscando tus alertas en la base de datos...</p>
+            <div id="lista-notificaciones">
+                <p style="padding: 20px; text-align: center; opacity: 0.6;">Buscando alertas en la base de datos... 🔍</p>
             </div>
         </div>
     </main>
@@ -64,5 +122,15 @@
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
     <script src="js/notificaciones.js"></script>
+    <script src="js/eventos.js"></script> <script>
+        // Lógica de cierre de sesión
+        document.getElementById('btn-salir').addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                localStorage.removeItem('usuarioId');
+                window.location.href = '/';
+            }
+        });
+    </script>
 </body>
 </html>

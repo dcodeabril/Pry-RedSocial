@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: MOTOR DE NOTAS EFÍMERAS (#15) - VERSIÓN ASYNC
+// ROL: ARQUITECTO (MOTOR DE NOTAS EFÍMERAS #15)
 // ARCHIVO: rutas/notas.routes.js
 // =============================================
 
@@ -8,37 +8,44 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos'); 
 
-// --- 1. CREAR UNA NUEVA NOTA (POST) ---
+// --- ✅ 1. PUBLICAR O ACTUALIZAR NOTA (POST) ---
+// Mantenemos solo una nota activa por usuario para el pasillo superior
 router.post('/crear', async (req, res) => {
-    const { usuario_id, contenido } = req.body;
+    const { usuario_id, texto } = req.body; // 'texto' mapea a 'contenido' en la DB
 
-    if (!usuario_id || !contenido) {
-        return res.status(400).json({ error: "Faltan datos para crear la nota." });
+    if (!usuario_id || !texto) {
+        return res.status(400).json({ error: "Faltan datos (ID o contenido) para la nota." });
     }
 
     try {
+        // 🛡️ PASO A: Limpiar nota anterior (Política: 1 nota por usuario)
+        await db.query(
+            "DELETE FROM guardados_y_notas WHERE usuario_id = ? AND tipo_entrada = 'nota'", 
+            [usuario_id]
+        );
+        
+        // 📝 PASO B: Insertar la nueva nota efímera
         const query = `
             INSERT INTO guardados_y_notas (usuario_id, contenido, tipo_entrada, fecha) 
             VALUES (?, ?, 'nota', NOW())
         `;
-        // Usamos await porque tu configuración de DB devuelve promesas
-        await db.query(query, [usuario_id, contenido]);
+        await db.query(query, [usuario_id, texto]);
         
-        res.json({ mensaje: "Nota compartida con éxito." });
+        res.json({ mensaje: "¡Nota actualizada con éxito! ✨" });
     } catch (err) {
-        console.error("❌ Error al insertar nota:", err);
-        res.status(500).json({ error: "Error interno en la base de datos." });
+        console.error("❌ Error al procesar nota:", err);
+        res.status(500).json({ error: "Error interno al guardar en la base de datos." });
     }
 });
 
-// --- 2. OBTENER NOTAS DEL MURO (GET) ---
-router.get('/muro/:usuario_id', async (req, res) => {
+// --- ✅ 2. OBTENER NOTAS DEL PASILLO (GET) ---
+// Trae notas propias y de amigos con estado 'aceptada'
+router.get('/activas/:usuario_id', async (req, res) => {
     const { usuario_id } = req.params;
 
     try {
-        // Consulta Maestra: Unimos la tabla de notas con la de perfiles
         const query = `
-            SELECT gn.*, p.nombre, p.apellido, p.foto_url 
+            SELECT gn.id, gn.contenido, gn.fecha, p.nombre, p.apellido, p.foto_url, p.usuario_id
             FROM guardados_y_notas gn
             JOIN perfiles p ON gn.usuario_id = p.usuario_id
             WHERE gn.tipo_entrada = 'nota'
@@ -55,15 +62,14 @@ router.get('/muro/:usuario_id', async (req, res) => {
                 )
             )
             ORDER BY gn.fecha DESC
-            LIMIT 10;
+            LIMIT 15;
         `;
 
-        // Extraemos los resultados usando desestructuración de arreglos [results]
         const [results] = await db.query(query, [usuario_id, usuario_id, usuario_id, usuario_id]);
         res.json(results);
     } catch (err) {
-        console.error("❌ Error al obtener notas del muro:", err);
-        res.status(500).json({ error: "No se pudieron cargar las notas." });
+        console.error("❌ Error al obtener notas activas:", err);
+        res.status(500).json({ error: "No se pudieron cargar las notas del pasillo." });
     }
 });
 

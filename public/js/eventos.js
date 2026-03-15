@@ -4,105 +4,112 @@
 // ARCHIVO: public/js/eventos.js
 // =============================================
 
-console.log("✅ eventos.js cargado correctamente (Versión Maestro)");
+console.log("✅ eventos.js cargado correctamente (Versión Maestro #12)");
 
-// --- 1. 🖼️ MANEJO GLOBAL DE LA INTERFAZ DEL MODAL ---
-// 🚩 Estas funciones son globales para que el 'onclick' del HTML las reconozca al instante.
+const miIdEvento = localStorage.getItem('usuarioId');
+
+// --- 1. 🖼️ MANEJO GLOBAL DEL MODAL ---
 window.abrirModalEvento = function() {
-    console.log("🎉 Intentando abrir el modal de eventos...");
     const modal = document.getElementById('modal-evento');
     if (modal) {
         modal.style.display = 'flex';
     } else {
-        console.error("❌ ERROR: El elemento 'modal-evento' no existe en este HTML.");
+        console.error("❌ ERROR: El elemento 'modal-evento' no existe en el HTML.");
     }
 };
 
 window.cerrarModalEvento = function() {
     const modal = document.getElementById('modal-evento');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
 };
 
 // --- 2. 📥 CARGAR EVENTOS DESDE LA DB ---
-async function cargarEventos() {
-    const miId = localStorage.getItem('usuarioId');
-    // Buscamos el contenedor donde mostrar los eventos (lista o feed) de forma segura
-    const contenedor = document.getElementById('lista-eventos') || document.getElementById('feed');
+async function cargarAgendaEventos() {
+    const contenedor = document.getElementById('lista-eventos');
     if (!contenedor) return; 
 
     try {
-        console.log("📡 Cargando cartelera de eventos...");
-        const res = await fetch('/api/eventos');
+        console.log("📡 Cargando cartelera dinámica...");
+        const res = await fetch('/api/eventos/todos');
         const eventos = await res.json();
         
-        // Limpiamos solo si el contenedor es específico para eventos
-        if(document.getElementById('lista-eventos')) {
-            contenedor.innerHTML = '';
-        }
+        contenedor.innerHTML = '';
 
         if (!Array.isArray(eventos) || eventos.length === 0) {
-            if(document.getElementById('lista-eventos')) {
-                contenedor.innerHTML = `
-                <div class="card" style="text-align: center; opacity: 0.6; padding: 20px;">
-                    <p>No hay eventos programados. ✨</p>
+            contenedor.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; opacity: 0.6; padding: 20px;">
+                    <p>No hay eventos programados próximamente. ✨</p>
                 </div>`;
-            }
             return;
         }
 
-        eventos.forEach(e => {
-            const card = document.createElement('div');
-            card.className = 'event-card card'; 
-
-            // Verificamos si el usuario actual es el creador para mostrar el botón borrar
-            const btnBorrar = (String(e.creador_id) === String(miId)) 
+        contenedor.innerHTML = eventos.map(e => {
+            const esMio = String(e.creador_id) === String(miIdEvento);
+            const btnBorrar = esMio 
                 ? `<button onclick="eliminarEvento(${e.id})" class="btn-secundario" 
-                    style="margin-top:10px; color: #ff4d4d; border-color: #ff4d4d; width: 100%;">
-                    Eliminar Evento 🗑️
+                    style="margin-top:10px; color: #ff4d4d; border-color: #ff4d4d; width: 100%; font-size: 0.75rem;">
+                    Cancelar Evento 🗑️
                    </button>` 
                 : '';
             
-            card.innerHTML = `
-                <h4>${e.titulo}</h4>
-                <p style="font-size: 0.9rem; color: var(--primary);"><strong>📍 Lugar:</strong> ${e.ubicacion || 'Por confirmar'}</p>
-                <p style="margin: 10px 0;">${e.descripcion || 'Sin descripción.'}</p>
-                <div class="meta" style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); background: var(--bg-color); padding: 5px; border-radius: 4px;">
-                    <strong>📅 Fecha:</strong> ${new Date(e.fecha_evento).toLocaleString()}<br>
-                    <strong>👤 Organiza:</strong> ${e.nombre} ${e.apellido}
+            return `
+                <div id="evento-${e.id}" class="event-card card" 
+                     style="border-left: 5px solid var(--primary); padding: 15px; transition: background-color 1s ease;">
+                    <h4 style="margin: 0 0 5px 0; color: var(--primary);">${e.titulo}</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 10px;">${e.descripcion || 'Sin descripción.'}</p>
+                    <div class="meta" style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-color); padding: 8px; border-radius: 4px;">
+                        <div>📍 <strong>Lugar:</strong> ${e.ubicacion || 'Por confirmar'}</div>
+                        <div>📅 <strong>Fecha:</strong> ${new Date(e.fecha_evento).toLocaleString()}</div>
+                        <div style="margin-top: 5px; font-weight: bold; color: var(--text-color);">
+                            👤 Organiza: ${e.nombre} ${e.apellido}
+                        </div>
+                    </div>
+                    ${btnBorrar}
                 </div>
-                ${btnBorrar}
             `;
-            contenedor.appendChild(card);
-        });
+        }).join('');
+
+        // ✅ LÓGICA DE ATERRIZAJE: Resaltar si venimos de una notificación
+        if (window.location.hash && window.location.hash.startsWith('#evento-')) {
+            const idAncla = window.location.hash.substring(1);
+            const elemento = document.getElementById(idAncla);
+            if (elemento) {
+                setTimeout(() => {
+                    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Resaltado visual temporal
+                    elemento.style.backgroundColor = "#fff9c4"; 
+                    setTimeout(() => {
+                        elemento.style.backgroundColor = "transparent";
+                    }, 2000);
+                }, 600); // Pequeño delay para asegurar que el DOM renderizó
+            }
+        }
+
     } catch (err) {
         console.error("🚨 Error al conectar con el servidor de eventos:", err);
     }
 }
 
-// --- 3. 🚀 INICIALIZACIÓN Y PUBLICACIÓN ---
+// --- 3. 🚀 PUBLICACIÓN DE EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
     const formEvento = document.getElementById('form-evento');
-    const miId = localStorage.getItem('usuarioId');
 
     if (formEvento) {
         formEvento.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Sincronización exacta con los IDs de index.html
+            if (!miIdEvento) {
+                alert("❌ Debes iniciar sesión para crear eventos.");
+                return;
+            }
+
             const nuevoEvento = {
-                creador_id: miId,
+                creador_id: miIdEvento,
                 titulo: document.getElementById('ev-titulo').value.trim(),
                 descripcion: document.getElementById('ev-descripcion').value.trim(),
                 ubicacion: document.getElementById('ev-ubicacion').value.trim(),
                 fecha_evento: document.getElementById('ev-fecha').value
             };
-
-            if (!miId) {
-                alert("❌ Debes estar logueado para crear eventos.");
-                return;
-            }
 
             try {
                 const res = await fetch('/api/eventos/crear', {
@@ -112,10 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (res.ok) {
-                    alert("✅ ¡Evento publicado en la cartelera! 📅");
+                    alert("✅ ¡Evento publicado y amigos notificados! 📅");
                     formEvento.reset(); 
                     window.cerrarModalEvento(); 
-                    cargarEventos(); 
+                    cargarAgendaEventos(); 
                 } else {
                     const errorData = await res.json();
                     alert("❌ Error: " + errorData.error);
@@ -128,21 +135,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Carga inicial
-    cargarEventos();
+    cargarAgendaEventos();
 });
 
-// --- 4. 🗑️ ELIMINAR EVENTO (GLOBAL) ---
+// --- 4. 🗑️ ELIMINAR EVENTO ---
 window.eliminarEvento = async function(id) {
-    const miId = localStorage.getItem('usuarioId');
-    if (!confirm("¿Seguro que quieres cancelar este evento?")) return;
+    if (!confirm("¿Deseas cancelar este evento permanentemente?")) return;
 
     try {
-        const res = await fetch(`/api/eventos/${id}?usuario_id=${miId}`, {
+        const res = await fetch(`/api/eventos/${id}?usuario_id=${miIdEvento}`, {
             method: 'DELETE'
         });
 
         if (res.ok) {
-            cargarEventos();
+            cargarAgendaEventos();
         } else {
             const error = await res.json();
             alert("❌ " + error.error);

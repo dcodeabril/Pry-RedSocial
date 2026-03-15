@@ -12,100 +12,98 @@
 
         <div class="buscador-contenedor" style="position: relative; width: 300px; margin-left: 20px;">
             <input type="text" id="input-busqueda" placeholder="🔍 Buscar personas..." 
-                   style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #ddd; outline: none;">
+                   style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid var(--border-color); outline: none;">
             
             <div id="resultados-busqueda" class="card" 
-                 style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                 style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             </div>
         </div>
 
-        <nav style="display: flex; align-items: center; gap: 10px;">
-            <a href="index.html">Muro</a>
+        <nav style="display: flex; align-items: center; gap: 15px;">
+            <a href="index.html" class="active">Muro</a>
             <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
             <a href="mensajes.html">Mensajes</a>
-            <a href="notificaciones.html">Notificaciones</a>
             
-            <a href="#" onclick="abrirModalEvento()">Eventos</a>
+            <a href="notificaciones.html" class="nav-notif-wrapper">
+                Notificaciones
+                <span id="contador-notificaciones" class="badge-notif">0</span>
+            </a>
+
+            <a href="#" onclick="abrirModalEvento()" style="color: var(--primary); font-weight: bold; text-decoration: none;">
+                ➕ Crear Evento
+            </a>
+            
+            <a href="#lista-eventos" id="nav-eventos">Eventos</a>
             
             <a href="baul.html" style="color: #ffc107; font-weight: bold;">📂 Mis Tesoros</a>
 
-            <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold; text-decoration: none; margin-left: 10px;">
-                ⚙️ Panel Admin
-            </a>
+            <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold;">⚙️ Admin</a>
             
             <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 5px;">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
+            <button id="btn-tema" class="btn-secundario">🌙</button>
         </nav>
     </header>
 
     <main class="container">
-        <section class="notas-wrapper" style="margin-bottom: 20px;">
-            <div id="lista-notas" style="display: flex; gap: 15px; overflow-x: auto; padding: 10px 5px; scrollbar-width: none;">
-                <div class="nota-item" onclick="abrirModalNota()" style="flex: 0 0 80px; text-align: center; cursor: pointer;">
-                    <div class="nota-burbuja" style="width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 5px;">
-                        ➕
+        <section class="notas-wrapper" style="margin-bottom: 25px; background: var(--card-bg); border-radius: 8px; padding: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+            <div id="lista-notas" style="display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none;">
+                
+                <div class="nota-item" style="flex: 0 0 80px; text-align: center; cursor: pointer;" onclick="abrirModalNota()">
+                    <div class="nota-burbuja" style="width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                        <span style="font-size: 2rem; color: var(--primary);">+</span>
                     </div>
-                    <small style="font-size: 0.75rem; font-weight: bold;">Tu nota</small>
+                    <small style="font-weight: bold; font-size: 0.75rem;">Tu nota</small>
                 </div>
+
                 <div id="notas-dinamicas" style="display: flex; gap: 15px;"></div>
             </div>
         </section>
 
-        <section class="card" style="margin-bottom: 20px;">
+        <section class="card" id="lista-eventos" style="margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="margin: 0;">📅 Próximos Eventos</h3>
-                <button class="btn-secundario" onclick="abrirModalEvento()" style="font-size: 0.8rem;">+ Crear Evento</button>
+                <button class="btn-secundario" onclick="abrirModalEvento()" style="font-size: 0.8rem;">+ Organizar</button>
             </div>
-            <div id="lista-eventos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
-                <p style="text-align: center; opacity: 0.5;">Buscando eventos en el servidor...</p>
+            <div id="contenedor-eventos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                <p style="text-align: center; opacity: 0.5;">Cargando cartelera...</p>
             </div>
         </section>
 
         <section class="card create-post">
-            <textarea id="post-contenido" placeholder="¿Qué estás pensando?"></textarea>
-            <div class="post-actions">
-                <select id="post-privacidad">
-                    <option value="publica">Pública</option>
-                    <option value="amigos">Amigos</option>
-                    <option value="solo_yo">Solo yo</option>
+            <textarea id="post-contenido" placeholder="¿Qué estás pensando, Arquitecto?"></textarea>
+            <div class="post-actions" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <select id="post-privacidad" style="width: auto;">
+                    <option value="publica">🌎 Pública</option>
+                    <option value="amigos">👥 Amigos</option>
+                    <option value="solo_yo">🔒 Solo yo</option>
                 </select>
                 <button id="btn-publicar">Publicar</button>
             </div>
         </section>
 
-        <section id="feed">
-        </section>
+        <section id="feed"></section>
     </main>
 
     <div id="modal-evento" class="modal-overlay" style="display: none;">
         <div class="modal-content card">
             <header class="modal-header">
                 <h3>🎉 Crear Nuevo Evento</h3>
-                <button onclick="cerrarModalEvento()" class="btn-close" style="border:none; background:none; cursor:pointer; font-size:1.5rem;">×</button>
+                <button onclick="cerrarModalEvento()" class="btn-close">×</button>
             </header>
-            
             <form id="form-evento" class="modal-body">
-                <div style="margin-top:10px;">
-                    <label>Título del Evento:</label>
-                    <input type="text" id="ev-titulo" placeholder="Ej: Cumpleaños de Lucero" required>
-                </div>
+                <label>Título:</label>
+                <input type="text" id="ev-titulo" required placeholder="Ej: Inauguración">
                 
-                <div style="margin-top:10px;">
-                    <label>Descripción:</label>
-                    <textarea id="ev-descripcion" placeholder="¿De qué trata el evento?"></textarea>
-                </div>
+                <label>Descripción:</label>
+                <textarea id="ev-descripcion" placeholder="¿Qué haremos?"></textarea>
                 
-                <div style="margin-top:10px;">
-                    <label>Ubicación:</label>
-                    <input type="text" id="ev-ubicacion" placeholder="Ej: Casa de Israel o Zoom">
-                </div>
+                <label>Ubicación:</label>
+                <input type="text" id="ev-ubicacion" placeholder="Ej: Ambato">
                 
-                <div style="margin-top:10px;">
-                    <label>Fecha y Hora:</label>
-                    <input type="datetime-local" id="ev-fecha" required>
-                </div>
-
-                <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <label>Fecha y Hora:</label>
+                <input type="datetime-local" id="ev-fecha" required>
+                
+                <div class="modal-actions">
                     <button type="button" class="btn-secundario" onclick="cerrarModalEvento()">Cancelar</button>
                     <button type="submit" class="btn-primario">Publicar Evento</button>
                 </div>
@@ -113,17 +111,18 @@
         </div>
     </div>
 
-    <script src="js/publicaciones.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
     <script src="js/buscar.js"></script> 
     <script src="js/notas.js"></script>
     <script src="js/eventos.js"></script>
+    <script src="js/publicaciones.js"></script>
+    <script src="js/notificaciones.js"></script> 
 
     <script>
         document.getElementById('btn-salir').addEventListener('click', (e) => {
             e.preventDefault(); 
-            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+            if(confirm("¿Deseas cerrar sesión?")) {
                 localStorage.removeItem('usuarioId'); 
                 window.location.href = '/'; 
             }

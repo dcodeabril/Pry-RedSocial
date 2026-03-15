@@ -3,33 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <title>Bienvenido - Facebook Local</title>
-    <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="css/general.css">
     <style>
         .auth-container { max-width: 400px; margin: 100px auto; text-align: center; }
         .auth-box { padding: 30px; }
         .toggle-link { color: var(--primary); cursor: pointer; text-decoration: underline; }
+        
+        /* Espaciado para los inputs */
+        .margin-v { margin-bottom: 15px; }
+        
+        /* Animación de entrada suave */
+        #login-section, #register-section {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-light">
     <div class="auth-container">
-        <h1>Facebook Local</h1>
+        <h1 style="color: var(--primary); font-size: 3rem; margin-bottom: 10px;">Facebook Local</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Conecta con tus amigos y el mundo que te rodea.</p>
+
         <div class="card auth-box" id="login-section">
-            <h2>Iniciar Sesión</h2>
-            <input type="email" id="login-email" placeholder="Correo electrónico" class="margin-v">
-            <input type="password" id="login-pass" placeholder="Contraseña (12 caracteres)" class="margin-v">
-            <button id="btn-entrar" style="width: 100%;">Entrar</button>
-            <p style="margin-top:15px;">¿No tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Regístrate</span></p>
+            <h2 style="margin-bottom: 20px;">Iniciar Sesión</h2>
+            <input type="email" id="login-email" placeholder="Correo electrónico" class="margin-v" required>
+            <input type="password" id="login-pass" placeholder="Contraseña (12 caracteres)" class="margin-v" required>
+            <button id="btn-entrar" style="width: 100%; padding: 12px; font-size: 1.1rem;">Entrar</button>
+            <hr style="margin: 20px 0; opacity: 0.1;">
+            <p>¿No tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Regístrate</span></p>
         </div>
 
         <div class="card auth-box" id="register-section" style="display: none;">
-            <h2>Crear Cuenta</h2>
-            <input type="email" id="reg-email" placeholder="Tu correo electrónico" class="margin-v">
-            <input type="password" id="reg-pass" placeholder="Crea tu clave (12 caracteres)" class="margin-v">
-            <button id="btn-registrar" style="width: 100%;">Registrarme</button>
-            <p style="margin-top:15px;">¿Ya tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Inicia Sesión</span></p>
+            <h2 style="margin-bottom: 20px;">Crear Cuenta</h2>
+            <input type="email" id="reg-email" placeholder="Tu correo electrónico" class="margin-v" required>
+            <input type="password" id="reg-pass" placeholder="Crea tu clave (12 caracteres)" class="margin-v" required>
+            <button id="btn-registrar" style="width: 100%; padding: 12px; font-size: 1.1rem; background-color: #42b72a;">Registrarme</button>
+            <hr style="margin: 20px 0; opacity: 0.1;">
+            <p>¿Ya tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Inicia Sesión</span></p>
         </div>
     </div>
+
     <script src="js/auth.js"></script>
+    <script>
+        // Función simple para intercambiar entre Login y Registro
+        function toggleAuth() {
+            const login = document.getElementById('login-section');
+            const register = document.getElementById('register-section');
+            if (login.style.display === "none") {
+                login.style.display = "block";
+                register.style.display = "none";
+            } else {
+                login.style.display = "none";
+                register.style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>

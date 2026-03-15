@@ -15,6 +15,15 @@ const app = express();
 app.use(cors());
 app.use(express.json()); 
 
+// --- 🚦 RASTREADOR DE TRÁFICO (DEPURACIÓN) ---
+// Este bloque nos dirá exactamente qué ruta se queda "colgada"
+app.use((req, res, next) => {
+    console.log(`📡 Petición entrante: ${req.method} ${req.url}`);
+    // Si en la terminal ves que una petición entra pero la página no carga,
+    // esa es la ruta que debemos revisar.
+    next();
+});
+
 // Evitar que sirva index.html por defecto para respetar el Login (P1)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 

@@ -65,7 +65,6 @@ router.post('/login', async (req, res) => {
 
         const usuario = usuarios[0];
 
-        // 🛡️ FILTRO DE SEGURIDAD: Verificamos si la cuenta está suspendida
         if (usuario.estado === 'suspendido') {
             return res.status(403).json({ 
                 error: "Acceso denegado. Tu cuenta se encuentra suspendida por el Administrador. 🚫" 
@@ -90,7 +89,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// --- 3. OBTENER AJUSTES Y PERFIL ---
+// --- 3. OBTENER AJUSTES (Privado) ---
 router.get('/ajustes/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -141,36 +140,57 @@ router.put('/actualizar-ajustes/:id', async (req, res) => {
     }
 });
 
-// --- 5. BUSCADOR DE USUARIOS (Radar P5) ---
+// --- 🔍 5. BUSCADOR PREDICTIVO (Módulo #13) ---
 router.get('/buscar', async (req, res) => {
-    const { q, miId } = req.query;
-
-    if (!q) return res.json([]);
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json([]);
 
     try {
         const query = `
-            SELECT usuario_id, nombre, apellido, foto_url 
+            SELECT usuario_id, nombre, apellido, foto_url, bio 
             FROM perfiles 
-            WHERE (nombre LIKE ? OR apellido LIKE ? OR CONCAT(nombre, ' ', apellido) LIKE ?)
-            AND usuario_id != ?
-            LIMIT 10`;
+            WHERE nombre LIKE ? OR apellido LIKE ? 
+            LIMIT 5
+        `;
+        const termino = `${q}%`; 
+        const [resultados] = await db.query(query, [termino, termino]);
         
-        const busqueda = `%${q}%`;
-        const [usuarios] = await db.query(query, [busqueda, busqueda, busqueda, miId]);
-        
-        res.json(usuarios);
+        res.json(resultados);
     } catch (err) {
-        console.error("🚨 Error en el buscador SQL:", err);
-        res.status(500).json({ error: "No se pudo realizar la búsqueda." });
+        console.error("🚨 Error en búsqueda predictiva:", err);
+        res.status(500).json({ error: "Error en el buscador" });
     }
 });
 
-// --- 🚫 6. SUSPENDER USUARIO (Solo Admin ID: 1 - Punto #20) ---
+// --- 👤 6. OBTENER PERFIL PÚBLICO (#13) ---
+// Esta ruta permite ver a otros usuarios desde el buscador
+router.get('/perfil/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT u.id, u.email, p.nombre, p.apellido, p.bio, p.foto_url 
+            FROM usuarios u 
+            JOIN perfiles p ON u.id = p.usuario_id 
+            WHERE u.id = ?`;
+        
+        const [rows] = await db.query(query, [id]);
+        
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: "Usuario no encontrado" });
+        }
+    } catch (err) {
+        console.error("🚨 Error al obtener perfil:", err);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+// --- 🚫 7. SUSPENDER USUARIO (Solo Admin ID: 1) ---
 router.patch('/suspendido/:id', async (req, res) => {
     const { id } = req.params;
     const { adminId } = req.body; 
 
-    // Verificamos autoridad del Arquitecto
     if (parseInt(adminId) !== 1) {
         return res.status(403).json({ error: "No tienes permisos de administrador." });
     }

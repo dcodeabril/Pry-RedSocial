@@ -61,6 +61,29 @@ body {
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
+/* --- 🔍 RESULTADOS DE BÚSQUEDA PREDICTIVA (#13) --- */
+#resultados-busqueda {
+    border-radius: 8px;
+    overflow: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+/* Soporte para el hover tanto en clases genéricas como específicas */
+.search-item:hover, .search-result-item:hover {
+    background-color: var(--bg-color) !important;
+    transition: background 0.2s;
+}
+
+/* Estilo para navegadores Webkit (Chrome/Edge/Safari) */
+#resultados-busqueda::-webkit-scrollbar {
+    width: 6px;
+}
+#resultados-busqueda::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 10px;
+}
+
 /* --- 💬 ESTILOS DE COMENTARIOS --- */
 .comment-box {
     background: var(--bg-color);
@@ -109,6 +132,28 @@ nav a {
     margin-right: 15px;
 }
 
+/* 🔴 Punto de Notificación Estilo Facebook */
+.nav-notif-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.badge-notif {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background-color: #ff4d4d;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-weight: bold;
+    border: 2px solid var(--header-bg);
+    display: none;
+    min-width: 10px;
+    text-align: center;
+}
+
 /* --- 📝 ESTÉTICA DE NOTAS (#15) --- */
 .notas-wrapper {
     padding-top: 25px;
@@ -128,25 +173,6 @@ nav a {
 
 .nota-burbuja:hover { transform: scale(1.05); }
 
-.nota-texto-preview {
-    position: absolute;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    color: #333;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    white-space: nowrap;
-    z-index: 50;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* --- 📅 ESTILOS DEL MODAL DE EVENTOS (#14) --- */
 .modal-overlay {
     position: fixed;
@@ -165,30 +191,6 @@ nav a {
     animation: slideUp 0.3s ease;
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
-}
-
-.btn-close {
-    background: none;
-    color: var(--text-muted);
-    font-size: 1.5rem;
-    padding: 0;
-    border: none;
-    cursor: pointer;
-}
-
-.modal-body label {
-    display: block;
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
 .modal-actions {
     margin-top: 20px;
     display: flex;
@@ -203,26 +205,16 @@ nav a {
 
 /* --- 📅 ESTÉTICA DE TARJETAS DE EVENTOS (#14) --- */
 .event-card {
-    border-left: 5px solid var(--primary); /* Una franja azul para identificarlos */
+    border-left: 5px solid var(--primary);
     padding: 12px;
     background: var(--bg-color);
-    border-radius: 4px; /* Un toque de redondeo */
+    border-radius: 4px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .event-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.event-card h4 {
-    margin: 0 0 5px 0;
-    color: var(--text-color);
-}
-
-.event-card .meta {
-    font-size: 0.8rem;
-    color: var(--text-muted);
 }
 
 /* --- 📱 ADAPTABILIDAD --- */
