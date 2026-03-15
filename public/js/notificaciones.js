@@ -58,8 +58,11 @@ async function cargarNotificaciones() {
                 `;
             }
 
+            // ✅ RUTA DE IMAGEN CORREGIDA: Evita imágenes rotas
+            const avatarRuta = (n.foto_url && n.foto_url !== 'default.png') ? `img/${n.foto_url}` : 'img/default.png';
+
             item.innerHTML = `
-                <img src="img/${n.foto_url || 'default.png'}" class="notif-avatar" alt="Avatar">
+                <img src="${avatarRuta}" class="notif-avatar" alt="Avatar">
                 <div class="notif-content" style="flex-grow: 1;">
                     <div class="notif-text">
                         <strong>${n.nombre} ${n.apellido}</strong> ${interpretarTipo(n.tipo)}
@@ -71,7 +74,7 @@ async function cargarNotificaciones() {
                 <button onclick="borrarNotificacion(${n.id})" style="background:none; border:none; cursor:pointer; margin-left:10px;">🗑️</button>
             `;
 
-            // ✅ NAVEGACIÓN CONTEXTUAL: Al hacer clic, vamos al contenido
+            // ✅ NAVEGACIÓN CONTEXTUAL
             item.onclick = (e) => {
                 if (e.target.tagName !== 'BUTTON') {
                     irAContenido(n.id, n.tipo, n.referencia_id);
@@ -92,14 +95,19 @@ window.irAContenido = async function(notiId, tipo, refId) {
         // 2. Determinar destino
         let urlDestino = "";
         if (tipo === 'nuevo_evento') urlDestino = `index.html#evento-${refId}`;
-        else if (tipo === 'reaccion' || tipo === 'comentario') urlDestino = `index.html#post-${refId}`;
-        else if (tipo === 'amistad' || tipo === 'confirmacion_amistad') urlDestino = `perfil.html?id=${refId}`;
+        // ✅ AHORA TAMBIÉN SALTA A LOS POSTS COMPARTIDOS
+        else if (tipo === 'reaccion' || tipo === 'comentario' || tipo === 'compartir') {
+            urlDestino = `index.html#post-${refId}`;
+        }
+        else if (tipo === 'amistad' || tipo === 'confirmacion_amistad') {
+            urlDestino = `perfil.html?id=${refId}`;
+        }
         else urlDestino = "index.html";
 
         // 3. ¡Zarpamos!
         window.location.href = urlDestino;
         
-        // Si ya estamos en la página del ancla, forzamos el scroll suave
+        // Forzamos recarga si ya estamos en index para aplicar el resaltado
         if (window.location.pathname.includes('index.html')) {
             setTimeout(() => location.reload(), 100); 
         }
@@ -115,6 +123,7 @@ function interpretarTipo(tipo) {
         case 'nuevo_evento': return "creó un <b>nuevo evento</b> 📅";
         case 'reaccion': return "reaccionó a tu publicación 👍";
         case 'comentario': return "comentó tu post 💬";
+        case 'compartir': return "<b>compartió</b> tu publicación en su muro 🔄"; // ✅ NUEVO
         default: return "interactuó contigo.";
     }
 }

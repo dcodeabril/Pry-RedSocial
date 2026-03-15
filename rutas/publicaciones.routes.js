@@ -9,13 +9,23 @@ const router = express.Router();
 const db = require('../db/base_datos');
 
 // --- [1] OBTENER EL MURO PERSONALIZADO (GET) ---
+// ✅ ACTUALIZADO: Trae info del post original y su autor si es compartido
 router.get('/muro/:usuarioId', async (req, res) => {
     const { usuarioId } = req.params;
     try {
         const query = `
-            SELECT p.*, perf.nombre, perf.apellido, perf.foto_url 
+            SELECT 
+                p.*, 
+                perf.nombre, perf.apellido, perf.foto_url,
+                p_orig.contenido AS contenido_original,
+                p_orig.fecha AS fecha_original,
+                perf_orig.nombre AS nombre_original,
+                perf_orig.apellido AS apellido_original,
+                perf_orig.foto_url AS foto_original_url
             FROM publicaciones p
             JOIN perfiles perf ON p.usuario_id = perf.usuario_id
+            LEFT JOIN publicaciones p_orig ON p.original_post_id = p_orig.id
+            LEFT JOIN perfiles perf_orig ON p_orig.usuario_id = perf_orig.usuario_id
             WHERE 
                 p.usuario_id = ? 
                 OR 
@@ -44,11 +54,21 @@ router.get('/muro/:usuarioId', async (req, res) => {
     }
 });
 
-// --- [2] OBTENER POSTS DE UN USUARIO (Para el Perfil) ---
+// --- [2] OBTENER POSTS DE UN USUARIO (Perfil) ---
 router.get('/usuario/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const query = `SELECT * FROM publicaciones WHERE usuario_id = ? ORDER BY id DESC`;
+        const query = `
+            SELECT 
+                p.*, 
+                p_orig.contenido AS contenido_original,
+                perf_orig.nombre AS nombre_original,
+                perf_orig.apellido AS apellido_original
+            FROM publicaciones p
+            LEFT JOIN publicaciones p_orig ON p.original_post_id = p_orig.id
+            LEFT JOIN perfiles perf_orig ON p_orig.usuario_id = perf_orig.usuario_id
+            WHERE p.usuario_id = ? 
+            ORDER BY p.id DESC`;
         const [posts] = await db.query(query, [id]);
         res.json(posts);
     } catch (err) {
@@ -56,12 +76,45 @@ router.get('/usuario/:id', async (req, res) => {
     }
 });
 
-// --- [3] CREAR NUEVA PUBLICACIÓN ---
+// --- [3] COMPARTIR PUBLICACIÓN (#7) ---
+// ✅ ACTUALIZADO: Incluye lógica de notificación al autor original
+router.post('/compartir', async (req, res) => {
+    const { usuario_id, publicacion_id, comentario } = req.body;
+
+    try {
+        // 1. Buscamos quién es el dueño del post original
+        const [original] = await db.query('SELECT usuario_id FROM publicaciones WHERE id = ?', [publicacion_id]);
+        if (original.length === 0) return res.status(404).json({ error: "Post no encontrado" });
+
+        // 2. Insertamos la nueva publicación de tipo 'compartido'
+        const query = `
+            INSERT INTO publicaciones (usuario_id, contenido, tipo, original_post_id, privacidad)
+            VALUES (?, ?, 'compartido', ?, 'publica')
+        `;
+        const [result] = await db.query(query, [usuario_id, comentario, publicacion_id]);
+
+        // 3. SEGURO DE NOTIFICACIÓN: Si no soy yo mismo, aviso al autor original
+        if (original[0].usuario_id != usuario_id) {
+            await db.query(
+                'INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id) VALUES (?, ?, "compartir", ?)',
+                [original[0].usuario_id, usuario_id, publicacion_id] 
+            );
+            console.log(`🔔 Notificación de compartido enviada al usuario ${original[0].usuario_id}`);
+        }
+
+        res.json({ mensaje: "¡Publicación compartida! 🚀", id: result.insertId });
+    } catch (err) {
+        console.error("🚨 Error al compartir:", err);
+        res.status(500).json({ error: "Error en el servidor al intentar compartir." });
+    }
+});
+
+// --- [4] CREAR NUEVA PUBLICACIÓN ORIGINAL ---
 router.post('/crear', async (req, res) => {
     const { usuario_id, contenido, privacidad } = req.body;
     try {
         await db.query(
-            'INSERT INTO publicaciones (usuario_id, contenido, privacidad) VALUES (?, ?, ?)',
+            'INSERT INTO publicaciones (usuario_id, contenido, privacidad, tipo) VALUES (?, ?, ?, "original")',
             [usuario_id, contenido, privacidad || 'publica']
         );
         res.status(201).json({ mensaje: "Publicación creada con éxito ✅" });
@@ -70,7 +123,7 @@ router.post('/crear', async (req, res) => {
     }
 });
 
-// --- [4] REACCIONAR Y NOTIFICAR ---
+// --- [5] REACCIONAR Y NOTIFICAR ---
 router.post('/reaccionar', async (req, res) => {
     const { publicacion_id, usuario_id, tipo } = req.body;
     try {
@@ -100,13 +153,13 @@ router.post('/reaccionar', async (req, res) => {
                 [receptorId, usuario_id, publicacion_id]
             );
         }
-        res.json({ mensaje: "Reacción y notificación enviadas ✅" });
+        res.json({ mensaje: "Reacción procesada ✅" });
     } catch (err) {
         res.status(500).json({ error: "Error al procesar interacción." });
     }
 });
 
-// --- [5] OBTENER COMENTARIOS ---
+// --- [6] OBTENER COMENTARIOS ---
 router.get('/:id/comentarios', async (req, res) => {
     const { id } = req.params;
     try {
@@ -123,7 +176,7 @@ router.get('/:id/comentarios', async (req, res) => {
     }
 });
 
-// --- [6] COMENTAR Y NOTIFICAR ---
+// --- [7] COMENTAR Y NOTIFICAR ---
 router.post('/comentar', async (req, res) => {
     const { publicacion_id, usuario_id, contenido } = req.body;
     try {
@@ -155,7 +208,7 @@ router.post('/comentar', async (req, res) => {
     }
 });
 
-// --- [7] ELIMINAR PUBLICACIÓN ---
+// --- [8] ELIMINAR PUBLICACIÓN ---
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     const { usuario_id } = req.query; 
@@ -164,7 +217,7 @@ router.delete('/:id', async (req, res) => {
         let queryBorrado;
         let params;
 
-        if (parseInt(usuario_id) === 1) {
+        if (parseInt(usuario_id) === 1) { // Admin Israel
             queryBorrado = 'DELETE FROM publicaciones WHERE id = ?';
             params = [id];
         } else {
@@ -175,39 +228,32 @@ router.delete('/:id', async (req, res) => {
         const [resultado] = await db.query(queryBorrado, params);
 
         if (resultado.affectedRows > 0) {
-            res.json({ mensaje: "Publicación eliminada correctamente por moderación 🗑️" });
+            res.json({ mensaje: "Publicación eliminada correctamente 🗑️" });
         } else {
             res.status(403).json({ error: "No tienes permiso para eliminar este post o ya no existe." });
         }
     } catch (err) {
-        console.error("🚨 Error al borrar publicación:", err);
         res.status(500).json({ error: "Error interno al intentar eliminar el post." });
     }
 });
 
-// --- [8] GUARDAR EN EL BAÚL (#8 - Usando tu tabla guardados_y_notas) ---
+// --- [9] GUARDAR EN EL BAÚL ---
 router.post('/guardar-tesoro', async (req, res) => {
     const { usuario_id, publicacion_id } = req.body;
-
     try {
-        // 🎯 Insertamos en la tabla que ya existe en tu Dump
         await db.query(
             `INSERT INTO guardados_y_notas (usuario_id, referencia_id, tipo_entrada) 
              VALUES (?, ?, 'guardado')`,
             [usuario_id, publicacion_id]
         );
-        res.json({ mensaje: "¡Publicación guardada en tu baúl de tesoros! 💾" });
+        res.json({ mensaje: "¡Publicación guardada en tu baúl! 💾" });
     } catch (err) {
-        // Manejo de duplicados por si ya está guardado
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ error: "Ya tienes este tesoro guardado en tu baúl." });
-        }
-        console.error(err);
+        if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: "Ya está guardado." });
         res.status(500).json({ error: "No se pudo guardar el tesoro." });
     }
 });
 
-// --- [8.1] OBTENER MI BAÚL DE TESOROS ---
+// --- [9.1] OBTENER MI BAÚL DE TESOROS ---
 router.get('/baul/:usuarioId', async (req, res) => {
     const { usuarioId } = req.params;
     try {
@@ -218,12 +264,10 @@ router.get('/baul/:usuarioId', async (req, res) => {
             JOIN perfiles perf ON p.usuario_id = perf.usuario_id
             WHERE gn.usuario_id = ? AND gn.tipo_entrada = 'guardado'
             ORDER BY gn.fecha DESC`;
-            
         const [tesoros] = await db.query(query, [usuarioId]);
         res.json(tesoros);
     } catch (err) {
-        console.error("🚨 Error al abrir el baúl:", err);
-        res.status(500).json({ error: "No pudimos abrir tu baúl de tesoros." });
+        res.status(500).json({ error: "No pudimos abrir tu baúl." });
     }
 });
 

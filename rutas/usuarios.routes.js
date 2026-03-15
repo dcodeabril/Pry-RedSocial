@@ -163,7 +163,6 @@ router.get('/buscar', async (req, res) => {
 });
 
 // --- 👤 6. OBTENER PERFIL PÚBLICO (#13) ---
-// Esta ruta permite ver a otros usuarios desde el buscador
 router.get('/perfil/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -201,6 +200,46 @@ router.patch('/suspendido/:id', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error al actualizar el estado del usuario." });
+    }
+});
+
+// --- 🔑 8. PROMOVER USUARIO CON CÓDIGO MAESTRO ---
+router.patch('/promover', async (req, res) => {
+    const { usuario_a_promover, codigo, admin_solicitante_id } = req.body;
+
+    try {
+        // SEGURIDAD EXTRA: Solo el admin principal (ID 1) puede usar esta ruta
+        if (admin_solicitante_id != 1) {
+            return res.status(403).json({ error: "No tienes permisos para autorizar ascensos. 🚫" });
+        }
+
+        // 1. Verificar si el código existe y está disponible
+        const [busqueda] = await db.query(
+            'SELECT * FROM codigos_admin WHERE codigo = ? AND estado = "disponible"', 
+            [codigo]
+        );
+
+        if (busqueda.length === 0) {
+            return res.status(403).json({ error: "Código inválido, expirado o ya utilizado. ❌" });
+        }
+
+        const codigoId = busqueda[0].id;
+
+        // 2. Ejecutar ascenso y "quema" del código en una sola transacción lógica
+        await db.query('UPDATE usuarios SET rol = "admin" WHERE id = ?', [usuario_a_promover]);
+        
+        await db.query(
+            `UPDATE codigos_admin 
+             SET estado = "usado", usuario_que_lo_uso = ?, fecha_uso = NOW() 
+             WHERE id = ?`,
+            [usuario_a_promover, codigoId]
+        );
+
+        res.json({ mensaje: "¡Usuario ascendido a Administrador con éxito! ⭐" });
+
+    } catch (err) {
+        console.error("🚨 Error en proceso de ascenso:", err);
+        res.status(500).json({ error: "Error interno del servidor de seguridad." });
     }
 });
 
