@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (COMUNICACIÓN DINÁMICA P3)
+// ROL: ARQUITECTO (COMUNICACIÓN DINÁMICA P3 + VIDEOLLAMADA #11)
 // ARCHIVO: mensajes.js
 // =============================================
 
@@ -18,7 +18,6 @@ let amigoSeleccionadoId = null;
 async function cargarListaAmigos() {
     if (!miId) return;
     try {
-        // 🎯 Ruta maestra de amistades que ya sincronizamos
         const res = await fetch(`/api/amistades/lista/${miId}`);
         const amigos = await res.json();
         
@@ -46,9 +45,22 @@ async function cargarListaAmigos() {
 // --- 🎯 2. SELECCIONAR AMIGO Y ABRIR CHAT ---
 window.seleccionarAmigo = function(id, nombreCompleto) {
     amigoSeleccionadoId = id;
-    chatHeader.innerText = `Chat con ${nombreCompleto}`;
+
+    // ✅ ACTUALIZACIÓN: Cabecera dinámica con botón de Videollamada (#11)
+    chatHeader.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-right: 10px;">
+            <span>Chat con <strong>${nombreCompleto}</strong></span>
+            <div class="chat-header-actions">
+                <span onclick="abrirInterfazLlamada(${id})" 
+                      style="cursor:pointer; font-size:1.5rem; transition: transform 0.2s;" 
+                      title="Iniciar Videollamada"
+                      onmouseover="this.style.transform='scale(1.2)'" 
+                      onmouseout="this.style.transform='scale(1)'">📹</span>
+            </div>
+        </div>
+    `;
     
-    // Resaltar visualmente en la lista (Persona 5)
+    // Resaltar visualmente en la lista
     document.querySelectorAll('.amigo-item').forEach(el => el.style.background = 'white');
     const itemActivo = document.getElementById(`item-amigo-${id}`);
     if (itemActivo) itemActivo.style.background = '#e7f3ff';
@@ -56,7 +68,7 @@ window.seleccionarAmigo = function(id, nombreCompleto) {
     cargarMensajes();
 };
 
-// --- 💬 3. OBTENER CONVERSACIÓN (Burbujas Dinámicas) ---
+// --- 💬 3. OBTENER CONVERSACIÓN ---
 async function cargarMensajes() {
     if (!amigoSeleccionadoId) return;
 
@@ -87,7 +99,6 @@ async function cargarMensajes() {
             </div>
         `).join('');
 
-        // Auto-scroll al último mensaje
         mensajesBody.scrollTop = mensajesBody.scrollHeight;
 
     } catch (err) {
@@ -127,7 +138,6 @@ inputMsj.addEventListener('keypress', (e) => {
 });
 
 // --- 🔄 SINCRONIZACIÓN AUTOMÁTICA ---
-// Consultamos nuevos mensajes cada 4 segundos si hay un chat abierto
 setInterval(() => {
     if (amigoSeleccionadoId) {
         cargarMensajes();

@@ -48,13 +48,13 @@
                    style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid var(--border-color); outline: none;">
             
             <div id="resultados-busqueda" class="card" 
-                 style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                   style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             </div>
         </div>
         
         <nav style="display: flex; align-items: center; gap: 15px;">
             <a href="index.html">Muro</a>
-            <a href="perfil.html" id="nav-nombre" style="color: var(--primary); font-weight: bold;">Mi Perfil</a> 
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" style="color: var(--primary); font-weight: bold;">Mi Perfil</a> 
             <a href="mensajes.html">Mensajes</a>
             
             <a href="notificaciones.html" class="nav-notif-wrapper">
@@ -63,10 +63,9 @@
             </a>
             
             <a href="baul.html" style="color: #ffc107; font-weight: bold;">📂 Mis Tesoros</a>
-
             <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold;">⚙️ Admin</a>
+            <a href="#" onclick="cerrarSesionTotal()" style="color: #ff4d4d; font-weight: bold;">Salir</a>
             
-            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold;">Salir</a>
             <button id="btn-tema" class="btn-secundario">🌙</button>
         </nav>
     </header>
@@ -82,7 +81,6 @@
             <div class="info-perfil">
                 <h2 id="perf-nombre-completo">Cargando identidad...</h2>
                 <p id="perf-bio">Cargando biografía...</p>
-                
                 <div id="zona-acciones-perfil" style="margin-top: 15px; display: flex; gap: 10px;"></div>
             </div>
         </div>
@@ -95,20 +93,51 @@
         </section>
     </main>
 
+    <div id="modal-videollamada" class="modal-video-overlay" style="display: none;">
+        <div class="video-container">
+            <video id="remoteVideo" autoplay playsinline class="video-remote"></video>
+            <video id="localVideo" autoplay playsinline muted class="video-local"></video>
+            <div class="video-status" id="video-status">Llamando...</div>
+
+            <div id="controles-entrantes" style="display: none; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100;">
+                <button onclick="aceptarLlamadaClick()" style="background: #28a745; color: white; padding: 15px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    ✅ Contestar Llamada
+                </button>
+            </div>
+
+            <div class="video-controls">
+                <button onclick="colgarYSalir()" class="control-btn btn-hangup">📞</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
     <script src="js/buscar.js"></script>
     <script src="js/notificaciones.js"></script>
+    <script src="js/videollamada.js"></script> 
     <script src="js/perfil.js"></script>
 
     <script>
-        document.getElementById('btn-salir').addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-                localStorage.removeItem('usuarioId'); 
+        // ✅ NAVEGACIÓN DINÁMICA
+        function irAMiPerfil() {
+            const miId = localStorage.getItem('usuarioId');
+            if(miId) {
+                window.location.href = `perfil.html?id=${miId}`;
+            } else {
                 window.location.href = '/';
             }
-        });
+        }
+
+        // ✅ CIERRE DE SESIÓN LIMPIO
+        function cerrarSesionTotal() {
+            if(confirm("¿Estás seguro de que deseas cerrar sesión de forma segura?")) {
+                localStorage.clear(); 
+                sessionStorage.clear();
+                window.location.href = '/';
+            }
+        }
     </script>
 </body>
 </html>

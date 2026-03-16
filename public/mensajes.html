@@ -11,7 +11,6 @@
         .chat-window { width: 70%; display: flex; flex-direction: column; padding: 15px; border-radius: 8px; }
         .mensajes-lista { flex-grow: 1; overflow-y: auto; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; padding: 10px; }
         
-        /* Estilos para las burbujas de mensaje */
         .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 80%; }
         .msg-emisor { align-self: flex-end; background-color: #007bff; color: white; text-align: right; margin-left: auto; }
         .msg-receptor { align-self: flex-start; background-color: #e4e6eb; color: #050505; text-align: left; }
@@ -27,27 +26,25 @@
 <body>
     <header class="main-header">
         <div class="logo"><h1>Facebook Local</h1></div>
-        <nav>
+        <nav style="display: flex; align-items: center; gap: 15px;">
             <a href="index.html">Muro</a>
-            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre">Mi Perfil</a> 
             <a href="mensajes.html" class="active">Mensajes</a>
             <a href="notificaciones.html">Notificaciones</a>
-            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+            <a href="#" onclick="cerrarSesionTotal()" style="color: #ff4d4d; font-weight: bold; margin-left: 15px;">Cerrar Sesión</a>
+            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙</button>
         </nav>
     </header>
 
     <main class="container chat-layout">
         <aside class="card sidebar-amigos">
             <h3>Contactos</h3>
-            <ul id="lista-amigos">
-                </ul>
+            <ul id="lista-amigos"></ul>
         </aside>
 
         <section class="card chat-window">
             <div id="chat-header">Selecciona un amigo para chatear</div>
-            <div id="mensajes-body" class="mensajes-lista d-flex flex-column">
-                </div>
+            <div id="mensajes-body" class="mensajes-lista d-flex flex-column"></div>
             <div class="chat-input">
                 <input type="text" id="input-msj" placeholder="Escribe un mensaje...">
                 <button id="btn-enviar" class="btn-primario">Enviar</button>
@@ -55,18 +52,46 @@
         </section>
     </main>
 
+    <div id="modal-videollamada" class="modal-video-overlay" style="display: none;">
+        <div class="video-container">
+            <video id="remoteVideo" autoplay playsinline class="video-remote"></video>
+            <video id="localVideo" autoplay playsinline muted class="video-local"></video>
+            <div class="video-status" id="video-status">Llamando...</div>
+
+            <div id="controles-entrantes" style="display: none; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100;">
+                <button onclick="aceptarLlamadaClick()" style="background: #28a745; color: white; padding: 15px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    ✅ Contestar Llamada
+                </button>
+            </div>
+
+            <div class="video-controls">
+                <button onclick="colgarYSalir()" class="control-btn btn-hangup">📞</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
+    <script src="js/videollamada.js"></script> 
     <script src="js/mensajes.js"></script>
     
     <script>
-        document.getElementById('btn-salir').addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm("¿Deseas cerrar sesión?")) {
-                localStorage.removeItem('usuarioId');
+        // ✅ NAVEGACIÓN DINÁMICA
+        function irAMiPerfil() {
+            const miId = localStorage.getItem('usuarioId');
+            if(miId) window.location.href = `perfil.html?id=${miId}`;
+            else window.location.href = '/';
+        }
+
+        // ✅ LIMPIEZA TOTAL DE SESIÓN
+        function cerrarSesionTotal() {
+            if(confirm("¿Deseas cerrar sesión de forma segura?")) {
+                localStorage.clear(); 
+                sessionStorage.clear();
                 window.location.href = '/';
             }
-        });
+        }
     </script>
 </body>
 </html>

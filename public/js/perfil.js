@@ -1,13 +1,15 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (MOTOR DE PERFIL DINÁMICO #13)
+// ROL: ARQUITECTO (MOTOR DE PERFIL DINÁMICO #13 + VIDEOLLAMADA #11)
 // ARCHIVO: public/js/perfil.js
 // =============================================
 
 (function() {
-    // 🛡️ Variables Privadas (viven solo dentro de esta burbuja)
+    // 🛡️ Variables Privadas: Extraemos los IDs de la sesión y de la URL
     const idSesionActual = localStorage.getItem('usuarioId');
     const paramsUrl = new URLSearchParams(window.location.search);
+    
+    // Si no hay ID en la URL, por defecto es el mío. Esto evita perfiles cruzados.
     const idPerfilDestino = paramsUrl.get('id') || idSesionActual;
 
     // Elementos de la Interfaz
@@ -24,7 +26,7 @@
         if (!idPerfilDestino) return;
 
         try {
-            console.log("👤 Cargando perfil dinámico para ID:", idPerfilDestino);
+            console.log("👤 Solicitando perfil para el ID:", idPerfilDestino);
             const response = await fetch(`/api/usuarios/perfil/${idPerfilDestino}`);
             const datos = await response.json();
 
@@ -38,27 +40,32 @@
                                   : 'img/default.png';
                 }
 
-                // Generamos los botones según quién esté mirando
+                // Generamos los botones dinámicos
                 gestionarBotonesSociales();
-                // Cargamos el muro de este usuario
+                // Cargamos solo los posts de este usuario
                 cargarMuroUsuario();
             }
         } catch (error) {
-            console.error("🚨 Error al cargar el perfil:", error);
+            console.error("🚨 Error crítico al cargar el perfil:", error);
         }
     }
 
     /**
-     * 2. Gestiona si aparece "Editar" o "Agregar/Mensaje/Bloquear"
+     * 2. Lógica de Botones: Videollamada y Mensajería Dinámica
      */
     async function gestionarBotonesSociales() {
         if (!zonaAcciones) return;
 
+        // Comparamos IDs como Strings para evitar fallos de tipo
         if (String(idPerfilDestino) === String(idSesionActual)) {
-            // Caso: Es mi propio perfil
-            zonaAcciones.innerHTML = `<button onclick="window.location.href='ajustes.html'" class="btn-secundario">⚙️ Editar Perfil</button>`;
+            // Caso: Es mi perfil. Solo muestro ajustes.
+            zonaAcciones.innerHTML = `
+                <button onclick="window.location.href='ajustes.html'" class="btn-secundario">
+                    ⚙️ Editar Perfil
+                </button>
+            `;
         } else {
-            // Caso: Estoy visitando a alguien más
+            // Caso: Visitante. Mostramos herramientas de comunicación.
             try {
                 const resAmistad = await fetch(`/api/amistades/estado/${idSesionActual}/${idPerfilDestino}`);
                 const relacion = await resAmistad.json();
@@ -72,22 +79,35 @@
                     botonAmistad = `<button class="btn-secundario" style="background: #28a745; color: white; cursor: default;" disabled>Amigos ✅</button>`;
                 }
 
+                // ✅ RENDERIZADO FINAL: Todos los botones usan idPerfilDestino
                 zonaAcciones.innerHTML = `
                     ${botonAmistad}
-                    <button class="btn-primario" style="background: #e4e6eb; color: black; margin-left: 10px;">Enviar Mensaje 💬</button>
+                    
+                    <button class="btn-primario" 
+                            onclick="window.location.href='mensajes.html?id=${idPerfilDestino}'" 
+                            style="background: #e4e6eb; color: black; margin-left: 10px;">
+                        Enviar Mensaje 💬
+                    </button>
+                    
+                    <button class="btn-primario" 
+                            onclick="abrirInterfazLlamada(${idPerfilDestino})" 
+                            style="background: var(--primary); color: white; margin-left: 10px;">
+                        📞 Videollamada
+                    </button>
+
                     <button onclick="bloquearEsteUsuario(${idPerfilDestino})" class="btn-secundario" 
                             style="color: #dc3545; border-color: #dc3545; margin-left: auto;">
                         Bloquear 🚫
                     </button>
                 `;
             } catch (err) {
-                console.error("Error en lógica social:", err);
+                console.error("Error en lógica de botones sociales:", err);
             }
         }
     }
 
     /**
-     * 3. Carga las publicaciones específicas de este perfil
+     * 3. Muro de usuario filtrado
      */
     async function cargarMuroUsuario() {
         if (!contenedorPosts) return;
@@ -111,11 +131,11 @@
                 </div>
             `).join('');
         } catch (err) {
-            console.error("Error al cargar posts:", err);
+            console.error("Error al cargar posts del perfil:", err);
         }
     }
 
-    // --- 🌍 FUNCIONES GLOBALES (Para que el HTML las vea) ---
+    // --- 🌍 FUNCIONES GLOBALES ---
     window.enviarSolicitudAmistad = async function(idDestino) {
         try {
             const res = await fetch('/api/amistades/solicitar', {
@@ -139,6 +159,6 @@
         } catch (err) { console.error(err); }
     };
 
-    // Lanzar carga inicial
+    // Lanzar carga inicial al abrir el archivo
     document.addEventListener('DOMContentLoaded', cargarDatosPerfil);
 })();
