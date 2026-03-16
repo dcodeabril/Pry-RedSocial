@@ -306,3 +306,24 @@ nav a {
     border-radius: 20px;
     font-size: 0.8rem;
 }
+/* --- Estilo para el Rango de Administrador --- */
+.admin-badge {
+    background: linear-gradient(45deg, #ffd700, #ff8c00); /* Oro inmersivo */
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.admin-badge::before {
+    content: '⭐';
+    margin-right: 3px;
+    font-size: 0.7rem;
+}
