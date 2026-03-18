@@ -1,0 +1,169 @@
+/* =============================================
+   PROYECTO: FACEBOOK LOCAL
+   SECCIÓN: PENSAMIENTOS EFÍMEROS (NOTAS)
+   ARCHIVO: notas.css
+   ============================================= */
+
+/* --- 🧊 CONTENEDOR Y ESTADO VACÍO --- */
+.notas-wrapper {
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+
+#notas-dinamicas {
+    display: flex;
+    gap: 15px;
+}
+
+#lista-notas {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 10px 5px;
+    scrollbar-width: none; /* Firefox */
+}
+
+#lista-notas::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.notas-vacias {
+    font-size: 0.85rem; 
+    opacity: 0.6; 
+    padding: 20px;
+    font-style: italic;
+}
+
+/* --- 🎈 ÍTEM DE LA NOTA --- */
+.nota-item {
+    flex: 0 0 85px; 
+    text-align: center; 
+    position: relative; 
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nota-item:hover {
+    transform: scale(1.08);
+}
+
+/* 💭 El texto que flota sobre la cabeza (Preview) */
+.nota-texto-preview {
+    font-size: 0.7rem;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 15px;
+    background: var(--bg-card, #fff);
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    color: var(--text-color, #333);
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+}
+
+/* Pequeño triángulo para efecto de burbuja de cómic */
+.nota-texto-preview::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--bg-card, #fff);
+}
+
+/* --- ✨ ESTADOS DINÁMICOS (Es Mía) --- */
+.nota-item-mia .nota-texto-preview {
+    border-color: #28a745; 
+    background: #f0fff4;
+    font-weight: bold;
+}
+
+.nota-item-mia .nota-texto-preview::after {
+    border-top-color: #28a745;
+}
+
+.nota-item-mia .nota-burbuja {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+}
+
+/* --- 🖼️ BURBUJA Y AVATAR --- */
+.nota-burbuja {
+    width: 65px; 
+    height: 65px; 
+    border-radius: 50%; 
+    border: 3px solid var(--primary, #1877f2); 
+    margin: 0 auto 8px; 
+    overflow: hidden; 
+    background: #f0f2f5;
+    padding: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.nota-avatar {
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* 🎨 Iniciales cuando no hay foto (Solución definitiva para iniciales) */
+.nota-avatar-initial {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary, #1877f2), #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.4rem;
+    border-radius: 50%;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.nota-nombre {
+    font-size: 0.75rem; 
+    color: var(--text-muted, #65676b);
+    font-weight: 600;
+    display: block;
+    margin-top: 4px;
+}
+
+/* --- ➕ BOTÓN "TU NOTA" (CREAR) --- */
+.nota-plus-icon {
+    font-size: 1.8rem;
+    color: var(--primary, #1877f2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* --- 🌓 MODO OSCURO --- */
+body.dark-theme .nota-texto-preview {
+    background: #242526;
+    border-color: #3e4042;
+    color: #e4e6eb;
+}
+
+body.dark-theme .nota-texto-preview::after {
+    border-top-color: #242526;
+}
+
+body.dark-theme .nota-burbuja {
+    background: #3a3b3c;
+}
+
+body.dark-theme .nota-item-mia .nota-texto-preview {
+    background: #1c2b21;
+    border-color: #28a745;
+}

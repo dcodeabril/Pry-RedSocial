@@ -1,32 +1,40 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (SISTEMA DE SEGURIDAD P1)
+// ROL: ARQUITECTO (SISTEMA DE SEGURIDAD P1 + FILTRO DE ROLES)
 // ARCHIVO: public/js/guardia.js
 // =============================================
 
 (function() {
     const usuarioId = localStorage.getItem('usuarioId');
+    const rol = (localStorage.getItem('rol') || '').toLowerCase(); // Obtenemos el rol
     const path = window.location.pathname;
 
-    // 🔍 Detectamos si el usuario está en la zona de Login
-    // (Acepta '/', '/index.html' (si fuera el login), o '/auth.html')
+    // 🔍 Detectamos el tipo de página
     const esPaginaLogin = path.includes('auth.html') || path === '/' || path.endsWith('/');
+    const esPaginaAdmin = path.includes('admin_'); // Detecta páginas como admin_reportes.html
 
-    // 🚩 CASO 1: No hay sesión e intenta entrar a páginas protegidas (Muro, Perfil, etc.)
+    // 🚩 CASO 1: No hay sesión e intenta entrar a cualquier página protegida
     if (!usuarioId && !esPaginaLogin) {
         console.warn("⛔ Acceso denegado. Redirigiendo al Login...");
         window.location.href = '/'; 
-        return; // Detenemos la ejecución
+        return;
     }
     
-    // 🚩 CASO 2: Ya hay sesión e intenta volver al Login (auth.html)
-    // Lo mandamos directo al Muro para que no pierda tiempo
+    // 🚩 CASO 2: Sesión activa intentando entrar al Login
     if (usuarioId && esPaginaLogin) {
         console.log("✅ Sesión activa. Llevándote al Muro...");
         window.location.href = 'index.html';
         return;
     }
 
-    // Si no cae en ninguno de los dos casos, el guardia lo deja pasar tranquilamente.
-    console.log("👮 Guardia: Acceso verificado.");
+    // 🚩 CASO 3: Protección de Rutas Administrativas (EL NUEVO FILTRO)
+    if (esPaginaAdmin && rol !== 'admin') {
+        console.error("🚫 ¡ALERTA! Intento de acceso administrativo no autorizado.");
+        alert("No tienes permisos de administrador para ver esta sección. 🛑");
+        window.location.href = 'index.html'; // Lo mandamos al muro
+        return;
+    }
+
+    // Si pasa estos filtros, el acceso es legítimo
+    console.log(`👮 Guardia: Acceso verificado para [${rol.toUpperCase()}]`);
 })();

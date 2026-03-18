@@ -1,24 +1,23 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (SEGURIDAD Y ROLES P1)
+// ROL: ARQUITECTO (SISTEMA DE AUTENTICACIÓN SINCRONIZADO)
 // ARCHIVO: auth.js
 // =============================================
+
+// Prevenir que un usuario logueado vea el login
+if (localStorage.getItem('usuarioId')) {
+    window.location.replace('index.html'); 
+}
 
 // --- 🔄 1. CAMBIO ENTRE LOGIN Y REGISTRO ---
 function toggleAuth() {
     const loginSec = document.getElementById('login-section');
     const regSec = document.getElementById('register-section');
-    
-    if (loginSec.style.display === 'none') {
-        loginSec.style.display = 'block';
-        regSec.style.display = 'none';
-    } else {
-        loginSec.style.display = 'none';
-        regSec.style.display = 'block';
-    }
+    loginSec.classList.toggle('auth-hidden');
+    regSec.classList.toggle('auth-hidden');
 }
 
-// --- 🔑 2. LÓGICA DE INICIO DE SESIÓN ACTUALIZADA ---
+// --- 🔑 2. LÓGICA DE INICIO DE SESIÓN (REPARADA) ---
 document.getElementById('btn-entrar').addEventListener('click', async () => {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
@@ -38,12 +37,12 @@ document.getElementById('btn-entrar').addEventListener('click', async () => {
         const data = await res.json();
 
         if (res.ok) {
-            // ✅ ÉXITO: Guardamos TODO el kit de identidad en el navegador
+            // 🛡️ ESTANDARIZACIÓN DE KEYS (Fundamental para que el Perfil y Guardia funcionen)
             localStorage.setItem('usuarioId', data.usuarioId);
-            localStorage.setItem('usuarioRol', data.rol);     // 🔑 ¡ESTA ES LA LLAVE ADMIN!
-            localStorage.setItem('usuarioNombre', data.nombre); // Para el saludo inicial
+            localStorage.setItem('rol', data.rol); // 👈 Corregido: de 'usuarioRol' a 'rol'
+            localStorage.setItem('nombre', data.nombre); // 👈 Corregido: de 'usuarioNombre' a 'nombre'
             
-            console.log("🔓 Sesión iniciada como:", data.rol);
+            console.log("🔓 Sesión iniciada con éxito. Rol detectado:", data.rol);
             window.location.href = 'index.html'; 
         } else {
             alert("Acceso Denegado: " + data.error);
@@ -54,7 +53,7 @@ document.getElementById('btn-entrar').addEventListener('click', async () => {
     }
 });
 
-// --- 📝 3. LÓGICA DE REGISTRO (PERSONA 1 y 5) ---
+// --- 📝 3. LÓGICA DE REGISTRO ---
 document.getElementById('btn-registrar').addEventListener('click', async () => {
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-pass').value;

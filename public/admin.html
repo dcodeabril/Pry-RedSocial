@@ -6,87 +6,64 @@
     
     <script>
         (function() {
-            // Buscamos en todas las llaves posibles para no fallar
             const rol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
             const miId = localStorage.getItem('usuarioId');
-
-            console.log("Validando acceso Admin...", { rol, miId });
-
-            // El Arquitecto entra por rol O por su ID de creador (1)
             if (rol !== 'admin' && miId !== '1') {
-                console.error("Acceso denegado. Redirigiendo al muro...");
                 window.location.href = 'index.html'; 
             }
         })();
     </script>
     
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css">
-    
-    <style>
-        .admin-section { margin-bottom: 50px; }
-        .header-notif { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        /* Estilos Usuarios */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background-color: #f8f9fa; }
-
-        /* Estilos Reportes */
-        .report-card { 
-            display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; 
-            align-items: center; padding: 20px; margin-bottom: 15px;
-            border-left: 6px solid #ffa500; background: white; border-radius: 8px;
-        }
-        .badge { background: #dc3545; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
-    </style>
-</head>
+    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/admin.css">   </head>
 <body>
     <header class="main-header">
         <div class="logo"><h1>Admin Control Center</h1></div>
         <nav>
             <a href="index.html">Ver Muro</a>
-            <button id="btn-tema" class="btn-secundario">🌙 Modo Oscuro</button>
+            <button id="btn-tema" class="btn-base">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
     <main class="container">
         <section class="admin-section card">
-            <div class="header-notif">
+            <div class="header-admin">
                 <h2>🚩 Reportes de la Comunidad</h2>
                 <span id="contador-reportes" class="badge">Cargando...</span>
             </div>
             
-            <div id="lista-reportes-admin" style="margin-top: 10px; margin-bottom: 20px;">
+            <div id="lista-reportes-admin" class="report-list-container">
                 <p>Cargando denuncias...</p>
             </div>
 
-            <div style="border-top: 1px solid #eee; padding-top: 20px;">
-                <a href="admin_reportes.html" class="btn-primario" 
-                   style="background: #dc3545; color: white; text-decoration: none; padding: 12px 25px; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 1rem;">
+            <div class="admin-footer-actions">
+                <a href="admin_reportes.html" class="btn-admin-action">
                     Gestionar Denuncias Detalladas ⚖️
                 </a>
             </div>
         </section>
 
-        <hr style="margin: 40px 0; border: 0; border-top: 2px solid #eee;">
+        <hr class="separator-heavy">
 
         <section class="admin-section card">
             <h2>👥 Control de Usuarios</h2>
             <div id="msg"></div>
-            <table style="margin-top: 20px;">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-usuarios">
-                </tbody>
-            </table>
+            
+            <div class="admin-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-usuarios">
+                        </tbody>
+                </table>
+            </div>
         </section>
     </main>
 

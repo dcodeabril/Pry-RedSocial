@@ -12,7 +12,8 @@ const miIdEvento = localStorage.getItem('usuarioId');
 window.abrirModalEvento = function() {
     const modal = document.getElementById('modal-evento');
     if (modal) {
-        modal.style.display = 'flex';
+        modal.classList.add('modal-evento-visible');
+        modal.classList.remove('modal-evento-hidden');
     } else {
         console.error("❌ ERROR: El elemento 'modal-evento' no existe en el HTML.");
     }
@@ -20,7 +21,10 @@ window.abrirModalEvento = function() {
 
 window.cerrarModalEvento = function() {
     const modal = document.getElementById('modal-evento');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.classList.add('modal-evento-hidden');
+        modal.classList.remove('modal-evento-visible');
+    }
 };
 
 // --- 2. 📥 CARGAR EVENTOS DESDE LA DB ---
@@ -37,7 +41,7 @@ async function cargarAgendaEventos() {
 
         if (!Array.isArray(eventos) || eventos.length === 0) {
             contenedor.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; opacity: 0.6; padding: 20px;">
+                <div class="eventos-vacio">
                     <p>No hay eventos programados próximamente. ✨</p>
                 </div>`;
             return;
@@ -46,21 +50,19 @@ async function cargarAgendaEventos() {
         contenedor.innerHTML = eventos.map(e => {
             const esMio = String(e.creador_id) === String(miIdEvento);
             const btnBorrar = esMio 
-                ? `<button onclick="eliminarEvento(${e.id})" class="btn-secundario" 
-                    style="margin-top:10px; color: #ff4d4d; border-color: #ff4d4d; width: 100%; font-size: 0.75rem;">
+                ? `<button onclick="eliminarEvento(${e.id})" class="btn-secundario btn-cancelar-evento">
                     Cancelar Evento 🗑️
                    </button>` 
                 : '';
             
             return `
-                <div id="evento-${e.id}" class="event-card card" 
-                     style="border-left: 5px solid var(--primary); padding: 15px; transition: background-color 1s ease;">
-                    <h4 style="margin: 0 0 5px 0; color: var(--primary);">${e.titulo}</h4>
-                    <p style="font-size: 0.85rem; margin-bottom: 10px;">${e.descripcion || 'Sin descripción.'}</p>
-                    <div class="meta" style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-color); padding: 8px; border-radius: 4px;">
+                <div id="evento-${e.id}" class="event-card card">
+                    <h4 class="event-card-title">${e.titulo}</h4>
+                    <p class="event-card-desc">${e.descripcion || 'Sin descripción.'}</p>
+                    <div class="event-card-meta">
                         <div>📍 <strong>Lugar:</strong> ${e.ubicacion || 'Por confirmar'}</div>
                         <div>📅 <strong>Fecha:</strong> ${new Date(e.fecha_evento).toLocaleString()}</div>
-                        <div style="margin-top: 5px; font-weight: bold; color: var(--text-color);">
+                        <div class="event-card-organizer">
                             👤 Organiza: ${e.nombre} ${e.apellido}
                         </div>
                     </div>
@@ -76,12 +78,11 @@ async function cargarAgendaEventos() {
             if (elemento) {
                 setTimeout(() => {
                     elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Resaltado visual temporal
-                    elemento.style.backgroundColor = "#fff9c4"; 
+                    elemento.classList.add('event-highlight');
                     setTimeout(() => {
-                        elemento.style.backgroundColor = "transparent";
+                        elemento.classList.remove('event-highlight');
                     }, 2000);
-                }, 600); // Pequeño delay para asegurar que el DOM renderizó
+                }, 600);
             }
         }
 
@@ -134,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Carga inicial
     cargarAgendaEventos();
 });
 

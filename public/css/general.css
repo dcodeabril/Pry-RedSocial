@@ -1,329 +1,86 @@
-/* =============================================
-   PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-   ROL: PERSONA 5 (DISEÑO Y UI/UX)
+/* ============================================================
+   PROYECTO: FACEBOOK LOCAL (SISTEMA DE DISEÑO GLOBAL)
    ARCHIVO: general.css
-   ============================================= */
+   ============================================================ */
 
-/* --- 📋 VARIABLES DE COLORES GLOBALES --- */
 :root {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #050505;
-    --text-muted: #65676b;
-    --primary: #1877f2;
-    --header-bg: #ffffff;
-    --border-color: #eeeeee;
+    /* --- ☀️ MODO CLARO (Variables por defecto) --- */
+    --primary: #3B82F6;         /* Azul vibrante */
+    --primary-hover: #2563EB;
+    
+    --bg-page: #F9FAFB;         /* Fondo de la página */
+    --card-bg: #FFFFFF;         /* Fondo de tarjetas y paneles */
+    --bg-input: #F3F4F6;        /* Gris claro para inputs */
+    
+    --text-main: #1F2937;       /* Gris oscuro (títulos) */
+    --text-muted: #6B7280;      /* Gris medio (placeholders e iconos) */
+    
+    --border: #E5E7EB;          /* Bordes sutiles */
+    --header-bg: #3B82F6;       /* Color de la barra de navegación */
+    --header-text: #FFFFFF;     /* Texto e iconos en la barra */
+
+    /* Estructura Global */
+    --radius-main: 12px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* --- 🌙 COLORES PARA MODO OSCURO --- */
+/* --- 🌙 MODO OSCURO (Sobrescribe las variables) --- */
 body.dark-mode {
-    --bg-color: #18191a;
-    --card-bg: #242526;
-    --text-color: #e4e6eb;
-    --text-muted: #b0b3b8;
-    --header-bg: #242526;
-    --border-color: #3e4042;
+    --bg-page: #111827;         /* Gris casi negro */
+    --card-bg: #1F2937;         /* Gris azulado oscuro */
+    --bg-input: #374151;        /* Gris intermedio para inputs */
+    
+    --text-main: #F9FAFB;       /* Blanco roto */
+    --text-muted: #9CA3AF;      /* Gris claro para iconos en modo oscuro */
+    
+    --border: #374151;          /* Borde oscuro */
+    --header-bg: #1e3a8a;       /* Azul marino profundo */
+    --header-text: #F9FAFB;
 }
 
-/* --- 🏗️ ESTILOS BASE Y CONTENEDORES --- */
+/* --- 📋 ESTILOS BASE (Se aplican a todo el sitio) --- */
 body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: Segoe UI, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    transition: background 0.3s, color 0.3s;
+    transition: background-color 0.3s, color 0.3s; /* Transición suave al cambiar de tema */
 }
 
-.main-header {
-    background: var(--header-bg);
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 15px;
-}
-
-/* --- 📄 DISEÑO DE TARJETAS --- */
-.card, .post-card {
-    background: var(--card-bg);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-/* --- 🔍 RESULTADOS DE BÚSQUEDA PREDICTIVA (#13) --- */
-#resultados-busqueda {
-    border-radius: 8px;
-    overflow: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary) transparent;
-}
-
-/* Soporte para el hover tanto en clases genéricas como específicas */
-.search-item:hover, .search-result-item:hover {
-    background-color: var(--bg-color) !important;
-    transition: background 0.2s;
-}
-
-/* Estilo para navegadores Webkit (Chrome/Edge/Safari) */
-#resultados-busqueda::-webkit-scrollbar {
-    width: 6px;
-}
-#resultados-busqueda::-webkit-scrollbar-thumb {
-    background-color: var(--primary);
-    border-radius: 10px;
-}
-
-/* --- 💬 ESTILOS DE COMENTARIOS --- */
-.comment-box {
-    background: var(--bg-color);
-    color: var(--text-color);
-    padding: 10px;
-    border-radius: 15px;
-    margin-top: 8px;
-    font-size: 0.9em;
-}
-
-/* --- 🔘 BOTONES Y ACCIONES --- */
-button, .btn-secundario {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: filter 0.2s;
-}
-
-button:hover { filter: brightness(0.9); }
-
-.btn-secundario {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-}
-
-/* --- 📝 CAMPOS DE ENTRADA --- */
+/* Aplicación automática a elementos de formulario */
 textarea, input, select {
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 10px;
-    width: 100%;
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-main) !important;
+    border-radius: var(--radius-main);
+    font-family: inherit;
+    transition: all 0.3s ease;
 }
 
-/* --- 🔗 NAVEGACIÓN --- */
-nav a {
-    text-decoration: none;
+/* Estilo para los iconos que usan la clase .input-icon o similares */
+.input-icon, .search-icon, .toggle-password {
     color: var(--text-muted);
-    font-weight: 600;
-    margin-right: 15px;
 }
 
-/* 🔴 Punto de Notificación Estilo Facebook */
-.nav-notif-wrapper {
-    position: relative;
-    display: inline-block;
+/* Tarjetas genéricas (Cards) */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-main);
+    box-shadow: var(--shadow-sm);
 }
 
-.badge-notif {
-    position: absolute;
-    top: -8px;
-    right: -12px;
-    background-color: #ff4d4d;
-    color: white;
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 50%;
-    font-weight: bold;
-    border: 2px solid var(--header-bg);
-    display: none;
-    min-width: 10px;
-    text-align: center;
-}
-
-/* --- 📝 ESTÉTICA DE NOTAS (#15) --- */
-.notas-wrapper {
-    padding-top: 25px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
-    overflow-x: auto;
-}
-
-.nota-burbuja {
-    background: var(--card-bg);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    position: relative;
-}
-
-.nota-burbuja:hover { transform: scale(1.05); }
-
-/* --- 📅 ESTILOS DEL MODAL DE EVENTOS (#14) --- */
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.modal-content {
-    width: 100%;
-    max-width: 500px;
-    animation: slideUp 0.3s ease;
-}
-
-.modal-actions {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-/* --- 📅 ESTÉTICA DE TARJETAS DE EVENTOS (#14) --- */
-.event-card {
-    border-left: 5px solid var(--primary);
-    padding: 12px;
-    background: var(--bg-color);
-    border-radius: 4px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.event-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* --- 📱 ADAPTABILIDAD --- */
-@media (max-width: 768px) {
-    .main-header h1 { font-size: 1.2em; }
-    .container { padding: 10px; }
-}
-/* DISEÑO DE VIDEOLLAMADA #11 */
-.modal-video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.video-container {
-    position: relative;
-    width: 90%;
-    max-width: 800px;
-    height: 80vh;
-    background: #1a1a1a;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
-
-.video-remote {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: #222;
-}
-
-.video-local {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 150px;
-    height: 110px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid var(--primary);
-    background: #333;
-    z-index: 10;
-}
-
-.video-controls {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 20;
-}
-
-.control-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+/* Botones base */
+.btn-base {
+    background-color: var(--primary);
+    color: #FFFFFF;
     border: none;
-    background: rgba(255,255,255,0.2);
-    color: white;
-    font-size: 1.2rem;
+    border-radius: var(--radius-main);
     cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    transition: background-color 0.2s;
 }
 
-.control-btn:hover { background: rgba(255,255,255,0.4); }
-.btn-hangup { background: #dc3545 !important; }
-.btn-hangup:hover { background: #b02a37 !important; }
-
-.video-status {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    color: white;
-    background: rgba(0,0,0,0.5);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-}
-/* --- Estilo para el Rango de Administrador --- */
-.admin-badge {
-    background: linear-gradient(45deg, #ffd700, #ff8c00); /* Oro inmersivo */
-    color: #fff;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin-left: 8px;
-    text-transform: uppercase;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    display: inline-flex;
-    align-items: center;
-    vertical-align: middle;
-}
-
-.admin-badge::before {
-    content: '⭐';
-    margin-right: 3px;
-    font-size: 0.7rem;
+.btn-base:hover {
+    background-color: var(--primary-hover);
 }

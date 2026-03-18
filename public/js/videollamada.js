@@ -1,11 +1,10 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (MÓDULO DE VIDEOLLAMADAS #11 - VERSIÓN FINAL)
+// ROL: ARQUITECTO (MÓDULO DE VIDEOLLAMADAS - ACTUALIZACIÓN DE FUERZA CRÍTICA)
 // ARCHIVO: public/js/videollamada.js
 // =============================================
 
 (function() {
-    // 🛡️ Cápsula de seguridad para evitar errores de declaración duplicada (miId)
     const socket = io(); 
     const miId = localStorage.getItem('usuarioId');
 
@@ -14,6 +13,9 @@
     let receptorIdActual;
     let ofertaRecibida = null; 
 
+    // 📦 COLA DE ESPERA PARA CANDIDATOS ICE
+    let iceCandidatesQueue = [];
+
     const servers = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
@@ -21,13 +23,11 @@
         ]
     };
 
-    // --- 1. INICIALIZACIÓN ---
     if (miId) {
         socket.emit('join-room', miId);
         console.log(`✅ Canal de señales activo para: ${miId}`);
     }
 
-    // --- 2. ACCESO A CÁMARA Y MICRÓFONO ---
     async function iniciarMedia() {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -39,7 +39,6 @@
         }
     }
 
-    // --- 3. LÓGICA DE WEBRTC ---
     function crearPeerConnection(targetId) {
         peerConnection = new RTCPeerConnection(servers);
 
@@ -61,12 +60,22 @@
         };
     }
 
-    // --- 🌍 4. FUNCIONES GLOBALES (Exportadas al objeto window) ---
+    // --- 🌍 FUNCIONES GLOBALES ---
 
     window.abrirInterfazLlamada = function(idDestino) {
         const modal = document.getElementById('modal-videollamada');
+        const controles = document.getElementById('controles-entrantes');
+        
         if (modal) {
-            modal.style.display = 'flex';
+            // El que llama NO debe ver el botón de responder
+            if (controles) {
+                controles.style.setProperty('display', 'none', 'important');
+            }
+
+            modal.style.setProperty('display', 'flex', 'important');
+            modal.classList.add('video-modal-visible');
+            modal.classList.remove('video-modal-hidden');
+            
             const status = document.getElementById('video-status');
             if (status) status.innerText = "Llamando...";
             window.llamarUsuario(idDestino); 
@@ -88,12 +97,14 @@
         });
     };
 
-    // ✅ ACCIÓN: Contestar llamada desde el botón verde
     window.aceptarLlamadaClick = async function() {
         console.log("✅ Contestando llamada...");
         
         const controles = document.getElementById('controles-entrantes');
-        if (controles) controles.style.display = 'none';
+        if (controles) {
+            controles.style.setProperty('display', 'none', 'important');
+            controles.classList.add('video-controles-hidden');
+        }
         
         const status = document.getElementById('video-status');
         if (status) status.innerText = "Conectando...";
@@ -102,6 +113,12 @@
         crearPeerConnection(receptorIdActual);
 
         await peerConnection.setRemoteDescription(new RTCSessionDescription(ofertaRecibida));
+        
+        while (iceCandidatesQueue.length > 0) {
+            const candidate = iceCandidatesQueue.shift();
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
 
@@ -112,7 +129,6 @@
         });
     };
 
-    // ✅ COLGAR: Corregido con guardias de seguridad para evitar el error de "null"
     window.colgarLlamada = function() {
         if (peerConnection) {
             peerConnection.close();
@@ -122,25 +138,28 @@
             localStream.getTracks().forEach(track => track.stop());
         }
         
-        // Limpiamos los videos solo si los elementos existen
         const remoteVideo = document.getElementById('remoteVideo');
         const localVideo = document.getElementById('localVideo');
         if (remoteVideo) remoteVideo.srcObject = null;
         if (localVideo) localVideo.srcObject = null;
         
-        // 🛡️ Guardia contra el error Uncaught TypeError
         const controles = document.getElementById('controles-entrantes');
         if (controles) {
-            controles.style.display = 'none';
+            controles.style.setProperty('display', 'none', 'important');
         }
-        
-        console.log("📵 Llamada terminada.");
+
+        iceCandidatesQueue = [];
+        console.log("Log: 📵 Llamada terminada.");
     };
 
     window.colgarYSalir = function() {
         window.colgarLlamada(); 
         const modal = document.getElementById('modal-videollamada');
-        if (modal) modal.style.display = 'none';
+        if (modal) {
+            modal.style.setProperty('display', 'none', 'important');
+            modal.classList.add('video-modal-hidden');
+            modal.classList.remove('video-modal-visible');
+        }
     };
 
     window.toggleMic = () => {
@@ -159,42 +178,60 @@
         if (btn) btn.innerText = videoTrack.enabled ? '📷' : '🚫';
     };
 
-    // --- 5. ESCUCHA DE EVENTOS DEL SOCKET ---
+    // --- 5. ESCUCHA DE EVENTOS DEL SOCKET (LÓGICA DE FUERZA CRÍTICA) ---
 
     socket.on('llamada-entrante', async ({ emisorId, oferta }) => {
-        console.log(`🔔 Recibiendo llamada de: ${emisorId}`);
-        ofertaRecibida = oferta;
-        receptorIdActual = emisorId;
-
+        console.log(`🔔 LLAMADA DETECTADA DE: ${emisorId}`);
+        
         const modal = document.getElementById('modal-videollamada');
-        const status = document.getElementById('video-status');
         const controles = document.getElementById('controles-entrantes');
 
-        if (modal) modal.style.display = 'flex';
-        if (status) status.innerText = "📞 Llamada Entrante...";
-        
-        // Solo activamos el botón si el elemento existe en el HTML
-        if (controles) {
-            controles.style.display = 'block';
-        } else {
-            console.warn("⚠️ Advertencia: No se encontró '#controles-entrantes' en este archivo HTML.");
+        // 🚩 PASO 1: ACTIVACIÓN DEL PADRE (EL MODAL NEGRO)
+        if (modal) {
+            modal.classList.remove('video-modal-hidden', 'auth-hidden');
+            modal.classList.add('video-modal-visible');
+            // Forzamos visibilidad total
+            modal.style.setProperty('display', 'flex', 'important');
+            modal.style.setProperty('opacity', '1', 'important');
+            modal.style.setProperty('visibility', 'visible', 'important');
         }
+        
+        // 🚩 PASO 2: ACTIVACIÓN DEL HIJO (EL BOTÓN)
+        if (controles) {
+            controles.classList.remove('video-controles-hidden', 'auth-hidden');
+            controles.classList.add('video-controles-visible');
+            // Forzamos que se centre y se ponga por encima de todo
+            controles.style.setProperty('display', 'flex', 'important');
+            controles.style.setProperty('z-index', '100000', 'important');
+        }
+
+        const status = document.getElementById('video-status');
+        if (status) status.innerText = "📞 ALGUIEN TE ESTÁ LLAMANDO...";
+
+        ofertaRecibida = oferta;
+        receptorIdActual = emisorId;
     });
 
     socket.on('llamada-aceptada', async ({ respuesta }) => {
         if (peerConnection) {
             await peerConnection.setRemoteDescription(new RTCSessionDescription(respuesta));
+            while (iceCandidatesQueue.length > 0) {
+                const candidate = iceCandidatesQueue.shift();
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
         }
     });
 
     socket.on('ice-candidate', async (candidate) => {
         try {
-            if (peerConnection) {
+            if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
                 await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+                iceCandidatesQueue.push(candidate);
             }
         } catch (e) {
             console.error("Error ICE:", e);
         }
     });
 
-})(); // 🚪 Fin de la cápsula
+})();

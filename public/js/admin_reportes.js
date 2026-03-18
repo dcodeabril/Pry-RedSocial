@@ -12,29 +12,27 @@ async function cargarReportes() {
         const reportes = await res.json();
 
         if (reportes.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">No hay denuncias pendientes. ¡Paz total! ✨</td></tr>';
+            // Estilos movidos a .tabla-vacia
+            tabla.innerHTML = '<tr><td colspan="5" class="tabla-vacia">No hay denuncias pendientes. ¡Paz total! ✨</td></tr>';
             return;
         }
 
         tabla.innerHTML = reportes.map(r => `
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding: 10px;">${r.denunciante_nombre} ${r.denunciante_apellido}</td>
-                <td style="padding: 10px; font-style: italic;">"${r.post_contenido}"</td>
-                <td style="padding: 10px;">${r.autor_nombre} ${r.autor_apellido}</td>
-                <td style="padding: 10px;"><span style="color: #dc3545; font-weight: bold;">${r.motivo}</span></td>
-                <td style="padding: 10px; display: flex; flex-direction: column; gap: 5px;">
-                    <button onclick="eliminarPost(${r.post_id}, ${r.reporte_id})" class="btn-primario" 
-                            style="background: #dc3545; border: none; padding: 5px; color: white; cursor: pointer;">
+            <tr class="reporte-fila">
+                <td class="reporte-celda">${r.denunciante_nombre} ${r.denunciante_apellido}</td>
+                <td class="reporte-celda post-snippet">"${r.post_contenido}"</td>
+                <td class="reporte-celda">${r.autor_nombre} ${r.autor_apellido}</td>
+                <td class="reporte-celda"><span class="reporte-motivo">${r.motivo}</span></td>
+                <td class="reporte-celda reporte-acciones">
+                    <button onclick="eliminarPost(${r.post_id}, ${r.reporte_id})" class="btn-justicia btn-eliminar-post">
                         Borrar Post 🗑️
                     </button>
                     
-                    <button onclick="suspenderUsuario(${r.autor_id || r.post_id_autor}, ${r.reporte_id})" class="btn-primario" 
-                            style="background: #000; border: none; padding: 5px; color: white; cursor: pointer;">
+                    <button onclick="suspenderUsuario(${r.autor_id || r.post_id_autor}, ${r.reporte_id})" class="btn-justicia btn-suspender-autor">
                         Suspender Autor 🚫
                     </button>
 
-                    <button onclick="ignorarReporte(${r.reporte_id})" class="btn-secundario" 
-                            style="padding: 5px; cursor: pointer;">
+                    <button onclick="ignorarReporte(${r.reporte_id})" class="btn-justicia btn-ignorar-reporte">
                         Ignorar 👐
                     </button>
                 </td>
@@ -71,12 +69,11 @@ window.suspenderUsuario = async function(usuarioId, reporteId) {
         const res = await fetch(`/api/usuarios/suspendido/${usuarioId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ adminId: 1 }) // Tu ID de Arquitecto
+            body: JSON.stringify({ adminId: 1 }) 
         });
 
         if (res.ok) {
             alert("Usuario suspendido. El orden ha sido restaurado. ⚖️");
-            // Cerramos el reporte ya que el autor ya no existe/está bloqueado
             await ignorarReporte(reporteId); 
         } else {
             alert("Error al intentar suspender al usuario.");
@@ -90,7 +87,7 @@ window.suspenderUsuario = async function(usuarioId, reporteId) {
 window.ignorarReporte = async function(id) {
     try {
         await fetch(`/api/reportes/admin/resolver/${id}`, { method: 'PATCH' });
-        cargarReportes(); // Refrescar la tabla
+        cargarReportes(); 
     } catch (err) {
         console.error("Error al archivar reporte:", err);
     }

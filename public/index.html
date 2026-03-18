@@ -2,89 +2,136 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Facebook Local - Muro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muro - Facebook Local</title>
+    
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/notas.css">
+    <link rel="stylesheet" href="css/publicaciones.css"> 
+    <link rel="stylesheet" href="css/videollamada.css">
 </head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Facebook Local</h1></div>
-
-        <div class="buscador-contenedor" style="position: relative; width: 300px; margin-left: 20px;">
-            <input type="text" id="input-busqueda" placeholder="🔍 Buscar personas..." 
-                   style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid var(--border-color); outline: none;">
-            
-            <div id="resultados-busqueda" class="card" 
-                 style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            </div>
+        <div class="logo">
+            <h1>FL</h1>
         </div>
 
-        <nav style="display: flex; align-items: center; gap: 15px;">
-            <a href="index.html" class="active">Muro</a>
-            
-            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" style="font-weight: bold; color: var(--primary);">Mi Perfil</a> 
-            
-            <a href="mensajes.html">Mensajes</a>
-            
-            <a href="notificaciones.html" class="nav-notif-wrapper">
-                Notificaciones
-                <span id="contador-notificaciones" class="badge-notif">0</span>
-            </a>
+        <div class="buscador-contenedor">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar...">
+            <div id="resultados-busqueda"></div>
+        </div>
 
-            <a href="#" onclick="abrirModalEvento()" style="color: var(--primary); font-weight: bold; text-decoration: none;">
-                ➕ Crear Evento
-            </a>
-            
-            <a href="baul.html" style="color: #ffc107; font-weight: bold;">📂 Mis Tesoros</a>
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html" title="Muro">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="mensajes.html" title="Mensajes">
+                        <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="text">Mensajes</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="notificaciones.html" title="Notificaciones">
+                        <span class="icon">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="contador-notificaciones" class="badge-notif">0</span>
+                        </span>
+                        <span class="text">Avisos</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="abrirModalEvento()" title="Crear Evento">
+                        <span class="icon"><i class="fa-solid fa-calendar-plus"></i></span>
+                        <span class="text">Evento</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="baul.html" title="Mis Tesoros">
+                        <span class="icon"><i class="fa-solid fa-box-open"></i></span>
+                        <span class="text">Baúl</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon" id="theme-icon"></i></span>
+                    </button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()" title="Cerrar Sesión">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
 
-            <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold;">⚙️ Admin</a>
-            
-            <a href="#" onclick="cerrarSesionTotal()" style="color: #ff4d4d; font-weight: bold; margin-left: 5px;">Cerrar Sesión</a>
-            
-            <button id="btn-tema" class="btn-secundario">🌙</button>
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link" title="Mi Perfil">
+                <i class="fa-solid fa-user"></i>
+                <span id="user-name-text">Cargando...</span> 
+            </a> 
         </nav>
     </header>
 
     <main class="container">
-        <section class="notas-wrapper" style="margin-bottom: 25px; background: var(--card-bg); border-radius: 8px; padding: 15px;">
-            <div id="lista-notas" style="display: flex; gap: 15px; overflow-x: auto;">
-                <div class="nota-item" style="flex: 0 0 80px; text-align: center; cursor: pointer;" onclick="abrirModalNota()">
-                    <div class="nota-burbuja" style="width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;">
-                        <span style="font-size: 2rem; color: var(--primary);">+</span>
+        <section class="notas-wrapper">
+            <div id="lista-notas">
+                <div class="nota-item" onclick="abrirModalNota()">
+                    <div class="nota-burbuja">
+                        <span class="nota-plus-icon">+</span>
                     </div>
-                    <small style="font-weight: bold;">Tu nota</small>
+                    <small>Tu nota</small>
                 </div>
-                <div id="notas-dinamicas" style="display: flex; gap: 15px;"></div>
+                <div id="notas-dinamicas"></div>
             </div>
         </section>
 
         <section class="card create-post">
-            <textarea id="post-contenido" placeholder="¿Qué estás pensando, Arquitecta Lizbeth?"></textarea>
-            <div class="post-actions" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-                <select id="post-privacidad" style="width: auto;">
-                    <option value="publica">🌎 Pública</option>
-                    <option value="amigos">👥 Amigos</option>
-                    <option value="solo_yo">🔒 Solo yo</option>
-                </select>
-                <button id="btn-publicar">Publicar</button>
+            <textarea id="post-contenido" placeholder="¿Qué estás pensando?"></textarea>
+            <div class="post-actions-toolbar">
+                <div class="post-privacy-selector">
+                    <select id="post-privacidad">
+                        <option value="publica">🌎 Pública</option>
+                        <option value="amigos">👥 Amigos</option>
+                        <option value="solo_yo">🔒 Solo yo</option>
+                    </select>
+                </div>
+                <button id="btn-publicar" class="btn-vibrant">Publicar</button>
             </div>
         </section>
 
         <section id="feed"></section>
     </main>
 
-    <div id="modal-videollamada" class="modal-video-overlay" style="display: none;">
+    <div id="modal-videollamada" class="modal-video-overlay video-modal-hidden">
         <div class="video-container">
             <video id="remoteVideo" autoplay playsinline class="video-remote"></video>
             <video id="localVideo" autoplay playsinline muted class="video-local"></video>
-            <div class="video-status" id="video-status">Llamando...</div>
-            <div id="controles-entrantes" style="display: none; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100;">
-                <button onclick="aceptarLlamadaClick()" style="background: #28a745; color: white; padding: 15px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                    ✅ Contestar Llamada
+            <div class="video-header-info">
+                <div id="video-status" class="video-status-tag">Iniciando...</div>
+            </div>
+            
+            <div id="controles-entrantes" class="video-controles-hidden incoming-call-controls">
+                <button onclick="aceptarLlamadaClick()" class="btn-vibrant success-call">
+                    <i class="fa-solid fa-phone"></i> Responder Llamada
                 </button>
             </div>
-            <div class="video-controls">
-                <button onclick="colgarYSalir()" class="control-btn btn-hangup">📞</button>
+
+            <div class="video-footer-controls">
+                <button id="btn-mic" onclick="toggleMic()" class="btn-video-tool">🎤</button>
+                <button onclick="colgarYSalir()" class="btn-hangup">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </button>
+                <button id="btn-cam" onclick="toggleCam()" class="btn-video-tool">📷</button>
             </div>
         </div>
     </div>
@@ -100,35 +147,35 @@
     <script src="js/notificaciones.js"></script> 
 
     <script>
-        // ✅ LÓGICA DE INICIALIZACIÓN DE IDENTIDAD
         document.addEventListener('DOMContentLoaded', () => {
             const nombreUsuario = localStorage.getItem('nombre');
             const rolUsuario = localStorage.getItem('rol');
             
             if (nombreUsuario) {
-                // Actualizamos el nombre en la barra de navegación
-                const navNombre = document.getElementById('nav-nombre');
-                if (navNombre) navNombre.innerText = `👤 ${nombreUsuario}`;
+                const nameText = document.getElementById('user-name-text');
+                if (nameText) nameText.innerText = nombreUsuario;
                 
-                // Si es Lizbeth o Michelle (Admin), mostramos el botón de Admin
-                if (rolUsuario === 'admin') {
-                    const btnAdmin = document.getElementById('btn-admin-nav');
-                    if (btnAdmin) btnAdmin.style.display = 'inline-block';
-                }
+                const postText = document.getElementById('post-contenido');
+                if (postText) postText.placeholder = `¿Qué estás pensando, ${nombreUsuario}?`;
+            }
+
+            if (rolUsuario === 'admin') {
+                const btnAdmin = document.getElementById('btn-admin-nav');
+                if (btnAdmin) btnAdmin.style.display = 'inline-block';
             }
         });
 
         function irAMiPerfil() {
             const miId = localStorage.getItem('usuarioId');
             if(miId) window.location.href = `perfil.html?id=${miId}`;
-            else window.location.href = '/';
+            else window.location.href = '/auth.html';
         }
 
         function cerrarSesionTotal() {
-            if(confirm("¿Deseas cerrar sesión de forma segura, Arquitecta?")) {
+            if(confirm("¿Deseas cerrar sesión de forma segura?")) {
                 localStorage.clear(); 
                 sessionStorage.clear();
-                window.location.href = '/'; 
+                window.location.href = '/auth.html'; 
             }
         }
     </script>

@@ -1,0 +1,231 @@
+/* =============================================
+   PROYECTO: FACEBOOK LOCAL
+   SECCIÓN: AUTENTICACIÓN (DISEÑO PREMIUM + RESPONSIVO)
+   ARCHIVO: auth.css
+   ============================================= */
+
+/* --- 🌍 ESTILOS DE PÁGINA --- */
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #F9FAFB;
+    margin: 0;
+    padding: 20px; /* Margen de seguridad para móviles */
+}
+
+.auth-card {
+    display: flex;
+    width: 850px;
+    height: 550px;
+    background-color: #FFFFFF;
+    border-radius: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    transition: height 0.5s ease;
+}
+
+/* --- 🔵 PANEL AZUL (CON EFECTO LÍQUIDO) --- */
+.panel-welcome {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background-color: #3B82F6;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    z-index: 10;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    /* Transición elástica premium */
+    transition: 
+        transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
+        border-radius 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+        width 0.3s ease;
+    
+    border-radius: 0 150px 150px 0;
+}
+
+/* --- 📝 CONTENIDO INTERNO (PARALAJE) --- */
+.welcome-content {
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+/* --- ⚪ PANEL DE FORMULARIO --- */
+.panel-form {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+    box-sizing: border-box;
+    transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* --- 🔄 LÓGICA DE TRANSICIÓN DESKTOP --- */
+.auth-card.register-mode .panel-welcome {
+    transform: translateX(100%);
+    border-radius: 150px 0 0 150px;
+}
+
+.auth-card.register-mode .welcome-content {
+    transform: translateX(20%); 
+}
+
+.auth-card.register-mode .panel-form {
+    transform: translateX(-100%);
+}
+
+/* Estiramiento al hacer click (Feedback táctil) */
+.auth-card .panel-welcome:active {
+    width: 55%;
+}
+
+/* --- 📝 CONTENEDORES DE INPUT CON ICONOS --- */
+.input-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.input-container input {
+    width: 100%;
+    background-color: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    padding: 14px 15px 14px 45px; /* Espacio para icono izquierdo */
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #1F2937;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.input-container input:focus {
+    border-color: #3B82F6;
+}
+
+/* Iconos de la izquierda */
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6B7280;
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+/* El ojo de la contraseña */
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6B7280;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    z-index: 5;
+}
+
+.toggle-password:hover { color: #3B82F6; }
+
+/* --- 🔘 BOTONES Y TIPOGRAFÍA --- */
+.welcome-content h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: bold; }
+.welcome-content p { margin-bottom: 25px; opacity: 0.9; }
+
+.btn-ghost {
+    background: transparent;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    padding: 10px 30px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+.form-content { width: 100%; max-width: 300px; }
+.auth-title { font-size: 2rem; color: #1F2937; margin-bottom: 30px; text-align: center; font-weight: bold; }
+
+.btn-vibrant {
+    width: 100%;
+    background-color: #3B82F6;
+    color: #FFFFFF;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.3s;
+}
+.btn-vibrant:hover { background-color: #2563EB; }
+
+.auth-hidden { display: none !important; }
+
+/* =============================================
+   📱 SECCIÓN RESPONSIVE (MÓVILES Y TABLETS)
+   ============================================= */
+
+@media (max-width: 768px) {
+    .auth-card {
+        flex-direction: column;
+        width: 100%;
+        max-width: 420px;
+        height: 750px; /* Ajuste para que quepa el contenido vertical */
+    }
+
+    /* Ajuste del Panel Azul (Arriba) */
+    .panel-welcome {
+        width: 100%;
+        height: 35%;
+        top: 0;
+        left: 0;
+        border-radius: 0 0 100px 100px; /* Curva hacia abajo */
+        padding: 20px;
+    }
+
+    /* Ajuste del Panel Formulario (Abajo) */
+    .panel-form {
+        width: 100%;
+        height: 65%;
+        top: 35%;
+        right: 0;
+        padding: 30px;
+    }
+
+    /* 🔄 TRANSICIÓN VERTICAL PARA MÓVIL */
+    .auth-card.register-mode .panel-welcome {
+        transform: translateY(185%); /* Deslizamiento vertical */
+        border-radius: 100px 100px 0 0; /* Curva hacia arriba */
+    }
+
+    .auth-card.register-mode .panel-form {
+        transform: translateY(-53%); /* Sube el formulario */
+    }
+
+    /* Desactivamos el estiramiento horizontal en móvil para evitar bugs */
+    .auth-card .panel-welcome:active {
+        width: 100%;
+    }
+
+    .welcome-content h1 { font-size: 1.8rem; }
+    .welcome-content p { font-size: 0.9rem; margin-bottom: 15px; }
+    .auth-title { font-size: 1.6rem; margin-bottom: 20px; }
+}

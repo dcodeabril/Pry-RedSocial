@@ -1,0 +1,114 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: GESTIÓN DE REPORTES DETALLADA
+   ARCHIVO: admin_reportes.css
+   ============================================= */
+
+/* --- ⚖️ ENCABEZADO DE JUSTICIA --- */
+.justicia-header {
+    border-bottom: 2px solid var(--text-main);
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+}
+
+.justicia-header h2 {
+    font-size: 1.8rem;
+    color: var(--text-main);
+}
+
+.justicia-header p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* --- 📊 TABLA DE DENUNCIAS --- */
+.reportes-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: var(--radius-main);
+    box-shadow: var(--shadow-sm);
+}
+
+.reportes-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+}
+
+/* Estilo para filas y celdas (Extraído de JS) */
+.reporte-fila {
+    border-bottom: 1px solid #ddd;
+}
+
+.reporte-celda {
+    padding: 10px;
+}
+
+.tabla-vacia {
+    padding: 20px;
+    text-align: center;
+}
+
+.reportes-table th {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+/* --- 🔘 ACCIONES DE MODERACIÓN --- */
+.btn-justicia {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    margin-right: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.1s;
+    border: none; /* Reset general */
+}
+
+/* Contenedor de botones en la celda */
+.reporte-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.btn-eliminar-post {
+    background-color: #dc3545; /* Color original JS */
+    color: white;
+}
+
+.btn-suspender-autor {
+    background-color: #000; /* Color original JS */
+    color: white;
+}
+
+.btn-ignorar-reporte {
+    background-color: var(--bg-main);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.btn-justicia:active {
+    transform: scale(0.95);
+}
+
+/* Estilo para el contenido y motivos (Extraído de JS) */
+.post-snippet {
+    max-width: 250px;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reporte-motivo {
+    color: #dc3545;
+    font-weight: bold;
+}

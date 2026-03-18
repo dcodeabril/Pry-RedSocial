@@ -1,0 +1,101 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: BAÚL DE TESOROS (GUARDADOS)
+   ARCHIVO: baul.css
+   ============================================= */
+
+/* --- 🏛️ CABECERA DEL BAÚL --- */
+.baul-header {
+    margin-bottom: 30px;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(to bottom, var(--card-bg), transparent);
+    border-radius: var(--radius-main);
+}
+
+.baul-header h2 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.baul-header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+/* --- 📦 FEED DEL BAÚL (Galería de Tesoros) --- */
+#baul-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    animation: fadeInContainer 0.6s ease-out;
+}
+
+/* --- 🃏 TARJETA DE TESORO ESPECÍFICA --- */
+.tesoro-card {
+    margin-bottom: 20px;
+    border-left: 5px solid #ffc107; /* Toque dorado original */
+    border-top: 4px solid #ffc107; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tesoro-card:hover {
+    transform: translateY(-8px) rotate(1deg);
+    box-shadow: var(--shadow-md);
+}
+
+/* Elementos internos de la tarjeta (Extraídos del JS) */
+.tesoro-header {
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 10px;
+}
+
+.tesoro-avatar {
+    width: 35px; 
+    height: 35px; 
+    border-radius: 50%; 
+    object-fit: cover;
+}
+
+.tesoro-info-small {
+    display: block; 
+    opacity: 0.6;
+}
+
+.tesoro-body {
+    font-size: 1.1rem; 
+    line-height: 1.4; 
+    margin-bottom: 15px;
+}
+
+.tesoro-footer {
+    border-top: 1px solid #eee; 
+    padding-top: 10px; 
+    font-size: 0.8rem; 
+    opacity: 0.7;
+}
+
+/* --- 🏜️ ESTADO VACÍO --- */
+.baul-empty {
+    grid-column: 1 / -1; 
+    text-align: center; 
+    padding: 60px; 
+    background: var(--card-bg); 
+    border-radius: var(--radius-main); 
+    border: 2px dashed var(--border);
+}
+
+.baul-empty-title {
+    font-size: 1.2rem; 
+    opacity: 0.6;
+}
+
+/* --- 🎬 ANIMACIONES --- */
+@keyframes fadeInContainer {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,17 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: IDENTIDAD GLOBAL Y NAVEGACIÓN
+   ARCHIVO: usuario_global.css
+   ============================================= */
+
+/* --- 🛡️ CONTROL DE VISIBILIDAD --- */
+
+/* Clase para mostrar el botón de admin solo si corresponde */
+.nav-admin-visible {
+    display: inline-block !important;
+}
+
+/* Clase universal para ocultar elementos de la nav */
+.nav-element-hidden {
+    display: none !important;
+}

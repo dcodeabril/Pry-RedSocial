@@ -1,0 +1,23 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: CLIENTE DE AUTENTICACIÓN
+   ARCHIVO: auth_cliente.css
+   ============================================= */
+
+/* --- 📢 MENSAJES DINÁMICOS DEL SERVIDOR --- */
+.msg-exito {
+    color: green !important;
+    font-weight: 600;
+}
+
+.msg-error {
+    color: red !important;
+    font-weight: 600;
+}
+
+/* Espaciado base para el contenedor de mensajes */
+#mensaje-servidor {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    min-height: 1.2rem; /* Evita saltos de layout al aparecer el texto */
+}

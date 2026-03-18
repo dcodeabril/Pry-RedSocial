@@ -3,63 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <title>Bienvenido - Facebook Local</title>
-    <link rel="stylesheet" href="css/general.css">
-    <style>
-        .auth-container { max-width: 400px; margin: 100px auto; text-align: center; }
-        .auth-box { padding: 30px; }
-        .toggle-link { color: var(--primary); cursor: pointer; text-decoration: underline; }
-        
-        /* Espaciado para los inputs */
-        .margin-v { margin-bottom: 15px; }
-        
-        /* Animación de entrada suave */
-        #login-section, #register-section {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/auth.css">    
 </head>
-<body class="bg-light">
-    <div class="auth-container">
-        <h1 style="color: var(--primary); font-size: 3rem; margin-bottom: 10px;">Facebook Local</h1>
-        <p style="color: var(--text-muted); margin-bottom: 30px;">Conecta con tus amigos y el mundo que te rodea.</p>
+<body class="auth-page">
 
-        <div class="card auth-box" id="login-section">
-            <h2 style="margin-bottom: 20px;">Iniciar Sesión</h2>
-            <input type="email" id="login-email" placeholder="Correo electrónico" class="margin-v" required>
-            <input type="password" id="login-pass" placeholder="Contraseña (12 caracteres)" class="margin-v" required>
-            <button id="btn-entrar" style="width: 100%; padding: 12px; font-size: 1.1rem;">Entrar</button>
-            <hr style="margin: 20px 0; opacity: 0.1;">
-            <p>¿No tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Regístrate</span></p>
+    <div class="auth-card" id="auth-card">
+        
+        <div class="panel-welcome" id="panel-welcome">
+            <div class="welcome-content">
+                <h1>Facebook Local</h1>
+                <p id="side-text">¿No tienes una cuenta?</p>
+                <button class="btn-ghost" id="btn-toggle-side" onclick="toggleAuth()">Registrarse</button>
+            </div>
         </div>
 
-        <div class="card auth-box" id="register-section" style="display: none;">
-            <h2 style="margin-bottom: 20px;">Crear Cuenta</h2>
-            <input type="email" id="reg-email" placeholder="Tu correo electrónico" class="margin-v" required>
-            <input type="password" id="reg-pass" placeholder="Crea tu clave (12 caracteres)" class="margin-v" required>
-            <button id="btn-registrar" style="width: 100%; padding: 12px; font-size: 1.1rem; background-color: #42b72a;">Registrarme</button>
-            <hr style="margin: 20px 0; opacity: 0.1;">
-            <p>¿Ya tienes cuenta? <span class="toggle-link" onclick="toggleAuth()">Inicia Sesión</span></p>
+        <div class="panel-form">
+            <div class="form-content">
+                
+                <div id="login-section" class="form-view">
+                    <h2 class="auth-title">Iniciar Sesión</h2>
+                    
+                    <div class="input-container">
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <input type="email" id="login-email" placeholder="Correo electrónico" required>
+                    </div>
+
+                    <div class="input-container">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="login-pass" placeholder="Contraseña" required>
+                        <i class="fa-solid fa-eye toggle-password" onclick="toggleViewPassword('login-pass', this)"></i>
+                    </div>
+                    
+                    <button id="btn-entrar" class="btn-vibrant">Entrar</button>
+                </div>
+
+                <div id="register-section" class="form-view auth-hidden">
+                    <h2 class="auth-title">Crear Cuenta</h2>
+                    
+                    <div class="input-container">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="reg-nombre" placeholder="Nombre de usuario" required>
+                    </div>
+
+                    <div class="input-container">
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <input type="email" id="reg-email" placeholder="Correo electrónico" required>
+                    </div>
+
+                    <div class="input-container">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="reg-pass" placeholder="Crea tu contraseña" required>
+                        <i class="fa-solid fa-eye toggle-password" onclick="toggleViewPassword('reg-pass', this)"></i>
+                    </div>
+
+                    <button id="btn-registrar" class="btn-vibrant">Registrarme</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="js/auth.js"></script>
     <script>
-        // Función simple para intercambiar entre Login y Registro
+        // Función para mostrar/ocultar contraseña
+        function toggleViewPassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
         function toggleAuth() {
+            const card = document.getElementById('auth-card');
             const login = document.getElementById('login-section');
             const register = document.getElementById('register-section');
-            if (login.style.display === "none") {
-                login.style.display = "block";
-                register.style.display = "none";
-            } else {
-                login.style.display = "none";
-                register.style.display = "block";
-            }
+            const sideText = document.getElementById('side-text');
+            const btnToggle = document.getElementById('btn-toggle-side');
+
+            card.classList.toggle('register-mode');
+
+            setTimeout(() => {
+                if (card.classList.contains('register-mode')) {
+                    login.classList.add('auth-hidden');
+                    register.classList.remove('auth-hidden');
+                    sideText.innerText = "¿Ya tienes una cuenta?";
+                    btnToggle.innerText = "Iniciar Sesión";
+                } else {
+                    login.classList.remove('auth-hidden');
+                    register.classList.add('auth-hidden');
+                    sideText.innerText = "¿No tienes una cuenta?";
+                    btnToggle.innerText = "Registrarse";
+                }
+            }, 300);
         }
     </script>
 </body>

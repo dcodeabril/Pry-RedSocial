@@ -17,9 +17,11 @@ async function actualizarContadorNotificaciones() {
         if (badge) {
             if (data.total > 0) {
                 badge.innerText = data.total > 9 ? '9+' : data.total;
-                badge.style.display = 'block';
+                badge.classList.add('badge-visible');
+                badge.classList.remove('badge-hidden');
             } else {
-                badge.style.display = 'none';
+                badge.classList.add('badge-hidden');
+                badge.classList.remove('badge-visible');
             }
         }
     } catch (err) { console.error("🚨 Error en contador:", err); }
@@ -36,7 +38,7 @@ async function cargarNotificaciones() {
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-            lista.innerHTML = '<p style="padding: 20px; text-align: center; opacity: 0.6;">Sin novedades por ahora. ✨</p>';
+            lista.innerHTML = '<p class="notif-empty">Sin novedades por ahora. ✨</p>';
             return;
         }
 
@@ -45,25 +47,23 @@ async function cargarNotificaciones() {
         data.forEach(n => {
             const item = document.createElement('div');
             item.className = `notif-item ${n.leido ? '' : 'no-leido'}`;
-            item.style.cursor = "pointer";
             
             let botonesAmistad = '';
             if (n.tipo === 'amistad' && !n.leido) {
                 const idVinculo = n.referencia_id || n.id; 
                 botonesAmistad = `
-                    <div class="notif-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+                    <div class="notif-actions">
                         <button onclick="responderSolicitud(${idVinculo}, 'aceptada')" class="btn-primario">Aceptar</button>
                         <button onclick="responderSolicitud(${idVinculo}, 'rechazada')" class="btn-secundario">Rechazar</button>
                     </div>
                 `;
             }
 
-            // ✅ RUTA DE IMAGEN CORREGIDA: Evita imágenes rotas
             const avatarRuta = (n.foto_url && n.foto_url !== 'default.png') ? `img/${n.foto_url}` : 'img/default.png';
 
             item.innerHTML = `
                 <img src="${avatarRuta}" class="notif-avatar" alt="Avatar">
-                <div class="notif-content" style="flex-grow: 1;">
+                <div class="notif-content">
                     <div class="notif-text">
                         <strong>${n.nombre} ${n.apellido}</strong> ${interpretarTipo(n.tipo)}
                     </div>
@@ -71,10 +71,9 @@ async function cargarNotificaciones() {
                     ${botonesAmistad}
                 </div>
                 ${n.leido ? '' : '<div class="status-dot"></div>'}
-                <button onclick="borrarNotificacion(${n.id})" style="background:none; border:none; cursor:pointer; margin-left:10px;">🗑️</button>
+                <button onclick="borrarNotificacion(${n.id})" class="notif-btn-delete">🗑️</button>
             `;
 
-            // ✅ NAVEGACIÓN CONTEXTUAL
             item.onclick = (e) => {
                 if (e.target.tagName !== 'BUTTON') {
                     irAContenido(n.id, n.tipo, n.referencia_id);
@@ -89,13 +88,10 @@ async function cargarNotificaciones() {
 // --- 3. 🚀 FUNCIÓN MAESTRA: REDIRECCIÓN ---
 window.irAContenido = async function(notiId, tipo, refId) {
     try {
-        // 1. Marcar como leída en el servidor
         await fetch(`/api/notificaciones/leer/${notiId}`, { method: 'PUT' });
         
-        // 2. Determinar destino
         let urlDestino = "";
         if (tipo === 'nuevo_evento') urlDestino = `index.html#evento-${refId}`;
-        // ✅ AHORA TAMBIÉN SALTA A LOS POSTS COMPARTIDOS
         else if (tipo === 'reaccion' || tipo === 'comentario' || tipo === 'compartir') {
             urlDestino = `index.html#post-${refId}`;
         }
@@ -104,10 +100,8 @@ window.irAContenido = async function(notiId, tipo, refId) {
         }
         else urlDestino = "index.html";
 
-        // 3. ¡Zarpamos!
         window.location.href = urlDestino;
         
-        // Forzamos recarga si ya estamos en index para aplicar el resaltado
         if (window.location.pathname.includes('index.html')) {
             setTimeout(() => location.reload(), 100); 
         }
@@ -123,7 +117,7 @@ function interpretarTipo(tipo) {
         case 'nuevo_evento': return "creó un <b>nuevo evento</b> 📅";
         case 'reaccion': return "reaccionó a tu publicación 👍";
         case 'comentario': return "comentó tu post 💬";
-        case 'compartir': return "<b>compartió</b> tu publicación en su muro 🔄"; // ✅ NUEVO
+        case 'compartir': return "<b>compartió</b> tu publicación en su muro 🔄"; 
         default: return "interactuó contigo.";
     }
 }
@@ -148,7 +142,6 @@ window.responderSolicitud = async function(idRef, estado) {
     } catch (err) { console.error(err); }
 };
 
-// --- 🚀 INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
     actualizarContadorNotificaciones();
     cargarNotificaciones();
@@ -162,4 +155,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-setInterval(actualizarContadorNotificaciones, 30000); // Polling cada 30s
+setInterval(actualizarContadorNotificaciones, 30000);

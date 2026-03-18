@@ -4,7 +4,6 @@
 // ARCHIVO: public/js/admin.js
 // =============================================
 
-// 🚩 SEGURIDAD DE ROL (Blindaje de acceso)
 const miRol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
 const miId = localStorage.getItem('usuarioId');
 
@@ -13,7 +12,6 @@ if (miRol !== 'admin') {
     window.location.href = 'index.html'; 
 }
 
-// --- SELECTORES Y VARIABLES ---
 const tablaUsuarios = document.getElementById('tabla-usuarios');
 const msgUsuarios = document.getElementById('msg');
 const contenedorReportes = document.getElementById('lista-reportes-admin');
@@ -32,11 +30,12 @@ async function cargarUsuarios() {
         usuarios.forEach(user => {
             const tr = document.createElement('tr');
             
-            // ✅ DETERMINACIÓN DE BOTONES DE ACCIÓN
-            // Solo permitimos promover si no es admin ya
+            // ✅ Clase condicional para el botón de estado
+            const claseBtnEstado = user.estado === 'activo' ? 'btn-estado-activo' : 'btn-estado-suspendido';
+            const claseTextoEstado = user.estado === 'activo' ? 'estado-activo' : 'estado-suspendido';
+
             const btnPromover = (user.rol !== 'admin') 
-                ? `<button class="btn-secundario" 
-                           style="border-color: #28a745; color: #28a745; margin-right: 5px;"
+                ? `<button class="btn-secundario btn-ascender" 
                            onclick="promoverAAdmin(${user.id}, '${user.email}')">
                         Ascender 🔑
                    </button>` 
@@ -45,15 +44,14 @@ async function cargarUsuarios() {
             tr.innerHTML = `
                 <td>${user.id}</td>
                 <td>${user.email}</td>
-                <td style="text-transform: capitalize; font-weight: bold;">${user.rol}</td>
-                <td><span style="color: ${user.estado === 'activo' ? '#28a745' : '#dc3545'}; font-weight: bold;">
+                <td class="col-rol">${user.rol}</td>
+                <td><span class="estado-usuario ${claseTextoEstado}">
                     ${user.estado.toUpperCase()}
                 </span></td>
                 <td>
-                    <div style="display: flex; gap: 5px;">
+                    <div class="acciones-flex">
                         ${btnPromover}
-                        <button class="btn-secundario" 
-                                style="border-color: ${user.estado === 'activo' ? '#dc3545' : '#28a745'}; color: ${user.estado === 'activo' ? '#dc3545' : '#28a745'};"
+                        <button class="btn-secundario ${claseBtnEstado}" 
                                 onclick="cambiarEstadoUsuario(${user.id}, '${user.estado}')">
                             ${user.estado === 'activo' ? 'Suspender 🚫' : 'Activar ✅'}
                         </button>
@@ -84,8 +82,8 @@ window.promoverAAdmin = async function(usuarioId, nombreUsuario) {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                admin_solicitante_id: miId, // El ID de quien autoriza (tú)
-                usuario_a_promover: usuarioId, // El ID de quien asciende
+                admin_solicitante_id: miId, 
+                usuario_a_promover: usuarioId, 
                 codigo: codigoInput.trim() 
             })
         });
@@ -136,30 +134,29 @@ async function cargarResumenReportes() {
         if (!contenedorReportes) return;
 
         if (reportes.length === 0) {
-            contenedorReportes.innerHTML = '<p style="text-align:center; opacity:0.6; padding: 20px;">No hay denuncias pendientes. ✨</p>';
+            contenedorReportes.innerHTML = '<p class="msg-vacio">No hay denuncias pendientes. ✨</p>';
             return;
         }
 
         const resumen = reportes.slice(0, 3);
         contenedorReportes.innerHTML = resumen.map(r => `
-            <div class="report-card" style="border-left: 6px solid #dc3545; padding: 15px; margin-bottom: 10px; background: #fff5f5; border-radius: 8px;">
-                <div style="display: flex; justify-content: space-between;">
+            <div class="report-card">
+                <div class="report-card-header">
                     <strong>🚩 Motivo: ${r.motivo}</strong>
                     <small>${new Date(r.fecha_reporte).toLocaleDateString()}</small>
                 </div>
-                <p style="font-size: 0.9rem; margin: 5px 0;">
+                <p class="report-card-body">
                     <b>Post:</b> "${r.post_contenido.substring(0, 50)}..."
                 </p>
                 <small>Denunciado por: ${r.denunciante_nombre}</small>
             </div>
-        `).join('') + (reportes.length > 3 ? `<p style="text-align:center; font-size: 0.8rem; color: #666;">Y ${reportes.length - 3} denuncias más...</p>` : '');
+        `).join('') + (reportes.length > 3 ? `<p class="report-card-footer-info">Y ${reportes.length - 3} denuncias más...</p>` : '');
 
     } catch (err) {
         console.error("Error al cargar resumen:", err);
     }
 }
 
-// --- 🚀 ARRANQUE INICIAL ---
 function init() {
     if (miRol === 'admin') {
         cargarUsuarios();

@@ -2,32 +2,56 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Facebook Local - Acceso</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Local - Crear Cuenta</title>
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css">
-    <style>
-        .auth-container { max-width: 400px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #1877f2; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #166fe5; }
-        .toggle-link { color: #1877f2; cursor: pointer; text-decoration: underline; font-size: 0.9em; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/registro.css"> 
 </head>
 <body>
-    <div class="auth-container">
-        <h2 id="auth-title">Crear cuenta nueva</h2>
-        <form id="auth-form">
-            <input type="email" id="email" placeholder="Correo electrónico" maxlength="100" required>
+    <main class="auth-page">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">FL</div>
+                <h2 id="auth-title">Crear cuenta nueva</h2>
+                <p class="auth-subtitle">Únete a la red más rápida y segura.</p>
+            </div>
+
+            <div class="social-auth">
+                <button class="btn-social google"><i class="fa-brands fa-google"></i></button>
+                <button class="btn-social facebook"><i class="fa-brands fa-facebook-f"></i></button>
+                <button class="btn-social linkedin"><i class="fa-brands fa-linkedin-in"></i></button>
+            </div>
+
+            <div class="auth-divider">
+                <span>o usa tu correo</span>
+            </div>
             
-            <input type="password" id="password" placeholder="Contraseña (12 caracteres)" minlength="12" maxlength="12" required>
-            
-            <button type="submit" id="btn-submit">Registrarme</button>
-        </form>
-        <p style="margin-top:15px;">
-            <span class="toggle-link" id="toggle-auth">¿Ya tienes cuenta? Inicia sesión</span>
-        </p>
-        <div id="mensaje-servidor" style="margin-top:15px; color: #d32f2f;"></div>
-    </div>
+            <form id="auth-form">
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                    <input type="email" id="email" placeholder="Correo electrónico" maxlength="100" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" id="password" placeholder="Contraseña (12 caracteres)" minlength="12" maxlength="12" required>
+                </div>
+                
+                <button type="submit" id="btn-submit" class="btn-vibrant">Registrarme Ahora</button>
+            </form>
+
+            <div class="footer-links">
+                <p>
+                    <span class="toggle-link" id="toggle-auth" onclick="window.location.href='auth.html'">
+                        ¿Ya tienes cuenta? <strong>Inicia sesión</strong>
+                    </span>
+                </p>
+                <div id="mensaje-servidor"></div>
+            </div>
+        </div>
+    </main>
 
     <script src="js/auth_cliente.js"></script>
 </body>

@@ -1,0 +1,126 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: CENTRO DE NOTIFICACIONES
+   ARCHIVO: notificaciones.css
+   ============================================= */
+
+/* --- 🔔 CONTENEDOR DE ALERTAS --- */
+.notif-container { 
+    max-width: 650px; 
+    margin: 20px auto; 
+    animation: slideUp 0.4s ease;
+    padding: 0; 
+}
+
+.header-notif { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 20px;
+}
+
+.header-notif h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+/* --- 📩 ÍTEMS DE NOTIFICACIÓN --- */
+.notif-item { 
+    display: flex; 
+    align-items: center; 
+    padding: 15px 20px; 
+    border-bottom: 1px solid var(--border); 
+    transition: background 0.3s; 
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.notif-item.no-leido { 
+    background-color: rgba(24, 119, 242, 0.08); 
+}
+
+.notif-item:hover { 
+    background-color: var(--bg-main); 
+}
+
+.notif-avatar { 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    margin-right: 15px; 
+    object-fit: cover; 
+    border: 1px solid var(--border); 
+}
+
+.notif-content { 
+    flex-grow: 1; 
+}
+
+.notif-text { 
+    font-size: 0.95rem; 
+    line-height: 1.4; 
+}
+
+.notif-text strong { 
+    color: var(--primary); 
+}
+
+.notif-time { 
+    font-size: 0.8rem; 
+    color: var(--text-muted);
+    margin-top: 5px; 
+}
+
+/* --- 🛠️ ACCIONES Y BOTONES (Extraídos de JS) --- */
+.notif-actions {
+    margin-top: 10px; 
+    display: flex; 
+    gap: 10px;
+}
+
+.notif-btn-delete {
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    margin-left: 10px;
+    font-size: 1.1rem;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.notif-btn-delete:hover {
+    opacity: 1;
+}
+
+.notif-empty {
+    padding: 20px; 
+    text-align: center; 
+    opacity: 0.6;
+}
+
+/* --- 🔵 INDICADOR DE NOVEDAD Y CONTADOR --- */
+.status-dot { 
+    width: 12px; 
+    height: 12px; 
+    background: var(--primary); 
+    border-radius: 50%; 
+    margin-left: 10px; 
+    flex-shrink: 0; 
+}
+
+/* Clases de utilidad para el badge del nav */
+.badge-hidden {
+    display: none !important;
+}
+
+.badge-visible {
+    display: block !important;
+}
+
+/* --- 🎬 ANIMACIONES --- */
+@keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

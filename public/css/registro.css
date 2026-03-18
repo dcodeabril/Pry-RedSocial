@@ -1,0 +1,174 @@
+/* =============================================
+   PROYECTO: FACEBOOK LOCAL
+   SECCIÓN: ACCESO Y REGISTRO (MODERN UI)
+   ARCHIVO: registro.css
+   ============================================= */
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-page); /* Variable de general.css */
+    padding: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 20px; /* Bordes más curvos y modernos */
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.auth-header {
+    margin-bottom: 30px;
+}
+
+.auth-logo {
+    width: 60px;
+    height: 60px;
+    background: var(--primary);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    margin: 0 auto 15px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.auth-header h2 {
+    color: var(--text-main);
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.auth-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* --- 📱 REGISTRO SOCIAL --- */
+.social-auth {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-social {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-social:hover {
+    transform: translateY(-3px);
+    background-color: var(--bg-input);
+}
+
+.btn-social.google:hover { color: #DB4437; }
+.btn-social.facebook:hover { color: #1877F2; }
+.btn-social.linkedin:hover { color: #0A66C2; }
+
+.auth-divider {
+    margin: 20px 0;
+    position: relative;
+    border-top: 1px solid var(--border);
+}
+
+.auth-divider span {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    padding: 0 15px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+/* --- 📝 INPUTS CON ICONOS --- */
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+#auth-form input {
+    width: 100%;
+    padding: 12px 15px 12px 45px; /* Espacio para el icono */
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#auth-form input:focus {
+    border-color: var(--primary);
+}
+
+.btn-vibrant {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-vibrant:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* --- 🔗 FOOTER --- */
+.footer-links {
+    margin-top: 25px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+}
+
+.toggle-link {
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.toggle-link strong {
+    color: var(--primary);
+}
+
+#mensaje-servidor {
+    margin-top: 15px;
+    color: #EF4444; /* Rojo para errores */
+    font-weight: 600;
+}

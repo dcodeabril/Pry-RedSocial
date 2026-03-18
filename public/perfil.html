@@ -2,111 +2,122 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil - Facebook Local</title>
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css">
-    <style>
-        /* --- Estética de Portada (Persona 5) --- */
-        .perfil-header { position: relative; margin-bottom: 80px; padding: 0; overflow: visible; }
-        
-        .portada-container { 
-            width: 100%; height: 250px; 
-            background: linear-gradient(45deg, #1877f2, #00d4ff); 
-            border-radius: 8px 8px 0 0;
-            overflow: hidden;
-        }
-        .portada-container img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-
-        .foto-perfil-container {
-            position: absolute; bottom: -60px; left: 30px;
-            width: 150px; height: 150px;
-            border-radius: 50%; border: 5px solid var(--card-bg);
-            background: #eee; overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .foto-perfil-container img { width: 100%; height: 100%; object-fit: cover; }
-
-        .info-perfil { margin-top: 10px; padding: 15px 30px 20px 200px; }
-        .info-perfil h2 { font-size: 2.2rem; margin-bottom: 5px; color: var(--text-color); }
-        .info-perfil p { opacity: 0.8; font-style: italic; font-size: 1.1rem; color: var(--text-muted); }
-
-        .muro-propio { margin-top: 40px; }
-        .muro-propio h3 { 
-            margin-bottom: 20px; 
-            border-bottom: 3px solid var(--primary); 
-            display: inline-block;
-            padding-bottom: 5px;
-        }
-    </style>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/perfil.css"> 
 </head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Facebook Local</h1></div>
+        <div class="logo"><h1>FL</h1></div>
 
-        <div class="buscador-contenedor" style="position: relative; width: 300px; margin-left: 20px;">
-            <input type="text" id="input-busqueda" placeholder="🔍 Buscar personas..." 
-                   style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid var(--border-color); outline: none;">
-            
-            <div id="resultados-busqueda" class="card" 
-                   style="position: absolute; width: 100%; top: 45px; z-index: 1000; display: none; max-height: 300px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            </div>
+        <div class="buscador-contenedor">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar...">
+            <div id="resultados-busqueda"></div>
         </div>
         
-        <nav style="display: flex; align-items: center; gap: 15px;">
-            <a href="index.html">Muro</a>
-            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" style="color: var(--primary); font-weight: bold;">Mi Perfil</a> 
-            <a href="mensajes.html">Mensajes</a>
-            
-            <a href="notificaciones.html" class="nav-notif-wrapper">
-                Notificaciones
-                <span id="contador-notificaciones" class="badge-notif">0</span>
-            </a>
-            
-            <a href="baul.html" style="color: #ffc107; font-weight: bold;">📂 Mis Tesoros</a>
-            <a href="admin.html" id="btn-admin-nav" style="display: none; color: #6f42c1; font-weight: bold;">⚙️ Admin</a>
-            <a href="#" onclick="cerrarSesionTotal()" style="color: #ff4d4d; font-weight: bold;">Salir</a>
-            
-            <button id="btn-tema" class="btn-secundario">🌙</button>
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="mensajes.html">
+                        <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="text">Mensajes</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="notificaciones.html">
+                        <span class="icon">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="contador-notificaciones" class="badge-notif">0</span>
+                        </span>
+                        <span class="text">Avisos</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="abrirModalEvento()">
+                        <span class="icon"><i class="fa-solid fa-calendar-plus"></i></span>
+                        <span class="text">Evento</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="baul.html">
+                        <span class="icon"><i class="fa-solid fa-box-open"></i></span>
+                        <span class="text">Baúl</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon" id="theme-icon"></i></span>
+                        <span class="text">Tema</span>
+                    </button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
+
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
+                <i class="fa-solid fa-user"></i>
+                <span id="user-name-text">Cargando...</span> 
+            </a> 
         </nav>
     </header>
 
     <main class="container">
-        <div class="card perfil-header">
-            <div class="portada-container">
-                <img src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200" alt="Portada">
-            </div>
-            <div class="foto-perfil-container">
+        <section class="profile-card">
+            <div class="profile-avatar-wrapper">
                 <img id="perf-foto" src="img/default.png" alt="Foto de perfil">
             </div>
-            <div class="info-perfil">
-                <h2 id="perf-nombre-completo">Cargando identidad...</h2>
-                <p id="perf-bio">Cargando biografía...</p>
-                <div id="zona-acciones-perfil" style="margin-top: 15px; display: flex; gap: 10px;"></div>
+            <div class="profile-info-content">
+                <h2 id="perf-nombre-completo">...</h2>
+                <p id="perf-bio">...</p>
+                
+                <div id="zona-acciones-perfil" class="zona-acciones"></div>
             </div>
-        </div>
+        </section>
 
-        <section class="muro-propio">
-            <h3>Publicaciones</h3>
-            <div id="mis-posts">
-                <p style="text-align: center; opacity: 0.5;">Buscando historias en el servidor...</p>
+        <section class="posts-section">
+            <h3 class="section-title">Publicaciones</h3>
+            <div id="mis-posts" class="posts-grid">
+                <p class="muro-vacio">Buscando historias en el servidor...</p>
             </div>
         </section>
     </main>
 
-    <div id="modal-videollamada" class="modal-video-overlay" style="display: none;">
+    <div id="modal-videollamada" class="modal-video-overlay video-modal-hidden">
         <div class="video-container">
             <video id="remoteVideo" autoplay playsinline class="video-remote"></video>
             <video id="localVideo" autoplay playsinline muted class="video-local"></video>
-            <div class="video-status" id="video-status">Llamando...</div>
-
-            <div id="controles-entrantes" style="display: none; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100;">
-                <button onclick="aceptarLlamadaClick()" style="background: #28a745; color: white; padding: 15px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                    ✅ Contestar Llamada
+            
+            <div class="video-header-info">
+                <div id="video-status" class="video-status-tag">Iniciando...</div>
+            </div>
+            
+            <div id="controles-entrantes" class="video-controles-hidden">
+                <button onclick="aceptarLlamadaClick()" class="btn-vibrant success-call">
+                    <i class="fa-solid fa-phone"></i> Responder Llamada
                 </button>
             </div>
 
-            <div class="video-controls">
-                <button onclick="colgarYSalir()" class="control-btn btn-hangup">📞</button>
+            <div class="video-footer-controls">
+                <button id="btn-mic" onclick="toggleMic()" class="btn-video-tool" title="Mutear">🎤</button>
+                <button onclick="colgarYSalir()" class="btn-hangup" title="Terminar Llamada">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </button>
+                <button id="btn-cam" onclick="toggleCam()" class="btn-video-tool" title="Cámara">📷</button>
             </div>
         </div>
     </div>
@@ -120,22 +131,25 @@
     <script src="js/perfil.js"></script>
 
     <script>
-        // ✅ NAVEGACIÓN DINÁMICA
+        document.addEventListener('DOMContentLoaded', () => {
+            const nombre = localStorage.getItem('nombre');
+            if(nombre) {
+                const nameText = document.getElementById('user-name-text');
+                if (nameText) nameText.innerText = nombre;
+            }
+        });
+
         function irAMiPerfil() {
             const miId = localStorage.getItem('usuarioId');
-            if(miId) {
-                window.location.href = `perfil.html?id=${miId}`;
-            } else {
-                window.location.href = '/';
-            }
+            if(miId) window.location.href = `perfil.html?id=${miId}`;
+            else window.location.href = '/auth.html';
         }
 
-        // ✅ CIERRE DE SESIÓN LIMPIO
         function cerrarSesionTotal() {
-            if(confirm("¿Estás seguro de que deseas cerrar sesión de forma segura?")) {
+            if(confirm("¿Deseas cerrar sesión de forma segura?")) {
                 localStorage.clear(); 
                 sessionStorage.clear();
-                window.location.href = '/';
+                window.location.href = '/auth.html'; 
             }
         }
     </script>

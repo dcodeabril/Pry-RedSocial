@@ -4,27 +4,26 @@
     <meta charset="UTF-8">
     <title>Mi Baúl de Tesoros - Facebook Local</title>
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css">
-</head>
+    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/baul.css">    </head>
 <body>
     <header class="main-header">
         <div class="logo"><h1>Baúl de Tesoros 💾</h1></div>
         <nav>
             <a href="index.html">Volver al Muro</a>
             <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
-            <a href="#" id="btn-salir" style="color: #ff4d4d; font-weight: bold;">Cerrar Sesión</a>
+            <a href="#" id="btn-salir" class="nav-logout-btn">Cerrar Sesión</a>
         </nav>
     </header>
 
     <main class="container">
-        <header style="margin-bottom: 20px; text-align: center;">
+        <header class="baul-header">
             <h2>Tus Publicaciones Guardadas</h2>
-            <p style="opacity: 0.7;">Aquí descansan los posts que decidiste conservar.</p>
+            <p>Aquí descansan los posts que decidiste conservar.</p>
         </header>
 
         <section id="baul-feed">
-            <div class="card" style="text-align: center; padding: 40px;">
-                <p>Abriendo tu baúl...</p>
+            <div class="baul-empty">
+                <p>Abriendo tu baúl... 🗝️</p>
             </div>
         </section>
     </main>
@@ -32,9 +31,12 @@
     <script src="js/usuario_global.js"></script>
     <script src="js/baul.js"></script>
     <script>
-        document.getElementById('btn-salir').addEventListener('click', () => {
-            localStorage.removeItem('usuarioId');
-            window.location.href = '/';
+        document.getElementById('btn-salir').addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm("¿Deseas cerrar el baúl y salir, Arquitecta?")) {
+                localStorage.removeItem('usuarioId');
+                window.location.href = '/';
+            }
         });
     </script>
 </body>

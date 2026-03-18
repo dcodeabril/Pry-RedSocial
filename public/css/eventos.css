@@ -1,0 +1,116 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: GESTIÓN DE EVENTOS
+   ARCHIVO: eventos.css
+   ============================================= */
+
+/* --- 🏗️ DISEÑO DE REJILLA (Layout) --- */
+.eventos-layout { 
+    display: grid; 
+    grid-template-columns: 350px 1fr; 
+    gap: 25px; 
+    align-items: start;
+}
+
+.event-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 20px; 
+}
+
+/* --- 🎫 TARJETAS DE EVENTOS --- */
+.event-card { 
+    background: var(--card-bg); 
+    padding: 20px; 
+    border-radius: 12px; 
+    border-left: 6px solid var(--primary); 
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 1s ease;
+    animation: fadeIn 0.4s ease;
+}
+
+.event-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.event-card-title { 
+    margin: 0 0 5px 0; 
+    color: var(--primary); 
+    font-size: 1.2rem; 
+}
+
+.event-card-desc { 
+    font-size: 0.85rem; 
+    margin-bottom: 10px; 
+    color: var(--text-main);
+}
+
+.event-card-meta { 
+    font-size: 0.75rem; 
+    color: var(--text-muted); 
+    background: var(--bg-color); 
+    padding: 8px; 
+    border-radius: 4px; 
+    line-height: 1.5; 
+}
+
+.event-card-organizer {
+    margin-top: 5px; 
+    font-weight: bold; 
+    color: var(--text-color);
+}
+
+/* --- 🔘 ACCIONES --- */
+.btn-cancelar-evento {
+    margin-top: 10px; 
+    color: #ff4d4d; 
+    border-color: #ff4d4d; 
+    width: 100%; 
+    font-size: 0.75rem;
+}
+
+/* --- 🏜️ ESTADOS --- */
+.eventos-vacio {
+    grid-column: 1/-1; 
+    text-align: center; 
+    opacity: 0.6; 
+    padding: 20px;
+}
+
+.event-highlight {
+    background-color: #fff9c4 !important;
+}
+
+/* --- 🖼️ MODAL (Extraído de JS) --- */
+.modal-evento-hidden {
+    display: none !important;
+}
+
+.modal-evento-visible {
+    display: flex !important;
+}
+
+/* --- 📝 FORMULARIO DE EVENTOS --- */
+#form-evento label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+#form-evento input, 
+#form-evento textarea { 
+    margin: 8px 0 15px; 
+}
+
+/* --- 🎬 ANIMACIONES Y ADAPTABILIDAD --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 900px) {
+    .eventos-layout { 
+        grid-template-columns: 1fr; 
+    }
+}

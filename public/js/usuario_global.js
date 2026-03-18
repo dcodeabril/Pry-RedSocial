@@ -5,7 +5,6 @@
 // =============================================
 
 async function cargarIdentidadGlobal() {
-    // 🛡️ Recuperamos los datos de sesión desde el navegador
     const miId = localStorage.getItem('usuarioId');
     const miRol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol'); 
     
@@ -16,21 +15,24 @@ async function cargarIdentidadGlobal() {
 
     // --- 1. ⚙️ CONTROL DE NAVEGACIÓN SEGÚN ROL ---
     
-    // A. Control del Panel de Administración (Botón de engranaje)
-    // Solo Israel (Admin) puede ver este acceso directo
+    // A. Control del Panel de Administración
     if (btnAdminNav) {
-        btnAdminNav.style.display = (miRol === 'admin') ? 'inline-block' : 'none';
+        if (miRol === 'admin') {
+            btnAdminNav.classList.add('nav-admin-visible');
+            btnAdminNav.classList.remove('nav-element-hidden');
+        } else {
+            btnAdminNav.classList.add('nav-element-hidden');
+            btnAdminNav.classList.remove('nav-admin-visible');
+        }
     }
 
     // B. ✅ LIMPIEZA TOTAL DE EVENTOS EN LA NAV
-    // Ocultamos el enlace 'Eventos' para TODOS los roles. 
-    // La creación se gestiona ahora únicamente por el botón "➕ Crear Evento"
     if (enlaceEventos) {
-        enlaceEventos.style.display = 'none';
-        console.log("🧹 Nav: Enlace de eventos oculto para simplificar la interfaz.");
+        enlaceEventos.classList.add('nav-element-hidden');
+        console.log("扫 Nav: Enlace de eventos oculto para simplificar la interfaz.");
     }
 
-    // --- 2. 👤 CARGA DE NOMBRE Y PERSONALIZACIÓN (Persona 5) ---
+    // --- 2. 👤 CARGA DE NOMBRE Y PERSONALIZACIÓN ---
     if (!miId) return;
 
     try {
@@ -38,12 +40,10 @@ async function cargarIdentidadGlobal() {
         const datos = await res.json();
 
         if (res.ok && datos.nombre) {
-            // Actualizamos el nombre en la cabecera (Navbar)
             if (navNombre) {
                 navNombre.innerText = `${datos.nombre} ${datos.apellido}`;
             }
             
-            // Personalizamos el saludo en la caja de publicaciones del muro
             if (postPlaceholder) {
                 postPlaceholder.placeholder = `¿Qué estás pensando, ${datos.nombre}?`;
             }
@@ -55,5 +55,4 @@ async function cargarIdentidadGlobal() {
     }
 }
 
-// Ejecutamos la carga cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', cargarIdentidadGlobal);

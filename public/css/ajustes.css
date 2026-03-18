@@ -1,0 +1,56 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: CONFIGURACIÓN Y AJUSTES
+   ARCHIVO: ajustes.css
+   ============================================= */
+
+/* --- 📝 ESTRUCTURA DEL FORMULARIO --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+.form-group input, 
+.form-group textarea, 
+.form-group select {
+    width: 100%;
+    /* El resto del diseño (bordes, colores) viene de general.css */
+}
+
+/* --- 💡 ELEMENTOS DE APOYO --- */
+.form-help {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* Separadores internos de la tarjeta */
+.separator {
+    margin: 25px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+/* --- 🔘 BOTÓN DE GUARDADO --- */
+#btn-guardar-ajustes {
+    margin-top: 10px;
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    /* Hereda .btn-base de la matriz */
+}
+
+/* --- 📱 ADAPTABILIDAD --- */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+}

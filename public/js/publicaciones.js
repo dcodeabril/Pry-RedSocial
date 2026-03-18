@@ -1,10 +1,10 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (GESTIÓN DE MURO DINÁMICO P2, P3 Y P4)
+// ROL: ARQUITECTO (GESTIÓN DE MURO DINÁMICO - VERSIÓN INDUSTRIAL SINCRONIZADA)
 // ARCHIVO: public/js/publicaciones.js
 // =============================================
 
-(function() { // 🛡️ INICIO DE LA BURBUJA DE SEGURIDAD
+(function() { 
     
     const feed = document.getElementById('feed');
     const btnPublicar = document.getElementById('btn-publicar');
@@ -19,13 +19,12 @@
             const posts = await res.json();
 
             if (!Array.isArray(posts)) {
-                console.error("El servidor no devolvió una lista válida:", posts);
-                feed.innerHTML = `<p class="card" style="text-align:center;">⚠️ No se pudo cargar el muro personalizado.</p>`;
+                feed.innerHTML = `<p class="muro-status-msg card">⚠️ No se pudo cargar el muro personalizado.</p>`;
                 return;
             }
 
             if (posts.length === 0) {
-                feed.innerHTML = `<p class="card" style="text-align:center; padding: 20px;">Tu muro está vacío. ¡Sigue a más personas para ver contenido! 🌐</p>`;
+                feed.innerHTML = `<p class="muro-status-msg card">Tu muro está vacío. ¡Sigue a más personas! 🌐</p>`;
                 return;
             }
 
@@ -33,62 +32,76 @@
             
             posts.forEach(post => {
                 const div = document.createElement('div');
-                div.className = 'post-card card';
+                div.className = 'post-card card'; // Sincronizado con publicaciones.css
                 div.id = `post-${post.id}`; 
-                div.style.marginBottom = "20px";
-                div.style.transition = "background-color 1s ease";
 
                 const esCompartido = post.tipo === 'compartido';
                 
+                // --- 🧱 CONSTRUCCIÓN DINÁMICA DEL CONTENIDO ---
                 const contenidoHtml = esCompartido ? `
-                    <div class="post-comentario-compartido" style="margin-bottom: 10px; font-weight: 500; font-size: 1.1rem;">
+                    <div class="post-shared-comment">
                         ${post.contenido || ''}
                     </div>
-                    <div class="shared-box" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; background: rgba(0,0,0,0.03); margin-top: 5px; border-left: 4px solid var(--primary);">
-                        <header style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 5px;">
-                            <small style="opacity: 0.8;">Publicación original de <strong>${post.nombre_original} ${post.apellido_original}</strong></small>
+                    <div class="shared-box">
+                        <header class="shared-box-header">
+                            <small class="shared-box-author">
+                                <i class="fa-solid fa-retweet"></i> Publicación original de <strong>${post.nombre_original} ${post.apellido_original}</strong>
+                            </small>
                         </header>
-                        <div style="font-size: 1rem; line-height: 1.4; opacity: 0.9;">
+                        <div class="shared-box-content">
                             ${post.contenido_original || 'Contenido no disponible.'}
                         </div>
                     </div>
                 ` : `
-                    <div class="post-body" style="font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4;">
+                    <div class="post-body">
                         ${post.contenido}
                     </div>
                 `;
 
+                // Botones Administrativos
                 const btnBorrarPost = (post.usuario_id == miId || miId == '1') 
-                    ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario" style="color: #dc3545; border-color: #dc3545; font-size: 0.8rem;">Eliminar 🗑️</button>` 
+                    ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario btn-delete-alt"><i class="fa-solid fa-trash"></i> Eliminar</button>` 
                     : '';
 
                 const btnReportar = (post.usuario_id != miId) 
-                    ? `<button onclick="abrirReporte(${post.id})" class="btn-secundario" style="color: #ffa500; border-color: #ffa500; font-size: 0.8rem;">Reportar 🚩</button>` 
+                    ? `<button onclick="abrirReporte(${post.id})" class="btn-secundario btn-report-alt"><i class="fa-solid fa-flag"></i> Reportar</button>` 
                     : '';
 
+                // --- 🖼️ ESTRUCTURA FINAL (CON PARCHE PARA IMÁGENES ROTAS) ---
                 div.innerHTML = `
-                    <div class="post-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                        <img src="img/${post.foto_url || 'default.png'}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
-                        <div style="flex-grow: 1;">
+                    <div class="post-header-container">
+                        <img src="/img/${post.foto_url || 'default.png'}" 
+                             class="post-avatar" 
+                             onerror="this.onerror=null; this.src='/img/default.png';">
+                        <div class="post-user-meta">
                             <strong>${post.nombre} ${post.apellido}</strong>
-                            ${esCompartido ? '<span style="color:var(--primary); font-size:0.8rem; font-weight:bold; margin-left:5px;">🔄 compartió</span>' : ''}
-                            <small style="display: block; opacity: 0.6;">${new Date(post.fecha).toLocaleString()}</small>
+                            ${esCompartido ? '<span class="post-share-tag"><i class="fa-solid fa-share-nodes"></i> compartió</span>' : ''}
+                            <small class="post-timestamp">${new Date(post.fecha).toLocaleString()}</small>
                         </div>
-                        <small title="Privacidad" style="opacity: 0.5;">${post.privacidad === 'amigos' ? '👥' : post.privacidad === 'publica' ? '🌎' : '🔒'}</small>
+                        <div class="post-privacy-icon" title="Privacidad">
+                            ${post.privacidad === 'amigos' ? '👥' : post.privacidad === 'publica' ? '🌎' : '🔒'}
+                        </div>
                     </div>
                     
                     ${contenidoHtml}
 
-                    <div class="post-footer" style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 10px;">
-                        
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')" title="Me gusta">👍</button>
-                            <button class="btn-secundario" onclick="abrirComentarios(${post.id})" title="Comentar">💬</button>
-                            <button class="btn-secundario" onclick="prepararCompartir(${post.id})" style="color: var(--primary); border-color: var(--primary);" title="Compartir">🔄</button>
-                            <button class="btn-secundario" onclick="guardarPost(${post.id})" style="color: #ffc107; border-color: #ffc107;" title="Guardar">💾</button>
+                    <div class="post-footer-container">
+                        <div class="post-btn-group">
+                            <button class="btn-secundario" onclick="reaccionar(${post.id}, 'like')" title="Me gusta">
+                                <i class="fa-solid fa-thumbs-up"></i>
+                            </button>
+                            <button class="btn-secundario" onclick="abrirComentarios(${post.id})" title="Comentar">
+                                <i class="fa-solid fa-comment"></i>
+                            </button>
+                            <button class="btn-secundario btn-share-alt" onclick="prepararCompartir(${post.id})" title="Compartir">
+                                <i class="fa-solid fa-share"></i>
+                            </button>
+                            <button class="btn-secundario btn-save-alt" onclick="guardarPost(${post.id})" title="Guardar">
+                                <i class="fa-solid fa-bookmark"></i>
+                            </button>
                         </div>
 
-                        <div style="display: flex; gap: 8px;">
+                        <div class="post-btn-group">
                             ${btnReportar} 
                             ${btnBorrarPost}
                         </div>
@@ -97,15 +110,15 @@
                 feed.appendChild(div);
             });
 
-            // Lógica de resaltado por ancla
+            // Lógica de resaltado (Notificaciones)
             if (window.location.hash) {
                 const idAncla = window.location.hash.substring(1);
                 const elemento = document.getElementById(idAncla);
                 if (elemento) {
                     setTimeout(() => {
                         elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        elemento.style.backgroundColor = "#fff9c4";
-                        setTimeout(() => elemento.style.backgroundColor = "transparent", 2000);
+                        elemento.classList.add('post-highlight');
+                        setTimeout(() => elemento.classList.remove('post-highlight'), 3000);
                     }, 500);
                 }
             }
@@ -142,32 +155,20 @@
         });
     }
 
-    // --- 3. 🌍 FUNCIONES GLOBALES (Exportadas para el HTML) ---
+    // --- 3. 🌍 FUNCIONES GLOBALES ---
 
     window.prepararCompartir = async function(id) {
         const nota = prompt("¿Qué quieres decir sobre esta publicación? (Opcional)");
         if (nota === null) return;
-
         try {
             const res = await fetch('/api/publicaciones/compartir', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    usuario_id: miId,
-                    publicacion_id: id,
-                    comentario: nota
-                })
+                body: JSON.stringify({ usuario_id: miId, publicacion_id: id, comentario: nota })
             });
-
-            if (res.ok) {
-                alert("¡Publicación compartida en tu muro! 🚀");
-                cargarMuro();
-            } else {
-                alert("❌ No se pudo compartir la publicación.");
-            }
-        } catch (err) {
-            console.error("Error al compartir:", err);
-        }
+            if (res.ok) { alert("¡Publicación compartida! 🚀"); cargarMuro(); }
+            else { alert("❌ No se pudo compartir."); }
+        } catch (err) { console.error(err); }
     };
 
     window.reaccionar = async function(postId, tipo) {
@@ -218,4 +219,4 @@
 
     document.addEventListener('DOMContentLoaded', cargarMuro);
 
-})(); // 🛡️ FIN DE LA BURBUJA
+})();

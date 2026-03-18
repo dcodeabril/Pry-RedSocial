@@ -1,0 +1,301 @@
+/* =============================================
+   PROYECTO: FACEBOOK LOCAL
+   SECCIÓN: PERFIL (TOTAL WHITE + VIDEOLLAMADA)
+   ARCHIVO: perfil.css
+   ============================================= */
+
+/* --- 🏛️ RESET Y BASE --- */
+body {
+    background-color: #f0f2f5; 
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background 0.3s ease;
+}
+
+.profile-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+/* --- 🧭 HEADER (Sincronizado con Muro) --- */
+.main-header {
+    background-color: var(--header-bg) !important;
+    color: var(--header-text);
+    padding: 0 25px;
+    height: 65px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-sm);
+}
+
+.logo h1 {
+    color: #FFFFFF !important;
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+/* --- 🌟 NAVEGACIÓN MÁGICA (7 ITEMS) --- */
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-menu {
+    position: relative;
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu .list {
+    position: relative;
+    width: 70px;
+    height: 65px;
+    z-index: 1;
+}
+
+.nav-menu .list a, 
+.nav-menu .list button {
+    text-decoration: none !important;
+    background: transparent !important;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.nav-menu .list .icon {
+    font-size: 1.5rem;
+    color: #FFFFFF !important;
+    transition: 0.5s;
+}
+
+.nav-menu .list .text {
+    position: absolute;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.5s;
+}
+
+/* 🚀 Animaciones Hover Nav */
+.nav-menu .list:hover .icon { transform: translateY(-35px); }
+.nav-menu .list:hover .text { opacity: 1; transform: translateY(12px); }
+
+/* 🔵 INDICADOR CIRCULAR */
+.indicator {
+    position: absolute;
+    top: -30px;
+    width: 70px;
+    height: 70px;
+    background: var(--primary);
+    border-radius: 50%;
+    border: 6px solid var(--header-bg);
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.nav-menu:hover .indicator { opacity: 1; }
+
+/* 🔄 LÓGICA DE MOVIMIENTO */
+.nav-menu .list:nth-child(1):hover ~ .indicator { transform: translateX(calc(70px * 0)); }
+.nav-menu .list:nth-child(2):hover ~ .indicator { transform: translateX(calc(70px * 1)); }
+.nav-menu .list:nth-child(3):hover ~ .indicator { transform: translateX(calc(70px * 2)); }
+.nav-menu .list:nth-child(4):hover ~ .indicator { transform: translateX(calc(70px * 3)); }
+.nav-menu .list:nth-child(5):hover ~ .indicator { transform: translateX(calc(70px * 4)); }
+.nav-menu .list:nth-child(6):hover ~ .indicator { transform: translateX(calc(70px * 5)); }
+.nav-menu .list:nth-child(7):hover ~ .indicator { transform: translateX(calc(70px * 6)); }
+
+/* --- 👤 BLOQUE NOMBRE DERECHA --- */
+.nav-user-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px;
+    height: 45px;
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    font-weight: 600;
+}
+
+/* --- ⚪ TARJETA DE PERFIL --- */
+.profile-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    margin-bottom: 30px;
+}
+
+.profile-avatar-wrapper {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    padding: 3px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* --- 🔘 BOTONES DE ACCIÓN --- */
+
+/* Clase base: Editar y Reportes */
+.btn-edit-profile, 
+.btn-admin-report {
+    background-color: #e4e6eb;
+    color: #050505;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-edit-profile:hover, .btn-admin-report:hover { background-color: #d8dadf; }
+.btn-edit-profile:active, .btn-admin-report:active { transform: scale(0.96); }
+
+/* 🔵 BOTÓN VIBRANTE (VIDEOLLAMADA) */
+.btn-vibrant {
+    background-color: var(--primary);
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+}
+
+.btn-vibrant:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+}
+
+/* --- 📹 INTERFAZ DE VIDEOLLAMADA (OVERLAY) --- */
+.modal-video-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    display: none; /* Controlado por las clases de videollamada.css y JS */
+}
+
+.video-container {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+.video-remote { width: 100%; height: 100%; object-fit: cover; }
+
+.video-local {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 180px;
+    border-radius: 12px;
+    border: 2px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.video-footer-controls {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-hangup {
+    background: #dc3545;
+    color: white;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.btn-video-tool {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* --- 📜 SECCIÓN PUBLICACIONES --- */
+.posts-section { margin-top: 20px; }
+.section-title {
+    font-size: 1.3rem;
+    color: #1c1e21;
+    margin-bottom: 20px;
+    font-weight: 700;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.post-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}

@@ -1,0 +1,215 @@
+/* =============================================
+   PROYECTO: FACEBOOK LOCAL
+   SECCIÓN: MURO PRINCIPAL (MAGIC HOVER UI)
+   ARCHIVO: index.css
+   ============================================= */
+
+/* --- 🧭 HEADER Y BUSCADOR --- */
+.main-header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 0 25px;
+    height: 65px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.logo h1 {
+    color: var(--header-text);
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin: 0;
+}
+
+.buscador-contenedor {
+    position: relative;
+    width: 100%;
+    max-width: 250px;
+}
+
+#input-busqueda {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.15); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 15px 8px 35px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: var(--header-text);
+    outline: none;
+}
+
+/* --- 🌟 NAVEGACIÓN MÁGICA (ESTRICTAMENTE HOVER) --- */
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-menu {
+    position: relative;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    height: 65px;
+    align-items: center;
+}
+
+.nav-menu .list {
+    position: relative;
+    width: 70px; /* Ancho base para el indicador */
+    height: 65px;
+    z-index: 1;
+}
+
+.nav-menu .list a, .nav-menu .list button {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* Estilo de los Iconos */
+.nav-menu .list .icon {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: var(--header-text);
+    transition: 0.5s;
+    height: 100%;
+}
+
+/* Estilo del Texto (Aparece al hacer hover) */
+.nav-menu .list .text {
+    position: absolute;
+    color: var(--header-text);
+    font-weight: 500;
+    font-size: 0.7rem;
+    transition: 0.5s;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* 🚀 ANIMACIÓN AL PASAR EL CURSOR (:hover) */
+.nav-menu .list:hover .icon {
+    transform: translateY(-35px); /* El icono sube */
+}
+
+.nav-menu .list:hover .text {
+    opacity: 1; /* El texto se hace visible */
+    transform: translateY(12px);
+}
+
+/* --- 🔴 BADGE DE NOTIFICACIONES (Círculo Perfecto) --- */
+.badge-notif {
+    position: absolute;
+    top: 5px;
+    right: -5px;
+    background-color: #EF4444;
+    color: white;
+    font-size: 0.65rem;
+    width: 18px; 
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 2px solid var(--header-bg);
+    line-height: 1;
+}
+
+/* --- 🔵 EL INDICADOR (Círculo Mágico con Curvas) --- */
+.indicator {
+    position: absolute;
+    top: -30px; 
+    width: 70px;
+    height: 70px;
+    background: var(--primary); 
+    border-radius: 50%;
+    border: 6px solid var(--header-bg);
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0; /* Invisible por defecto */
+    pointer-events: none;
+}
+
+/* El círculo azul aparece solo cuando el mouse entra al menú */
+.nav-menu:hover .indicator {
+    opacity: 1;
+}
+
+/* 🔄 MOVIMIENTO DEL CÍRCULO SEGÚN EL ICONO QUE TOQUE EL MOUSE */
+.nav-menu .list:nth-child(1):hover ~ .indicator { transform: translateX(calc(70px * 0)); }
+.nav-menu .list:nth-child(2):hover ~ .indicator { transform: translateX(calc(70px * 1)); }
+.nav-menu .list:nth-child(3):hover ~ .indicator { transform: translateX(calc(70px * 2)); }
+.nav-menu .list:nth-child(4):hover ~ .indicator { transform: translateX(calc(70px * 3)); }
+.nav-menu .list:nth-child(5):hover ~ .indicator { transform: translateX(calc(70px * 4)); }
+.nav-menu .list:nth-child(6):hover ~ .indicator { transform: translateX(calc(70px * 5)); }
+.nav-menu .list:nth-child(7):hover ~ .indicator { transform: translateX(calc(70px * 6)); }
+
+/* 🎨 EFECTO CURVE OUTSIDE (Pseudo-elementos) */
+.indicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -22px;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border-top-right-radius: 20px;
+    box-shadow: 1px -10px 0 0 var(--header-bg);
+}
+
+.indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -22px;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border-top-left-radius: 20px;
+    box-shadow: -1px -10px 0 0 var(--header-bg);
+}
+
+/* --- 👤 BLOQUE DE NOMBRE (Estático y Profesional) --- */
+.nav-user-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px !important;
+    width: auto !important;
+    min-width: fit-content;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px;
+    height: 45px;
+    color: var(--header-text);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+#user-name-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* --- 📱 RESPONSIVE --- */
+@media (max-width: 950px) {
+    .main-header { height: auto; flex-direction: column; padding: 10px; gap: 10px; }
+    .nav-user-link { order: -1; margin-bottom: 5px; }
+}

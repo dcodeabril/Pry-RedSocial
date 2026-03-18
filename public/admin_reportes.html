@@ -2,52 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Moderación - Arquitecto Israel</title>
+    <title>Panel de Moderación - Proyecto Red Social</title>
     
     <script>
         (function() {
-            // Buscamos en todas las llaves posibles para evitar el bloqueo injusto
             const rol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
             const miId = localStorage.getItem('usuarioId');
 
-            console.log("Validando acceso a Justicia...", { rol, miId });
-
-            // El Arquitecto entra por su ROL o por ser el USUARIO ID 1 (Creador)
             if (rol !== 'admin' && miId !== '1') {
-                alert("🛑 ACCESO DENEGADO: Solo el Arquitecto tiene permiso para entrar aquí.");
+                alert("🛑 ACCESO DENEGADO: Área restringida para administración.");
                 window.location.href = 'index.html'; 
             }
         })();
     </script>
 
-    <link rel="stylesheet" href="css/general.css">
-</head>
-<body style="background: #f0f2f5;">
+    <link rel="stylesheet" href="css/general.css">       <link rel="stylesheet" href="css/admin_reportes.css"> </head>
+<body>
     <header class="main-header">
         <h1>⚖️ Centro de Justicia Social</h1>
-        <a href="index.html" class="btn-secundario">Volver al Muro</a>
+        <nav>
+            <a href="index.html" class="btn-base btn-secundario">Volver al Muro</a>
+        </nav>
     </header>
 
     <main class="container">
         <section class="card">
-            <header style="border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
+            <header class="justicia-header">
                 <h2>Denuncias Pendientes</h2>
-                <p style="font-size: 0.9rem; opacity: 0.7;">Gestión de integridad y seguridad de la comunidad.</p>
+                <p>Gestión de integridad y seguridad de la comunidad.</p>
             </header>
 
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                <thead>
-                    <tr style="background: #e4e6eb; text-align: left;">
-                        <th style="padding: 10px;">Denunciante</th>
-                        <th style="padding: 10px;">Publicación (Contenido)</th>
-                        <th style="padding: 10px;">Autor del Post</th>
-                        <th style="padding: 10px;">Motivo</th>
-                        <th style="padding: 10px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-reportes">
-                    </tbody>
-            </table>
+            <div class="reportes-table-container">
+                <table class="reportes-table">
+                    <thead>
+                        <tr>
+                            <th>Denunciante</th>
+                            <th>Publicación (Contenido)</th>
+                            <th>Autor del Post</th>
+                            <th>Motivo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-reportes">
+                        </tbody>
+                </table>
+            </div>
         </section>
     </main>
 

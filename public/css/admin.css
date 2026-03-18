@@ -1,0 +1,125 @@
+/* =============================================
+   PROYECTO: RED SOCIAL
+   SECCIÓN: PANEL DE ADMINISTRACIÓN (MASTER)
+   ARCHIVO: admin.css
+   ============================================= */
+
+/* --- 🏛️ SECCIONES DEL PANEL --- */
+.admin-section { 
+    margin-bottom: 50px; 
+}
+
+.header-admin { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+}
+
+/* --- 👥 TABLA DE CONTROL DE USUARIOS --- */
+.admin-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-main);
+    box-shadow: var(--shadow-sm);
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: var(--card-bg); 
+}
+
+th, td { 
+    padding: 12px 15px; 
+    border: 1px solid var(--border); 
+    text-align: left; 
+    color: var(--text-main);
+}
+
+th { 
+    background-color: var(--bg-main); 
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Clases extraídas de admin.js */
+.col-rol {
+    text-transform: capitalize;
+    font-weight: bold;
+}
+
+.estado-usuario {
+    font-weight: bold;
+}
+
+.estado-activo { color: #28a745; }
+.estado-suspendido { color: #dc3545; }
+
+.acciones-flex {
+    display: flex;
+    gap: 5px;
+}
+
+/* --- 🚩 TARJETAS DE REPORTE --- */
+.report-card { 
+    padding: 15px; 
+    margin-bottom: 10px; 
+    border-radius: 8px;
+    background: #fff5f5;
+    border-left: 6px solid #dc3545; /* Rojo de alerta original del JS */
+    transition: transform 0.2s;
+}
+
+.report-card-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.report-card-body {
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+.report-card-footer-info {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.msg-vacio {
+    text-align: center;
+    opacity: 0.6;
+    padding: 20px;
+}
+
+/* --- ⚖️ BOTONES --- */
+.btn-ascender {
+    border: 1px solid #28a745;
+    color: #28a745;
+    margin-right: 5px;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.btn-estado-activo {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.btn-estado-suspendido {
+    border: 1px solid #28a745;
+    color: #28a745;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}

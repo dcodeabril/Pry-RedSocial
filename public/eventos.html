@@ -4,52 +4,7 @@
     <meta charset="UTF-8">
     <title>Eventos - Facebook Local</title>
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css">
-    <style>
-        /* Estilos de Rejilla y Tarjetas (Persona 5) */
-        .eventos-layout { 
-            display: grid; 
-            grid-template-columns: 350px 1fr; 
-            gap: 25px; 
-            align-items: start;
-        }
-        
-        .event-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; 
-        }
-        
-        .event-card { 
-            background: var(--bg-card); 
-            padding: 20px; 
-            border-radius: 12px; 
-            border-left: 6px solid var(--primary); 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-
-        .event-card:hover { transform: translateY(-5px); }
-        
-        .event-card h4 { color: var(--primary); margin-bottom: 10px; font-size: 1.2rem; }
-        .event-card p { font-size: 0.95rem; margin-bottom: 15px; opacity: 0.9; }
-        .event-card .meta { font-size: 0.85rem; opacity: 0.7; line-height: 1.5; }
-
-        input, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0 15px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px;
-            background: var(--bg-input);
-            color: var(--text-color);
-        }
-
-        @media (max-width: 900px) {
-            .eventos-layout { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
+    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/eventos.css"> </head>
 <body>
     <header class="main-header">
         <div class="logo"><h1>Facebook Local</h1></div>
@@ -59,7 +14,7 @@
             <a href="mensajes.html">Mensajes</a>
             <a href="notificaciones.html">Notificaciones</a>
             <a href="eventos.html" class="active">Eventos</a>
-            <button id="btn-tema" class="btn-secundario" style="margin-left: 10px;">🌙 Modo Oscuro</button>
+            <button id="btn-tema" class="btn-base">🌙 Modo Oscuro</button>
         </nav>
     </header>
 
@@ -68,7 +23,8 @@
             
             <section class="card">
                 <h3>Organizar Nuevo Evento</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 15px;">Anuncia reuniones o fechas importantes a la red.</p>
+                <p class="section-desc">Anuncia reuniones o fechas importantes a la red.</p>
+                
                 <form id="form-evento">
                     <label for="ev-titulo">Título:</label>
                     <input type="text" id="ev-titulo" placeholder="Ej: Reunión de Arquitectos" required>
@@ -79,16 +35,16 @@
                     <label for="ev-fecha">Fecha y Hora:</label>
                     <input type="datetime-local" id="ev-fecha" required>
                     
-                    <button type="submit" id="btn-crear-evento" class="btn-primario" style="width: 100%;">
+                    <button type="submit" id="btn-crear-evento" class="btn-base" style="width: 100%;">
                         Publicar Evento 🗓️
                     </button>
                 </form>
             </section>
 
             <section>
-                <h2 style="margin-bottom: 20px;">Próximos Eventos</h2>
+                <h2 class="title-section">Próximos Eventos</h2>
                 <div id="lista-eventos" class="event-grid">
-                    <p>Buscando actividades en el calendario...</p>
+                    <p class="placeholder-text">Buscando actividades en el calendario...</p>
                 </div>
             </section>
 
