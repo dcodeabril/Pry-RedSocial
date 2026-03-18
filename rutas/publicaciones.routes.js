@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTA (CONTROL DE ACCESO TOTAL 🛡️)
+// ROL: ARQUITECTA (GESTIÓN ESTRATÉGICA DE POSTS Y TESOROS)
 // ARCHIVO: rutas/publicaciones.routes.js
 // =============================================
 
@@ -8,8 +8,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos');
 
-// --- [1] OBTENER EL MURO CON FILTRO DE AMISTAD OBLIGATORIO ---
-// ✅ SOLO SE MUESTRAN POSTS PROPIOS O DE AMIGOS ACEPTADOS (AUNQUE SEAN PÚBLICOS)
+// --- [1] OBTENER EL MURO CON FILTRO DE AMISTAD ---
 router.get('/muro/:usuarioId', async (req, res) => {
     const { usuarioId } = req.params;
     try {
@@ -25,10 +24,10 @@ router.get('/muro/:usuarioId', async (req, res) => {
             LEFT JOIN publicaciones p_orig ON p.original_post_id = p_orig.id
             LEFT JOIN perfiles perf_orig ON p_orig.usuario_id = perf_orig.usuario_id
             WHERE 
-                p.usuario_id = ? -- Condición A: Mis propios posts
+                p.usuario_id = ? 
                 OR (
-                    p.privacidad = 'publica' -- Condición B: Es público...
-                    AND p.usuario_id IN ( -- ...PERO ADEMÁS debemos ser amigos aceptados
+                    p.privacidad = 'publica' 
+                    AND p.usuario_id IN ( 
                         SELECT usuario_envia_id FROM amistades WHERE usuario_recibe_id = ? AND estado = 'aceptada'
                         UNION
                         SELECT usuario_recibe_id FROM amistades WHERE usuario_envia_id = ? AND estado = 'aceptada'
@@ -45,7 +44,6 @@ router.get('/muro/:usuarioId', async (req, res) => {
 });
 
 // --- [2] OBTENER POSTS EN EL PERFIL (FILTRO DINÁMICO) ---
-// ✅ SOLO SE VE EL CONTENIDO SI ES TU PROPIO PERFIL O SI ERES AMIGO DEL DUEÑO
 router.get('/usuario/:perfilId', async (req, res) => {
     const { perfilId } = req.params; 
     const visitanteId = req.query.visitanteId; 
@@ -55,17 +53,15 @@ router.get('/usuario/:perfilId', async (req, res) => {
         let params;
 
         if (perfilId == visitanteId) {
-            // Caso A: Estoy viendo mi propio perfil (Veo TODO)
             query = `SELECT p.* FROM publicaciones p WHERE p.usuario_id = ? ORDER BY p.id DESC`;
             params = [perfilId];
         } else {
-            // Caso B: Visitante ajeno. Solo ve si son amigos aceptados.
             query = `
                 SELECT p.* FROM publicaciones p 
                 WHERE p.usuario_id = ? 
                 AND (
-                    (p.privacidad = 'publica' OR p.privacidad = 'amigos') -- Ver públicas y de amigos
-                    AND ? IN ( -- Solo si el visitante está en la lista de amigos del dueño
+                    (p.privacidad = 'publica' OR p.privacidad = 'amigos')
+                    AND ? IN ( 
                         SELECT usuario_envia_id FROM amistades WHERE usuario_recibe_id = ? AND estado = 'aceptada'
                         UNION
                         SELECT usuario_recibe_id FROM amistades WHERE usuario_envia_id = ? AND estado = 'aceptada'
@@ -112,7 +108,7 @@ router.post('/reaccionar', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Error en reacción." }); }
 });
 
-// --- [6] ELIMINAR PUBLICACIÓN (PODER ADMINISTRATIVO: LIZBETH & MICHELLE) ---
+// --- [6] ELIMINAR PUBLICACIÓN ---
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     const { usuario_id } = req.query; 
@@ -136,16 +132,54 @@ router.delete('/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Error al eliminar." }); }
 });
 
-// --- [7] GUARDAR EN EL BAÚL ---
-router.post('/guardar-tesoro', async (req, res) => {
-    const { usuario_id, publicacion_id } = req.body;
+// --- [7] VER TESOROS DEL BAÚL (SINCRONIZADO ASYNC) ---
+router.get('/baul/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
     try {
-        await db.query(`INSERT INTO guardados_y_notas (usuario_id, referencia_id, tipo_entrada) VALUES (?, ?, 'guardado')`, [usuario_id, publicacion_id]);
-        res.json({ mensaje: "Guardado 💾" });
-    } catch (err) { res.status(500).json({ error: "No se pudo guardar." }); }
+        const query = `
+            SELECT 
+                p.*, 
+                pr.nombre, pr.apellido, pr.foto_url,
+                b.fecha_guardado 
+            FROM baul b
+            JOIN publicaciones p ON b.publicacion_id = p.id
+            LEFT JOIN perfiles pr ON p.usuario_id = pr.usuario_id
+            WHERE b.usuario_id = ?
+            ORDER BY b.fecha_guardado DESC
+        `;
+        const [tesoros] = await db.query(query, [usuarioId]);
+        res.json(tesoros); 
+    } catch (err) {
+        console.error("🚨 Error en DB al leer baúl:", err);
+        res.status(500).json({ error: "Error al consultar el baúl" });
+    }
 });
 
-// --- [8] OBTENER COMENTARIOS ---
+// --- [8] GUARDAR NUEVO TESORO (SINCRONIZADO ASYNC) ---
+router.post('/baul/guardar', async (req, res) => {
+    const { usuario_id, publicacion_id } = req.body;
+    try {
+        await db.query("INSERT IGNORE INTO baul (usuario_id, publicacion_id) VALUES (?, ?)", [usuario_id, publicacion_id]);
+        res.json({ success: true, mensaje: "¡Tesoro guardado! 💾" });
+    } catch (err) {
+        console.error("🚨 Error al guardar tesoro:", err);
+        res.status(500).json({ error: "No se pudo guardar" });
+    }
+});
+
+// --- [9] QUITAR DEL BAÚL (SINCRONIZADO ASYNC) ---
+router.delete('/baul/:postId', async (req, res) => {
+    const { postId } = req.params;
+    const { usuario_id } = req.query;
+    try {
+        await db.query("DELETE FROM baul WHERE publicacion_id = ? AND usuario_id = ?", [postId, usuario_id]);
+        res.json({ mensaje: "Tesoro eliminado con éxito" });
+    } catch (err) {
+        res.status(500).json({ error: "Error al eliminar" });
+    }
+});
+
+// --- [10] OBTENER COMENTARIOS ---
 router.get('/:id/comentarios', async (req, res) => {
     const { id } = req.params;
     try {
@@ -154,7 +188,7 @@ router.get('/:id/comentarios', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Error en comentarios." }); }
 });
 
-// --- [9] COMENTAR ---
+// --- [11] COMENTAR ---
 router.post('/comentar', async (req, res) => {
     const { publicacion_id, usuario_id, contenido } = req.body;
     try {

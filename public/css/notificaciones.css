@@ -1,48 +1,75 @@
 /* =============================================
-   PROYECTO: RED SOCIAL
-   SECCIÓN: CENTRO DE NOTIFICACIONES
+   PROYECTO: FACEBOOK LOCAL
+   SECCIÓN: CENTRO DE NOTIFICACIONES (INDUSTRIAL & VIBRANTE)
    ARCHIVO: notificaciones.css
    ============================================= */
 
 /* --- 🔔 CONTENEDOR DE ALERTAS --- */
 .notif-container { 
-    max-width: 650px; 
-    margin: 20px auto; 
+    max-width: 700px; 
+    margin: 25px auto; 
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    background: var(--bg-card, #fff);
     animation: slideUp 0.4s ease;
-    padding: 0; 
+    border: 1px solid var(--border-color, #e0e0e0);
 }
 
 .header-notif { 
-    display: flex; 
+    padding: 20px;
+    background: var(--bg-card, #fff);
+    border-bottom: 1px solid var(--border-color, #eee);
+    display: flex;
     justify-content: space-between; 
     align-items: center; 
-    padding: 20px;
 }
 
-.header-notif h2 {
+.header-notif h2 { 
+    font-size: 1.4rem; 
+    color: var(--text-color, #1c1e21); 
     margin: 0;
-    font-size: 1.5rem;
-    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* --- 📩 ÍTEMS DE NOTIFICACIÓN --- */
 .notif-item { 
     display: flex; 
-    align-items: center; 
     padding: 15px 20px; 
-    border-bottom: 1px solid var(--border); 
-    transition: background 0.3s; 
+    border-bottom: 1px solid var(--border-color, #f0f2f5); 
+    transition: all 0.2s ease; 
+    cursor: pointer;
+    position: relative;
+    align-items: center;
     text-decoration: none;
     color: inherit;
-    cursor: pointer;
-}
-
-.notif-item.no-leido { 
-    background-color: rgba(24, 119, 242, 0.08); 
 }
 
 .notif-item:hover { 
-    background-color: var(--bg-main); 
+    background: var(--bg-hover, #f9fafb); 
+}
+
+.notif-item.no-leido { 
+    background-color: rgba(24, 119, 242, 0.05); 
+}
+
+/* 🎨 Iniciales Sincronizadas (Identidad Industrial) */
+.notif-avatar-initial {
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary, #1877f2), #0056b3);
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-weight: bold; 
+    font-size: 1.2rem; 
+    flex-shrink: 0; 
+    margin-right: 15px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .notif-avatar { 
@@ -51,7 +78,7 @@
     border-radius: 50%; 
     margin-right: 15px; 
     object-fit: cover; 
-    border: 1px solid var(--border); 
+    border: 1px solid var(--border-color, #ddd);
 }
 
 .notif-content { 
@@ -61,66 +88,97 @@
 .notif-text { 
     font-size: 0.95rem; 
     line-height: 1.4; 
+    color: var(--text-color, #050505); 
 }
 
 .notif-text strong { 
-    color: var(--primary); 
+    color: var(--text-color, #1c1e21); 
+    font-weight: 700;
 }
 
 .notif-time { 
     font-size: 0.8rem; 
-    color: var(--text-muted);
-    margin-top: 5px; 
+    color: var(--text-muted, #65676b); 
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-/* --- 🛠️ ACCIONES Y BOTONES (Extraídos de JS) --- */
+/* --- 🛠️ ACCIONES --- */
 .notif-actions {
-    margin-top: 10px; 
+    margin-top: 12px; 
     display: flex; 
     gap: 10px;
 }
 
 .notif-btn-delete {
-    background: none; 
+    background: transparent; 
     border: none; 
+    color: #bcc0c4;
     cursor: pointer; 
-    margin-left: 10px;
+    padding: 10px; 
+    transition: all 0.2s;
     font-size: 1.1rem;
-    opacity: 0.5;
-    transition: opacity 0.2s;
 }
 
-.notif-btn-delete:hover {
-    opacity: 1;
+.notif-btn-delete:hover { 
+    color: #dc3545; 
+    transform: scale(1.1); 
 }
 
 .notif-empty {
-    padding: 20px; 
+    padding: 40px 20px; 
     text-align: center; 
-    opacity: 0.6;
+    color: var(--text-muted, #65676b);
+    font-style: italic;
 }
 
-/* --- 🔵 INDICADOR DE NOVEDAD Y CONTADOR --- */
+/* --- 🔵 INDICADORES Y BADGES --- */
 .status-dot { 
-    width: 12px; 
-    height: 12px; 
-    background: var(--primary); 
+    width: 10px; 
+    height: 10px; 
+    background: var(--primary, #1877f2); 
     border-radius: 50%; 
-    margin-left: 10px; 
+    margin: 0 15px; 
     flex-shrink: 0; 
 }
 
-/* Clases de utilidad para el badge del nav */
-.badge-hidden {
-    display: none !important;
-}
-
-.badge-visible {
-    display: block !important;
-}
+.badge-hidden { display: none !important; }
+.badge-visible { display: flex !important; }
 
 /* --- 🎬 ANIMACIONES --- */
 @keyframes slideUp {
-    from { transform: translateY(10px); opacity: 0; }
+    from { transform: translateY(15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* --- 🌓 MODO OSCURO REFORZADO --- */
+body.dark-theme .notif-container { 
+    background: #242526; 
+    border-color: #3e4042; 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+body.dark-theme .header-notif { 
+    background: #242526; 
+    border-bottom-color: #3e4042; 
+}
+
+body.dark-theme .header-notif h2 { color: #fff; }
+
+body.dark-theme .notif-item { 
+    border-bottom-color: #3e4042; 
+}
+
+body.dark-theme .notif-item:hover { 
+    background: #3a3b3c; 
+}
+
+body.dark-theme .notif-item.no-leido { 
+    background: rgba(24, 119, 242, 0.1); 
+}
+
+body.dark-theme .notif-text { color: #e4e6eb; }
+body.dark-theme .notif-text strong { color: #fff; }
+body.dark-theme .notif-time { color: #b0b3b8; }

@@ -32,7 +32,7 @@
             
             posts.forEach(post => {
                 const div = document.createElement('div');
-                div.className = 'post-card card'; // Sincronizado con publicaciones.css
+                div.className = 'post-card card'; 
                 div.id = `post-${post.id}`; 
 
                 const esCompartido = post.tipo === 'compartido';
@@ -58,8 +58,8 @@
                     </div>
                 `;
 
-                // Botones Administrativos
-                const btnBorrarPost = (post.usuario_id == miId || miId == '1') 
+                // Botones Administrativos (Michelle ID 2 tiene poder total)
+                const btnBorrarPost = (post.usuario_id == miId || miId == '1' || miId == '2') 
                     ? `<button onclick="eliminarPublicacion(${post.id})" class="btn-secundario btn-delete-alt"><i class="fa-solid fa-trash"></i> Eliminar</button>` 
                     : '';
 
@@ -67,7 +67,6 @@
                     ? `<button onclick="abrirReporte(${post.id})" class="btn-secundario btn-report-alt"><i class="fa-solid fa-flag"></i> Reportar</button>` 
                     : '';
 
-                // --- 🖼️ ESTRUCTURA FINAL (CON PARCHE PARA IMÁGENES ROTAS) ---
                 div.innerHTML = `
                     <div class="post-header-container">
                         <img src="/img/${post.foto_url || 'default.png'}" 
@@ -96,7 +95,7 @@
                             <button class="btn-secundario btn-share-alt" onclick="prepararCompartir(${post.id})" title="Compartir">
                                 <i class="fa-solid fa-share"></i>
                             </button>
-                            <button class="btn-secundario btn-save-alt" onclick="guardarPost(${post.id})" title="Guardar">
+                            <button class="btn-secundario btn-save-alt" onclick="guardarPost(${post.id})" title="Guardar en Baúl">
                                 <i class="fa-solid fa-bookmark"></i>
                             </button>
                         </div>
@@ -157,6 +156,28 @@
 
     // --- 3. 🌍 FUNCIONES GLOBALES ---
 
+    // 💾 GUARDAR POST EN BAÚL (DIRECCIÓN CORREGIDA)
+    window.guardarPost = async function(postId) {
+        if (!miId) return alert("Inicia sesión para guardar tesoros.");
+        
+        try {
+            // 🚀 URL SINCRONIZADA CON EL SERVIDOR INDUSTRIAL
+            const res = await fetch('/api/publicaciones/baul/guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario_id: miId, publicacion_id: postId })
+            });
+
+            if (res.ok) {
+                alert("¡Tesoro guardado en tu baúl! 💾");
+            } else {
+                alert("❌ No se pudo guardar el tesoro.");
+            }
+        } catch (err) { 
+            console.error("🚨 Error al guardar en baúl:", err); 
+        }
+    };
+
     window.prepararCompartir = async function(id) {
         const nota = prompt("¿Qué quieres decir sobre esta publicación? (Opcional)");
         if (nota === null) return;
@@ -174,13 +195,12 @@
     window.reaccionar = async function(postId, tipo) {
         if (!miId) return;
         try {
-            const res = await fetch('/api/publicaciones/reaccionar', {
+            await fetch('/api/publicaciones/reaccionar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ publicacion_id: postId, usuario_id: miId, tipo })
             });
-            if (res.status === 403) alert("🚫 Bloqueo de privacidad.");
-            else cargarMuro(); 
+            cargarMuro(); 
         } catch (err) { console.error(err); }
     };
 
@@ -202,18 +222,6 @@
                 body: JSON.stringify({ denunciante_id: miId, publicacion_id: postId, motivo })
             });
             if (res.ok) alert("✅ Reporte enviado al Administrador.");
-        } catch (err) { console.error(err); }
-    };
-
-    window.guardarPost = async function(postId) {
-        if (!miId) return;
-        try {
-            const res = await fetch('/api/publicaciones/guardar-tesoro', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario_id: miId, publicacion_id: postId })
-            });
-            if (res.ok) alert("¡Tesoro guardado! 💾");
         } catch (err) { console.error(err); }
     };
 

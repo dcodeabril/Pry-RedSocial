@@ -1,6 +1,6 @@
 /* =============================================
    PROYECTO: RED SOCIAL
-   SECCIÓN: BAÚL DE TESOROS (GUARDADOS)
+   SECCIÓN: BAÚL DE TESOROS (GOLDEN INDUSTRIAL)
    ARCHIVO: baul.css
    ============================================= */
 
@@ -8,94 +8,128 @@
 .baul-header {
     margin-bottom: 30px;
     text-align: center;
-    padding: 20px;
-    background: linear-gradient(to bottom, var(--card-bg), transparent);
-    border-radius: var(--radius-main);
+    padding: 30px;
+    background: linear-gradient(to bottom, var(--bg-card), transparent);
+    border-radius: 15px;
 }
 
 .baul-header h2 {
-    color: var(--primary);
-    font-size: 2rem;
-    margin-bottom: 5px;
+    color: #ffc107; /* Dorado Tesoro */
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    font-weight: 800;
 }
 
 .baul-header p {
     color: var(--text-muted);
-    font-size: 1.1rem;
-    font-style: italic;
+    font-size: 1rem;
+    opacity: 0.8;
 }
 
-/* --- 📦 FEED DEL BAÚL (Galería de Tesoros) --- */
+/* --- 📦 FEED DEL BAÚL --- */
 #baul-feed {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-    animation: fadeInContainer 0.6s ease-out;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 25px;
+    animation: fadeInContainer 0.5s ease-out;
 }
 
-/* --- 🃏 TARJETA DE TESORO ESPECÍFICA --- */
+/* --- 🃏 TARJETA DE TESORO --- */
 .tesoro-card {
-    margin-bottom: 20px;
-    border-left: 5px solid #ffc107; /* Toque dorado original */
-    border-top: 4px solid #ffc107; 
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 5px solid #ffc107; 
+    border-left: 2px solid rgba(255, 193, 7, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .tesoro-card:hover {
-    transform: translateY(-8px) rotate(1deg);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(255, 193, 7, 0.15);
 }
 
-/* Elementos internos de la tarjeta (Extraídos del JS) */
 .tesoro-header {
     display: flex; 
     align-items: center; 
-    gap: 10px; 
-    margin-bottom: 10px;
-}
-
-.tesoro-avatar {
-    width: 35px; 
-    height: 35px; 
-    border-radius: 50%; 
-    object-fit: cover;
-}
-
-.tesoro-info-small {
-    display: block; 
-    opacity: 0.6;
-}
-
-.tesoro-body {
-    font-size: 1.1rem; 
-    line-height: 1.4; 
+    gap: 12px; 
     margin-bottom: 15px;
 }
 
+.tesoro-avatar {
+    width: 45px; 
+    height: 45px; 
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 2px solid #ffc107;
+}
+
+.tesoro-user-info strong {
+    display: block;
+    color: var(--text-color);
+}
+
+.tesoro-info-small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.tesoro-body {
+    font-size: 1rem; 
+    line-height: 1.6; 
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
 .tesoro-footer {
-    border-top: 1px solid #eee; 
-    padding-top: 10px; 
-    font-size: 0.8rem; 
-    opacity: 0.7;
+    border-top: 1px solid var(--border-color, #eee); 
+    padding-top: 15px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tesoro-status {
+    font-size: 0.75rem; 
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.btn-remove-tesoro {
+    background: transparent;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-remove-tesoro:hover {
+    background: #ff4d4d;
+    color: white;
 }
 
 /* --- 🏜️ ESTADO VACÍO --- */
 .baul-empty {
     grid-column: 1 / -1; 
     text-align: center; 
-    padding: 60px; 
-    background: var(--card-bg); 
-    border-radius: var(--radius-main); 
-    border: 2px dashed var(--border);
-}
-
-.baul-empty-title {
-    font-size: 1.2rem; 
-    opacity: 0.6;
+    padding: 80px 20px; 
+    border: 2px dashed #ffc107;
+    background: rgba(255, 193, 7, 0.05);
 }
 
 /* --- 🎬 ANIMACIONES --- */
 @keyframes fadeInContainer {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🌓 MODO OSCURO */
+body.dark-theme .tesoro-card {
+    background: #242526;
+}
+body.dark-theme .tesoro-footer {
+    border-color: #3e4042;
 }

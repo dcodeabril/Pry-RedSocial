@@ -2,42 +2,81 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Baúl de Tesoros - Facebook Local</title>
+    
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/baul.css">    </head>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/index.css"> <link rel="stylesheet" href="css/baul.css"> 
+</head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Baúl de Tesoros 💾</h1></div>
-        <nav>
-            <a href="index.html">Volver al Muro</a>
-            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
-            <a href="#" id="btn-salir" class="nav-logout-btn">Cerrar Sesión</a>
+        <div class="logo">
+            <h1>FL</h1>
+        </div>
+
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html" title="Muro">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="mensajes.html" title="Mensajes">
+                        <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="text">Mensajes</span>
+                    </a>
+                </li>
+                <li class="list active">
+                    <a href="baul.html" title="Mis Tesoros">
+                        <span class="icon"><i class="fa-solid fa-box-open"></i></span>
+                        <span class="text">Baúl</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon" id="theme-icon"></i></span>
+                    </button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()" title="Cerrar Sesión">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
         </nav>
     </header>
 
     <main class="container">
         <header class="baul-header">
-            <h2>Tus Publicaciones Guardadas</h2>
-            <p>Aquí descansan los posts que decidiste conservar.</p>
+            <h2><i class="fa-solid fa-gem"></i> Mi Baúl de Tesoros</h2>
+            <p>Aquí descansan los posts que decidiste conservar para la posteridad.</p>
         </header>
 
         <section id="baul-feed">
             <div class="baul-empty">
-                <p>Abriendo tu baúl... 🗝️</p>
+                <i class="fa-solid fa-key fa-spin"></i>
+                <p>Abriendo tu baúl privado... 🗝️</p>
             </div>
         </section>
     </main>
 
+    <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
     <script src="js/baul.js"></script>
     <script>
-        document.getElementById('btn-salir').addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm("¿Deseas cerrar el baúl y salir, Arquitecta?")) {
-                localStorage.removeItem('usuarioId');
-                window.location.href = '/';
+        function cerrarSesionTotal() {
+            if(confirm("¿Deseas cerrar el baúl y salir de forma segura?")) {
+                localStorage.clear();
+                window.location.href = '/auth.html';
             }
-        });
+        }
     </script>
 </body>
 </html>

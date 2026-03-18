@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (BUSCADOR PREDICTIVO P5)
+// ROL: ARQUITECTO (BUSCADOR PREDICTIVO - VERSIÓN INDUSTRIAL)
 // ARCHIVO: public/js/buscar.js
 // =============================================
 
@@ -28,22 +28,31 @@ if (inputBusqueda) {
                 listaResultados.classList.add('results-visible');
                 listaResultados.classList.remove('results-hidden');
                 
-                listaResultados.innerHTML = usuarios.map(u => `
-                    <div class="search-result-item" 
-                         onclick="window.location.href='perfil.html?id=${u.usuario_id}'">
-                        
-                        <img src="img/${u.foto_url || 'default.png'}" class="search-result-avatar">
-                        
-                        <div class="search-result-info">
-                            <span class="search-result-name">
-                                ${u.nombre} ${u.apellido}
-                            </span>
-                            <small class="search-result-bio">
-                                ${u.bio || 'Usuario de Facebook Local'}
-                            </small>
+                listaResultados.innerHTML = usuarios.map(u => {
+                    // 🎨 LÓGICA DE IDENTIDAD: Iniciales o Foto (Con blindaje anti-errores)
+                    const inicial = u.nombre ? u.nombre.charAt(0).toUpperCase() : '?';
+                    
+                    const avatarHtml = u.foto_url 
+                        ? `<img src="/img/${u.foto_url}" class="search-result-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
+                        : `<div class="search-avatar-initial">${inicial}</div>`;
+
+                    return `
+                        <div class="search-result-item" 
+                             onclick="window.location.href='perfil.html?id=${u.usuario_id}'">
+                            
+                            ${avatarHtml}
+                            
+                            <div class="search-result-info">
+                                <span class="search-result-name">
+                                    ${u.nombre} ${u.apellido}
+                                </span>
+                                <small class="search-result-bio">
+                                    ${u.bio || 'Usuario de Facebook Local'}
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } else {
                 listaResultados.classList.add('results-visible');
                 listaResultados.classList.remove('results-hidden');
@@ -58,7 +67,7 @@ if (inputBusqueda) {
         }
     });
 
-    // --- 2. RE-ACTIVACIÓN ---
+    // --- 2. RE-ACTIVACIÓN AL ENFOCAR ---
     inputBusqueda.addEventListener('focus', () => {
         if (inputBusqueda.value.trim().length >= 2) {
             listaResultados.classList.add('results-visible');
@@ -67,7 +76,7 @@ if (inputBusqueda) {
     });
 }
 
-// --- 3. GESTIÓN DE VISIBILIDAD ---
+// --- 3. GESTIÓN DE VISIBILIDAD (Cerrar al hacer clic fuera) ---
 document.addEventListener('click', (e) => {
     const contenedor = document.querySelector('.buscador-contenedor');
     if (contenedor && !contenedor.contains(e.target)) {

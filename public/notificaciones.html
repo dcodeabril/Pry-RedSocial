@@ -2,59 +2,74 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Notificaciones - Facebook Local</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avisos - Facebook Local</title>
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/notificaciones.css"> </head>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/index.css"> <link rel="stylesheet" href="css/notificaciones.css">
+    <link rel="stylesheet" href="css/buscar.css"> 
+</head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Facebook Local</h1></div>
-        
-        <nav>
-            <a href="index.html">Muro</a>
-            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
-            <a href="mensajes.html">Mensajes</a>
-            
-            <a href="notificaciones.html" class="nav-notif-wrapper active-link">
-                Notificaciones
-                <span id="contador-notificaciones" class="badge-notif">0</span>
-            </a>
-            
-            <a href="#" id="btn-salir" class="nav-logout">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-base">🌙 Modo Oscuro</button>
+        <div class="logo"><h1>FL</h1></div>
+
+        <div class="buscador-contenedor">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar en la red...">
+            <div id="resultados-busqueda"></div>
+        </div>
+
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html" title="Muro">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="mensajes.html" title="Mensajes">
+                        <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                    </a>
+                </li>
+                <li class="list active">
+                    <a href="notificaciones.html" title="Notificaciones">
+                        <span class="icon">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="contador-notificaciones" class="badge-notif">0</span>
+                        </span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle"><i class="fa-solid fa-moon"></i></button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
         </nav>
     </header>
 
     <main class="container">
-        <div class="card notif-container">
+        <section class="card notif-container">
             <div class="header-notif">
-                <h2>Actividad Reciente</h2>
-                <button id="btn-marcar-leidas" class="btn-base btn-small">
-                    Marcar todo como leído
+                <h2><i class="fa-solid fa-bolt-lightning"></i> Actividad Reciente</h2>
+                <button id="btn-marcar-leidas" class="btn-vibrant btn-small">
+                    <i class="fa-solid fa-check-double"></i> Marcar todo
                 </button>
             </div>
             
-            <hr class="separator">
-            
             <div id="lista-notificaciones">
-                <p class="notif-placeholder">Buscando alertas en la base de datos... 🔍</p>
+                <p class="notif-placeholder">Sincronizando alertas... 🔍</p>
             </div>
-        </div>
+        </section>
     </main>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
+    <script src="js/buscar.js"></script>
     <script src="js/notificaciones.js"></script>
-    <script src="js/eventos.js"></script> 
-    
-    <script>
-        // Lógica de cierre de sesión (Mantenida intacta)
-        document.getElementById('btn-salir').addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-                localStorage.removeItem('usuarioId');
-                window.location.href = '/';
-            }
-        });
-    </script>
 </body>
 </html>

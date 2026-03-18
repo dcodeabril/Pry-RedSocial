@@ -1,6 +1,6 @@
 /* =============================================
    PROYECTO: FACEBOOK LOCAL
-   SECCIÓN: MURO PRINCIPAL (MAGIC HOVER UI)
+   SECCIÓN: MURO PRINCIPAL (MAGIC HOVER UI + UNIFICACIÓN INDUSTRIAL)
    ARCHIVO: index.css
    ============================================= */
 
@@ -63,12 +63,15 @@
 
 .nav-menu .list {
     position: relative;
-    width: 70px; /* Ancho base para el indicador */
+    width: 70px; 
     height: 65px;
     z-index: 1;
 }
 
-.nav-menu .list a, .nav-menu .list button {
+/* --- 🎨 UNIFICACIÓN DE ICONOS Y BOTONES (FORZADO INDUSTRIAL) --- */
+.nav-menu .list a, 
+.nav-menu .list button.btn-icon-toggle,
+.btn-nav-reset {
     position: relative;
     display: flex;
     justify-content: center;
@@ -76,28 +79,48 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    background: transparent;
-    border: none;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
     cursor: pointer;
     text-decoration: none;
+    outline: none !important;
+    color: #ffffff !important;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-/* Estilo de los Iconos */
+/* Ajuste de Precisión para el Botón de Eventos */
+.btn-nav-reset .icon i {
+    color: #ffffff !important;
+    font-size: 1.5rem;
+    transition: 0.5s;
+}
+
+/* Forzado de color blanco para todos los iconos en el Nav */
+.nav-menu .list a .icon i,
+.nav-menu .list button .icon i,
+.nav-user-link i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Contenedores de Iconos */
 .nav-menu .list .icon {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 1.5rem;
-    color: var(--header-text);
     transition: 0.5s;
     height: 100%;
 }
 
-/* Estilo del Texto (Aparece al hacer hover) */
+/* Texto de Hover */
 .nav-menu .list .text {
     position: absolute;
-    color: var(--header-text);
+    color: #ffffff;
     font-weight: 500;
     font-size: 0.7rem;
     transition: 0.5s;
@@ -105,17 +128,19 @@
     transform: translateY(20px);
 }
 
-/* 🚀 ANIMACIÓN AL PASAR EL CURSOR (:hover) */
-.nav-menu .list:hover .icon {
-    transform: translateY(-35px); /* El icono sube */
+/* 🚀 ANIMACIONES DE HOVER (Sincronizadas para Link y Botón) */
+.nav-menu .list:hover .icon,
+.nav-menu .list:hover .btn-nav-reset .icon {
+    transform: translateY(-35px);
 }
 
-.nav-menu .list:hover .text {
-    opacity: 1; /* El texto se hace visible */
+.nav-menu .list:hover .text,
+.nav-menu .list:hover .btn-nav-reset .text {
+    opacity: 1;
     transform: translateY(12px);
 }
 
-/* --- 🔴 BADGE DE NOTIFICACIONES (Círculo Perfecto) --- */
+/* --- 🔴 BADGE DE NOTIFICACIONES --- */
 .badge-notif {
     position: absolute;
     top: 5px;
@@ -133,7 +158,7 @@
     line-height: 1;
 }
 
-/* --- 🔵 EL INDICADOR (Círculo Mágico con Curvas) --- */
+/* --- 🔵 EL INDICADOR (Círculo Mágico) --- */
 .indicator {
     position: absolute;
     top: -30px; 
@@ -143,16 +168,14 @@
     border-radius: 50%;
     border: 6px solid var(--header-bg);
     transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    opacity: 0; /* Invisible por defecto */
+    opacity: 0;
     pointer-events: none;
 }
 
-/* El círculo azul aparece solo cuando el mouse entra al menú */
 .nav-menu:hover .indicator {
     opacity: 1;
 }
 
-/* 🔄 MOVIMIENTO DEL CÍRCULO SEGÚN EL ICONO QUE TOQUE EL MOUSE */
 .nav-menu .list:nth-child(1):hover ~ .indicator { transform: translateX(calc(70px * 0)); }
 .nav-menu .list:nth-child(2):hover ~ .indicator { transform: translateX(calc(70px * 1)); }
 .nav-menu .list:nth-child(3):hover ~ .indicator { transform: translateX(calc(70px * 2)); }
@@ -161,7 +184,7 @@
 .nav-menu .list:nth-child(6):hover ~ .indicator { transform: translateX(calc(70px * 5)); }
 .nav-menu .list:nth-child(7):hover ~ .indicator { transform: translateX(calc(70px * 6)); }
 
-/* 🎨 EFECTO CURVE OUTSIDE (Pseudo-elementos) */
+/* 🎨 EFECTO CURVE OUTSIDE */
 .indicator::before {
     content: '';
     position: absolute;
@@ -186,7 +209,7 @@
     box-shadow: -1px -10px 0 0 var(--header-bg);
 }
 
-/* --- 👤 BLOQUE DE NOMBRE (Estático y Profesional) --- */
+/* --- 👤 BLOQUE DE NOMBRE --- */
 .nav-user-link {
     display: flex;
     align-items: center;
@@ -197,7 +220,7 @@
     background-color: rgba(255, 255, 255, 0.1) !important;
     border-radius: 12px;
     height: 45px;
-    color: var(--header-text);
+    color: #ffffff !important;
     text-decoration: none;
     flex-shrink: 0;
 }

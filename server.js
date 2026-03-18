@@ -1,6 +1,6 @@
 // =============================================
-// PROYECTO: RED SOCIAL
-// ROL: ADMINISTRACIÓN (VERSIÓN LIMPIA + LOGS DE TRÁFICO)
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ADMINISTRACIÓN (TORRE DE CONTROL + ESTADO REAL-TIME)
 // ARCHIVO: server.js
 // =============================================
 
@@ -24,7 +24,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-// --- 🚦 RASTREADOR DE MOVIMIENTOS (LOGS DE USUARIO) ---
+// --- 🚦 RASTREADOR DE MOVIMIENTOS (LOGS) ---
 app.use((req, res, next) => {
     const hora = new Date().toLocaleTimeString();
     console.log(`👤 [${hora}] MOVIMIENTO: ${req.method} en ${req.url}`);
@@ -36,7 +36,7 @@ app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // --- 🗄️ CONEXIÓN A LA BASE DE DATOS ---
 const db = require('./db/base_datos');
 
-// --- 🛣️ IMPORTACIÓN DE RUTAS ---
+// --- 🛣️ IMPORTACIÓN DE RUTAS MODULARES ---
 const rutas = {
     usuarios: require('./rutas/usuarios.routes.js'),
     seguridad: require('./rutas/seguridad.routes.js'),
@@ -51,34 +51,32 @@ const rutas = {
     notas: require('./rutas/notas.routes')
 };
 
-// --- 🔗 CONEXIÓN DE RUTAS ---
+// Registro automático de rutas
 Object.keys(rutas).forEach(ruta => app.use(`/api/${ruta}`, rutas[ruta]));
 
-// --- 🔌 LÓGICA DE SEÑALIZACIÓN (MONITOREO WEBRTC 🎥) ---
+// --- 🟢 GESTIÓN DE ESTADOS ONLINE ---
+const socketsActivos = {}; 
+
 io.on('connection', (socket) => {
-    
     socket.on('join-room', (usuarioId) => {
-        socket.join(usuarioId.toString());
-        console.log(`📡 [SOCKET] Canal privado abierto para Usuario ID: ${usuarioId}`);
+        const uidStr = usuarioId.toString();
+        socket.join(uidStr);
+        socketsActivos[socket.id] = uidStr;
+        console.log(`📡 [SOCKET] Usuario ${uidStr} conectado.`);
+        enviarListaOnline();
     });
 
     socket.on('iniciar-llamada', async ({ emisorId, receptorId, oferta }) => {
         try {
-            console.log(`📞 [LLAMADA] Intento de: ${emisorId} hacia: ${receptorId}`);
-            
             const queryAmistad = `
                 SELECT id FROM amistades 
                 WHERE ((usuario_envia_id = ? AND usuario_recibe_id = ?) 
                    OR (usuario_envia_id = ? AND usuario_recibe_id = ?)) 
                 AND estado = 'aceptada'`;
-
             const [amistad] = await db.query(queryAmistad, [emisorId, receptorId, receptorId, emisorId]);
-
             if (amistad.length > 0) {
-                console.log(`✅ [LLAMADA] Autorizada. Enviando señal a ${receptorId}`);
                 io.to(receptorId.toString()).emit('llamada-entrante', { emisorId, oferta });
             } else {
-                console.log(`🚫 [LLAMADA] Bloqueada. Motivo: No son amigos.`);
                 socket.emit('error-llamada', { mensaje: "Vínculo de amistad requerido. 🔒" });
             }
         } catch (error) {
@@ -87,7 +85,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('contestar-llamada', ({ receptorId, emisorId, respuesta }) => {
-        console.log(`✅ [LLAMADA] Usuario ${receptorId} aceptó la videollamada de ${emisorId}`);
         io.to(emisorId.toString()).emit('llamada-aceptada', { receptorId, respuesta });
     });
 
@@ -96,18 +93,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('🔌 [SOCKET] Dispositivo desconectado.');
+        delete socketsActivos[socket.id];
+        enviarListaOnline();
     });
+
+    function enviarListaOnline() {
+        const listaIds = Object.values(socketsActivos);
+        const idsUnicos = [...new Set(listaIds)];
+        io.emit('usuarios-online', idsUnicos);
+    }
 });
 
-// --- 🚪 ACCESO ---
+// --- 🚪 ACCESO ESTÁTICO ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'auth.html')));
 
 app.get('/api/estado', (req, res) => {
     res.json({ 
         proyecto: "Proyecto Red Social 🚀",
-        seguridad: "BCrypt + Friendship Shield 🔒",
-        logs: "Verbose Mode - Active 🟢"
+        seguridad: "BCrypt + Real-Time Tracking 🟢",
+        monitoreo: `${Object.keys(socketsActivos).length} sockets activos`
     });
 });
 
@@ -121,7 +125,7 @@ server.listen(PORT, async () => {
         📡 CENTRAL DE CONTROL - PROYECTO RED SOCIAL
         🔗 URL: http://localhost:${PORT}
         🗄️ DB: MySQL CONECTADO ✅
-        🕵️ MONITOR: LOGS DE DEPURACIÓN ACTIVOS 🔍
+        🟢 STATUS: RASTREADOR DE ESTADO ACTIVO
         =================================================
         `);
     } catch (error) {

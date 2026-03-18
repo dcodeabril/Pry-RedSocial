@@ -2,55 +2,114 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Facebook Local - Mensajes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensajes - Facebook Local</title>
+    
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/mensajes.css"> </head>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/index.css"> <link rel="stylesheet" href="css/mensajes.css"> 
+    <link rel="stylesheet" href="css/buscar.css"> <link rel="stylesheet" href="css/videollamada.css">
+</head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Facebook Local</h1></div>
-        <nav>
-            <a href="index.html">Muro</a>
-            <a href="#" onclick="irAMiPerfil()" id="nav-nombre">Mi Perfil</a> 
-            <a href="mensajes.html" class="active">Mensajes</a>
-            <a href="notificaciones.html">Notificaciones</a>
-            <a href="#" onclick="cerrarSesionTotal()" class="nav-link-logout">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-base">🌙</button>
+        <div class="logo">
+            <h1>FL</h1>
+        </div>
+
+        <div class="buscador-contenedor">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar contactos...">
+            <div id="resultados-busqueda"></div>
+        </div>
+
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html" title="Muro">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list active"> <a href="mensajes.html" title="Mensajes">
+                        <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="text">Mensajes</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="notificaciones.html" title="Notificaciones">
+                        <span class="icon">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="contador-notificaciones" class="badge-notif">0</span>
+                        </span>
+                        <span class="text">Avisos</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon" id="theme-icon"></i></span>
+                    </button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()" title="Cerrar Sesión">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
+
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
+                <i class="fa-solid fa-user"></i>
+                <span id="user-name-text">Cargando...</span> 
+            </a> 
         </nav>
     </header>
 
     <main class="container chat-layout">
-        <aside class="card sidebar-amigos">
-            <h3>Contactos</h3>
+        <aside class="sidebar-amigos">
+            <div class="sidebar-header">
+                <h3><i class="fa-solid fa-address-book"></i> Contactos</h3>
+            </div>
             <ul id="lista-amigos"></ul>
         </aside>
 
-        <section class="card chat-window">
-            <div id="chat-header">Selecciona un amigo para chatear</div>
+        <section class="chat-window card">
+            <div id="chat-header" class="chat-header-empty">
+                Selecciona un amigo para iniciar la conversación
+            </div>
             
             <div id="mensajes-body" class="mensajes-lista">
                 </div>
 
-            <div class="chat-input">
-                <input type="text" id="input-msj" placeholder="Escribe un mensaje...">
-                <button id="btn-enviar" class="btn-base">Enviar</button>
+            <div class="chat-input-container">
+                <input type="text" id="input-msj" placeholder="Escribe un mensaje industrial...">
+                <button id="btn-enviar" class="btn-vibrant">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </section>
     </main>
 
-    <div id="modal-videollamada" class="modal-video-overlay" style="display: none;">
+    <div id="modal-videollamada" class="modal-video-overlay video-modal-hidden">
         <div class="video-container">
             <video id="remoteVideo" autoplay playsinline class="video-remote"></video>
             <video id="localVideo" autoplay playsinline muted class="video-local"></video>
-            <div class="video-status" id="video-status">Llamando...</div>
-
-            <div id="controles-entrantes" style="display: none; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100;">
-                <button onclick="aceptarLlamadaClick()" class="btn-base" style="background: var(--success); padding: 15px 30px; border-radius: 50px;">
-                    ✅ Contestar Llamada
+            <div class="video-header-info">
+                <div id="video-status" class="video-status-tag">Llamando...</div>
+            </div>
+            
+            <div id="controles-entrantes" class="video-controles-hidden incoming-call-controls">
+                <button onclick="aceptarLlamadaClick()" class="btn-vibrant success-call">
+                    <i class="fa-solid fa-phone"></i> Responder
                 </button>
             </div>
 
-            <div class="video-controls">
-                <button onclick="colgarYSalir()" class="btn-base" style="background: var(--error); border-radius: 50%; width: 50px; height: 50px;">📞</button>
+            <div class="video-footer-controls">
+                <button onclick="colgarYSalir()" class="btn-hangup">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -58,21 +117,27 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
+    <script src="js/buscar.js"></script>
     <script src="js/videollamada.js"></script> 
     <script src="js/mensajes.js"></script>
     
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nombre = localStorage.getItem('nombre');
+            if (nombre) document.getElementById('user-name-text').innerText = nombre;
+        });
+
         function irAMiPerfil() {
             const miId = localStorage.getItem('usuarioId');
             if(miId) window.location.href = `perfil.html?id=${miId}`;
-            else window.location.href = '/';
+            else window.location.href = '/auth.html';
         }
 
         function cerrarSesionTotal() {
             if(confirm("¿Deseas cerrar sesión de forma segura?")) {
                 localStorage.clear(); 
                 sessionStorage.clear();
-                window.location.href = '/';
+                window.location.href = '/auth.html'; 
             }
         }
     </script>

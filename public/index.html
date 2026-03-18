@@ -8,12 +8,13 @@
     <script src="js/guardia.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="css/general.css"> 
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/buscar.css">
     <link rel="stylesheet" href="css/notas.css">
     <link rel="stylesheet" href="css/publicaciones.css"> 
     <link rel="stylesheet" href="css/videollamada.css">
+    <link rel="stylesheet" href="css/eventos.css"> 
 </head>
 <body>
     <header class="main-header">
@@ -49,12 +50,14 @@
                         <span class="text">Avisos</span>
                     </a>
                 </li>
+                
                 <li class="list">
-                    <a href="#" onclick="abrirModalEvento()" title="Crear Evento">
-                        <span class="icon"><i class="fa-solid fa-calendar-plus"></i></span>
-                        <span class="text">Evento</span>
-                    </a>
+                    <button onclick="abrirModalEvento()" class="btn-nav-reset" title="Centro de Eventos">
+                        <span class="icon"><i class="fa-solid fa-calendar-check"></i></span>
+                        <span class="text">Eventos</span>
+                    </button>
                 </li>
+
                 <li class="list">
                     <a href="baul.html" title="Mis Tesoros">
                         <span class="icon"><i class="fa-solid fa-box-open"></i></span>
@@ -119,19 +122,54 @@
             <div class="video-header-info">
                 <div id="video-status" class="video-status-tag">Iniciando...</div>
             </div>
-            
             <div id="controles-entrantes" class="video-controles-hidden incoming-call-controls">
                 <button onclick="aceptarLlamadaClick()" class="btn-vibrant success-call">
-                    <i class="fa-solid fa-phone"></i> Responder Llamada
+                    <i class="fa-solid fa-phone"></i> Responder
                 </button>
             </div>
-
             <div class="video-footer-controls">
                 <button id="btn-mic" onclick="toggleMic()" class="btn-video-tool">🎤</button>
-                <button onclick="colgarYSalir()" class="btn-hangup">
-                    <i class="fa-solid fa-phone-slash"></i>
-                </button>
+                <button onclick="colgarYSalir()" class="btn-hangup"><i class="fa-solid fa-phone-slash"></i></button>
                 <button id="btn-cam" onclick="toggleCam()" class="btn-video-tool">📷</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-evento" class="modal-evento-overlay modal-evento-hidden">
+        <div class="modal-evento-content card industrial-scroll">
+            <div class="modal-evento-header">
+                <h3><i class="fa-solid fa-calendar-check"></i> Centro de Eventos</h3>
+                <button onclick="cerrarModalEvento()" class="btn-close-modal">&times;</button>
+            </div>
+            
+            <div class="modal-evento-body">
+                <section class="modal-section">
+                    <h4><i class="fa-solid fa-plus"></i> Organizar Nuevo</h4>
+                    <form id="form-evento-modal">
+                        <div class="input-group">
+                            <input type="text" id="ev-titulo-modal" placeholder="Título del evento" required>
+                        </div>
+                        <div class="input-group">
+                            <textarea id="ev-desc-modal" rows="2" placeholder="Descripción breve..."></textarea>
+                        </div>
+                        <div class="input-group-row">
+                            <input type="text" id="ev-ubicacion-modal" placeholder="📍 Ubicación">
+                            <input type="datetime-local" id="ev-fecha-modal" required>
+                        </div>
+                        <button type="submit" class="btn-vibrant" style="width: 100%;">
+                            Publicar Evento <i class="fa-solid fa-bullhorn"></i>
+                        </button>
+                    </form>
+                </section>
+
+                <hr class="separator-industrial">
+
+                <section class="modal-section">
+                    <h4><i class="fa-solid fa-list-ul"></i> Próximos Eventos</h4>
+                    <div id="lista-eventos-modal" class="event-grid-mini">
+                        <p class="placeholder-text">Cargando agenda... 🔍</p>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -149,19 +187,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const nombreUsuario = localStorage.getItem('nombre');
-            const rolUsuario = localStorage.getItem('rol');
-            
             if (nombreUsuario) {
                 const nameText = document.getElementById('user-name-text');
                 if (nameText) nameText.innerText = nombreUsuario;
-                
                 const postText = document.getElementById('post-contenido');
                 if (postText) postText.placeholder = `¿Qué estás pensando, ${nombreUsuario}?`;
-            }
-
-            if (rolUsuario === 'admin') {
-                const btnAdmin = document.getElementById('btn-admin-nav');
-                if (btnAdmin) btnAdmin.style.display = 'inline-block';
             }
         });
 

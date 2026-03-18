@@ -63,7 +63,7 @@
         // 2. 🛡️ BOTÓN ADMIN (Solo si el rol es administrador)
         if (rolUsuario === 'admin') {
             htmlBotones += `
-                <button onclick="window.location.href='admin_reportes.html'" class="btn-admin-report">
+                <button onclick="window.location.href='admin.html'" class="btn-admin-report">
                     <i class="fa-solid fa-chart-line"></i> Reportes
                 </button>
             `;
