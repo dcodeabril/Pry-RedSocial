@@ -1,125 +1,253 @@
-/* =============================================
-   PROYECTO: RED SOCIAL
-   SECCIÓN: PANEL DE ADMINISTRACIÓN (MASTER)
+/* ============================================================
+   PROYECTO: FACEBOOK LOCAL (CENTRO DE CONTROL)
+   SECCIÓN: PANEL DE ADMINISTRACIÓN MASTER
    ARCHIVO: admin.css
-   ============================================= */
+   ROL: INGENIERÍA DE INTERFAZ INDUSTRIAL 🛰️
+   ============================================================ */
 
-/* --- 🏛️ SECCIONES DEL PANEL --- */
+/* --- 🏗️ SECCIONES Y ESTRUCTURA DEL PANEL --- */
 .admin-section { 
-    margin-bottom: 50px; 
+    margin-bottom: 40px; 
+    border-radius: var(--radius-main);
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease;
 }
 
-.header-admin { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 20px; 
+.admin-card-header {
+    background: linear-gradient(135deg, #475569, #1e293b);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-/* --- 👥 TABLA DE CONTROL DE USUARIOS --- */
+/* Estado Crítico para Reportes */
+.admin-card-header.urgent {
+    background: linear-gradient(135deg, #ef4444, #991b1b);
+}
+
+.admin-card-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.admin-body {
+    padding: 25px;
+}
+
+/* --- 👥 TABLA MODERNA DE USUARIOS --- */
 .admin-table-container {
     width: 100%;
     overflow-x: auto;
-    border-radius: var(--radius-main);
-    box-shadow: var(--shadow-sm);
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
 }
 
-table { 
+.modern-table { 
     width: 100%; 
     border-collapse: collapse; 
-    background: var(--card-bg); 
+    background: transparent;
 }
 
-th, td { 
-    padding: 12px 15px; 
-    border: 1px solid var(--border); 
-    text-align: left; 
-    color: var(--text-main);
-}
-
-th { 
-    background-color: var(--bg-main); 
+.modern-table th { 
+    background-color: var(--bg-page); 
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
 }
 
-/* Clases extraídas de admin.js */
-.col-rol {
-    text-transform: capitalize;
-    font-weight: bold;
+.modern-table td { 
+    padding: 15px; 
+    border-bottom: 1px solid var(--border); 
+    color: var(--text-main);
+    font-size: 0.9rem;
+    vertical-align: middle;
 }
 
-.estado-usuario {
-    font-weight: bold;
+/* --- 🏷️ IDENTIFICADORES Y STATUS PILLS --- */
+.status-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: inline-block;
+    letter-spacing: 0.5px;
 }
 
-.estado-activo { color: #28a745; }
-.estado-suspendido { color: #dc3545; }
+.tag-activo { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.tag-suspendido { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-.acciones-flex {
+.rol-pill {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid #bae6fd;
+}
+
+.master-badge {
+    color: #f59e0b;
+    font-weight: 800;
+    font-size: 0.8rem;
     display: flex;
+    align-items: center;
     gap: 5px;
 }
 
-/* --- 🚩 TARJETAS DE REPORTE --- */
-.report-card { 
-    padding: 15px; 
-    margin-bottom: 10px; 
-    border-radius: 8px;
-    background: #fff5f5;
-    border-left: 6px solid #dc3545; /* Rojo de alerta original del JS */
-    transition: transform 0.2s;
+.user-id {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+/* --- 🚩 TARJETAS DE REPORTE (ZONA DE ALERTA) --- */
+.admin-report-card {
+    display: flex;
+    background: var(--bg-page);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.admin-report-card:hover {
+    transform: translateX(10px);
+    box-shadow: var(--shadow-sm);
+}
+
+.report-indicator {
+    width: 6px;
+    background: #ef4444;
+}
+
+.report-content {
+    padding: 18px;
+    flex-grow: 1;
 }
 
 .report-card-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
-.report-card-body {
+.motivo-tag {
+    background: #1e293b;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.report-excerpt {
     font-size: 0.9rem;
-    margin: 5px 0;
-}
-
-.report-card-footer-info {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #666;
+    margin: 10px 0;
+    line-height: 1.5;
+    color: var(--text-main);
+    font-style: italic;
 }
 
 .msg-vacio {
     text-align: center;
     opacity: 0.6;
-    padding: 20px;
+    padding: 40px;
+    font-style: italic;
 }
 
-/* --- ⚖️ BOTONES --- */
-.btn-ascender {
-    border: 1px solid #28a745;
-    color: #28a745;
-    margin-right: 5px;
-    background: transparent;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
+/* --- 🔘 BOTONES DE ACCIÓN INDUSTRIAL --- */
+.acciones-flex {
+    display: flex;
+    gap: 10px;
 }
 
-.btn-estado-activo {
-    border: 1px solid #dc3545;
-    color: #dc3545;
-    background: transparent;
+.btn-action-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text-muted);
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 1rem;
 }
 
-.btn-estado-suspendido {
-    border: 1px solid #28a745;
-    color: #28a745;
-    background: transparent;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
+.btn-action-icon.promote:hover { 
+    background: #fef3c7; 
+    color: #d97706; 
+    border-color: #f59e0b;
+    transform: scale(1.1);
+}
+
+.btn-danger-soft:hover { 
+    background: #fee2e2; 
+    color: #dc2626; 
+    border-color: #ef4444;
+    transform: scale(1.1);
+}
+
+.btn-success-soft:hover { 
+    background: #dcfce7; 
+    color: #16a34a; 
+    border-color: #22c55e;
+    transform: scale(1.1);
+}
+
+.btn-admin-primary {
+    background: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.btn-admin-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+}
+
+/* --- 📱 RESPONSIVE --- */
+@media (max-width: 768px) {
+    .admin-card-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .acciones-flex {
+        flex-direction: column;
+    }
 }

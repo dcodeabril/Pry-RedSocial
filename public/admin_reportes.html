@@ -2,54 +2,93 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Moderación - Proyecto Red Social</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Justicia HQ - Facebook Local</title>
     
     <script>
         (function() {
             const rol = localStorage.getItem('rol') || localStorage.getItem('usuarioRol');
             const miId = localStorage.getItem('usuarioId');
-
             if (rol !== 'admin' && miId !== '1') {
-                alert("🛑 ACCESO DENEGADO: Área restringida para administración.");
                 window.location.href = 'index.html'; 
             }
         })();
     </script>
 
-    <link rel="stylesheet" href="css/general.css">       <link rel="stylesheet" href="css/admin_reportes.css"> </head>
+    <script src="js/guardia.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/admin_reportes.css">
+</head>
 <body>
     <header class="main-header">
-        <h1>⚖️ Centro de Justicia Social</h1>
-        <nav>
-            <a href="index.html" class="btn-base btn-secundario">Volver al Muro</a>
+        <div class="logo"><h1>Justicia HQ</h1></div>
+
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="admin.html">
+                        <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                        <span class="text">Control</span>
+                    </a>
+                </li>
+                <li class="list active">
+                    <a href="admin_reportes.html">
+                        <span class="icon"><i class="fa-solid fa-scale-balanced"></i></span>
+                        <span class="text">Justicia</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon"></i></span>
+                        <span class="text">Tema</span>
+                    </button>
+                </li>
+                <div class="indicator"></div>
+            </ul>
         </nav>
     </header>
 
     <main class="container">
-        <section class="card">
-            <header class="justicia-header">
-                <h2>Denuncias Pendientes</h2>
-                <p>Gestión de integridad y seguridad de la comunidad.</p>
+        <section class="admin-section card">
+            <header class="justicia-header urgent">
+                <div class="header-info">
+                    <h2><i class="fa-solid fa-gavel"></i> Denuncias Pendientes</h2>
+                    <p>Gestión de integridad y cumplimiento de normas de la comunidad.</p>
+                </div>
+                <div id="stats-justicia" class="admin-badge">Sincronizando...</div>
             </header>
 
             <div class="reportes-table-container">
-                <table class="reportes-table">
+                <table class="modern-table">
                     <thead>
                         <tr>
                             <th>Denunciante</th>
-                            <th>Publicación (Contenido)</th>
-                            <th>Autor del Post</th>
+                            <th>Publicación Contenido</th>
+                            <th>Autor</th>
                             <th>Motivo</th>
-                            <th>Acciones</th>
+                            <th>Operaciones de Moderación</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-reportes">
-                        </tbody>
+                        <tr>
+                            <td colspan="5" class="loading-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Cargando expedientes...
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>
     </main>
 
+    <script src="js/tema.js"></script>
     <script src="js/admin_reportes.js"></script>
 </body>
 </html>

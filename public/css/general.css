@@ -1,23 +1,22 @@
 /* ============================================================
    PROYECTO: FACEBOOK LOCAL (SISTEMA DE DISEÑO GLOBAL)
    ARCHIVO: general.css
+   ROL: INGENIERÍA DE PRECISIÓN E INTERACCIÓN DINÁMICA 🛰️
    ============================================================ */
 
 :root {
-    /* --- ☀️ MODO CLARO (Variables por defecto) --- */
-    --primary: #3B82F6;         /* Azul vibrante */
+    /* --- ☀️ MODO CLARO --- */
+    --primary: #3B82F6;
     --primary-hover: #2563EB;
-    
-    --bg-page: #F9FAFB;         /* Fondo de la página */
-    --card-bg: #FFFFFF;         /* Fondo de tarjetas y paneles */
-    --bg-input: #F3F4F6;        /* Gris claro para inputs */
-    
-    --text-main: #1F2937;       /* Gris oscuro (títulos) */
-    --text-muted: #6B7280;      /* Gris medio (placeholders e iconos) */
-    
-    --border: #E5E7EB;          /* Bordes sutiles */
-    --header-bg: #3B82F6;       /* Color de la barra de navegación */
-    --header-text: #FFFFFF;     /* Texto e iconos en la barra */
+    --primary-dark: #1D4ED8;
+    --bg-page: #F9FAFB;
+    --card-bg: #FFFFFF;
+    --bg-input: #F3F4F6;
+    --text-main: #1F2937;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --header-bg: #3B82F6;
+    --header-text: #FFFFFF;
 
     /* Estructura Global */
     --radius-main: 12px;
@@ -25,30 +24,27 @@
     --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* --- 🌙 MODO OSCURO (Sobrescribe las variables) --- */
+/* --- 🌙 MODO OSCURO --- */
 body.dark-mode {
-    --bg-page: #111827;         /* Gris casi negro */
-    --card-bg: #1F2937;         /* Gris azulado oscuro */
-    --bg-input: #374151;        /* Gris intermedio para inputs */
-    
-    --text-main: #F9FAFB;       /* Blanco roto */
-    --text-muted: #9CA3AF;      /* Gris claro para iconos en modo oscuro */
-    
-    --border: #374151;          /* Borde oscuro */
-    --header-bg: #1e3a8a;       /* Azul marino profundo */
+    --bg-page: #111827;
+    --card-bg: #1F2937;
+    --bg-input: #374151;
+    --text-main: #F9FAFB;
+    --text-muted: #9CA3AF;
+    --border: #374151;
+    --header-bg: #1e3a8a;
     --header-text: #F9FAFB;
 }
 
-/* --- 📋 ESTILOS BASE (Se aplican a todo el sitio) --- */
+/* --- 📋 ESTILOS BASE --- */
 body {
     background-color: var(--bg-page);
     color: var(--text-main);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    transition: background-color 0.3s, color 0.3s; /* Transición suave al cambiar de tema */
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Aplicación automática a elementos de formulario */
 textarea, input, select {
     background-color: var(--bg-input) !important;
     border: 1px solid var(--border) !important;
@@ -58,12 +54,6 @@ textarea, input, select {
     transition: all 0.3s ease;
 }
 
-/* Estilo para los iconos que usan la clase .input-icon o similares */
-.input-icon, .search-icon, .toggle-password {
-    color: var(--text-muted);
-}
-
-/* Tarjetas genéricas (Cards) */
 .card {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
@@ -71,16 +61,150 @@ textarea, input, select {
     box-shadow: var(--shadow-sm);
 }
 
-/* Botones base */
-.btn-base {
-    background-color: var(--primary);
-    color: #FFFFFF;
-    border: none;
-    border-radius: var(--radius-main);
-    cursor: pointer;
-    transition: background-color 0.2s;
+/* --- 🛰️ BARRA DE NAVEGACIÓN "MAGIC NAV" --- */
+.main-header {
+    background-color: var(--header-bg);
+    height: 75px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+    transition: background-color 0.3s;
 }
 
-.btn-base:hover {
-    background-color: var(--primary-hover);
+.logo h1 { 
+    font-size: 1.5rem; 
+    margin: 0; 
+    font-weight: 800; 
+    letter-spacing: 1px;
+    color: var(--header-text);
 }
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-menu {
+    position: relative;
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu .list {
+    position: relative;
+    width: 70px;
+    height: 75px;
+    z-index: 1;
+}
+
+.nav-menu .list a, 
+.nav-menu .list button {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: var(--header-text);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+}
+
+/* --- ✨ ANIMACIÓN DE TEXTO (RECALIBRADA) --- */
+.nav-menu .text {
+    position: absolute;
+    font-size: 0.65rem;
+    font-weight: 700;
+    opacity: 0; 
+    color: white !important; 
+    text-align: center;
+    width: 100%;
+    /* Transición de 0.4s para mayor agilidad */
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(10px); 
+    bottom: 8px; 
+    z-index: 20 !important;
+    pointer-events: none;
+    visibility: visible;
+}
+
+.nav-menu .list:hover .text,
+.nav-menu .list.active .text {
+    opacity: 1 !important;
+    transform: translateY(0px) !important;
+}
+
+/* --- 🎯 REFUERZO DE FEEDBACK HÁPTICO EN ICONOS --- */
+.nav-menu .icon {
+    font-size: 1.3rem;
+    transition: 0.5s;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Estado Activo Base y Hover de No-Activos (-8px) */
+.nav-menu .list.active a .icon,
+.nav-menu .list.active button .icon,
+.nav-menu .list:not(.active):hover a .icon,
+.nav-menu .list:not(.active):hover button .icon {
+    transform: translateY(-8px);
+}
+
+/* 🚀 MEJORA HÁPTICA: Reacción al hover sobre el ya activo */
+.nav-menu .list.active:hover a .icon,
+.nav-menu .list.active:hover button .icon {
+    transform: translateY(-12px) scale(1.1); /* Salto superior y escalado */
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- 🔑 EL INDICADOR (SISTEMA DE PRECISIÓN) --- */
+.indicator {
+    position: absolute !important; 
+    top: 50%;
+    left: 0;
+    width: 70px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    z-index: 0;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none; 
+}
+
+/* 🎯 POSICIONES X */
+.nav-menu .list:nth-child(1).active ~ .indicator { transform: translate(0px, -50%); }
+.nav-menu .list:nth-child(2).active ~ .indicator { transform: translate(70px, -50%); }
+.nav-menu .list:nth-child(3).active ~ .indicator { transform: translate(140px, -50%); }
+.nav-menu .list:nth-child(4).active ~ .indicator { transform: translate(210px, -50%); }
+.nav-menu .list:nth-child(5).active ~ .indicator { transform: translate(280px, -50%); }
+.nav-menu .list:nth-child(6).active ~ .indicator { transform: translate(350px, -50%); }
+.nav-menu .list:nth-child(7).active ~ .indicator { transform: translate(420px, -50%); }
+
+/* --- 👤 IDENTIDAD DINÁMICA --- */
+.nav-user-link {
+    color: var(--header-text);
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 15px;
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
+    height: 40px;
+    line-height: 1;
+}
+
+.nav-user-link i { font-size: 1.2rem; }

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Admin - Facebook Local</title>
     
     <script>
@@ -15,59 +16,101 @@
     </script>
     
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/admin.css">   </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/buscar.css">
+</head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Admin Control Center</h1></div>
-        <nav>
-            <a href="index.html">Ver Muro</a>
-            <button id="btn-tema" class="btn-base">🌙 Modo Oscuro</button>
+        <div class="logo"><h1>Admin HQ</h1></div>
+
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list active">
+                    <a href="admin.html">
+                        <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                        <span class="text">Control</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon" id="theme-icon"></i></span>
+                        <span class="text">Tema</span>
+                    </button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
+
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
+                <i class="fa-solid fa-user-shield"></i>
+                <span id="user-name-text">Admin Michelle</span> 
+            </a> 
         </nav>
     </header>
 
     <main class="container">
+        <!-- SECCIÓN DE REPORTES -->
         <section class="admin-section card">
-            <div class="header-admin">
-                <h2>🚩 Reportes de la Comunidad</h2>
-                <span id="contador-reportes" class="badge">Cargando...</span>
+            <div class="admin-card-header urgent">
+                <h2><i class="fa-solid fa-triangle-exclamation"></i> Reportes de la Comunidad</h2>
+                <span id="contador-reportes" class="admin-badge">0 Pendientes</span>
             </div>
             
-            <div id="lista-reportes-admin" class="report-list-container">
-                <p>Cargando denuncias...</p>
-            </div>
+            <div class="admin-body">
+                <div id="lista-reportes-admin" class="report-list-container">
+                    <p class="loading-text">Sincronizando denuncias...</p>
+                </div>
 
-            <div class="admin-footer-actions">
-                <a href="admin_reportes.html" class="btn-admin-action">
-                    Gestionar Denuncias Detalladas ⚖️
-                </a>
+                <div class="admin-footer-actions">
+                    <a href="admin_reportes.html" class="btn-admin-primary">
+                        <span>Gestionar Denuncias Detalladas</span>
+                        <i class="fa-solid fa-gavel"></i>
+                    </a>
+                </div>
             </div>
         </section>
 
-        <hr class="separator-heavy">
-
+        <!-- SECCIÓN DE USUARIOS -->
         <section class="admin-section card">
-            <h2>👥 Control de Usuarios</h2>
-            <div id="msg"></div>
+            <div class="admin-card-header">
+                <h2><i class="fa-solid fa-users-gear"></i> Control de Usuarios</h2>
+                <div id="msg"></div>
+            </div>
             
-            <div class="admin-table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-usuarios">
-                        </tbody>
-                </table>
+            <div class="admin-body">
+                <div class="admin-table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Rango</th>
+                                <th>Estado</th>
+                                <th>Operaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-usuarios"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>
 
     <script src="js/tema.js"></script>
-    <script src="js/admin.js"></script> 
+    <script src="js/usuario_global.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>

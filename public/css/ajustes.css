@@ -1,10 +1,106 @@
-/* =============================================
-   PROYECTO: RED SOCIAL
-   SECCIÓN: CONFIGURACIÓN Y AJUSTES
+/* ============================================================
+   PROYECTO: RED SOCIAL - FACEBOOK LOCAL
+   SECCIÓN: CONFIGURACIÓN Y AJUSTES (INDUSTRIAL)
    ARCHIVO: ajustes.css
-   ============================================= */
+   ESTADO: RECALIBRACIÓN TOTAL Y PROTECCIÓN DE CABECERA 🛡️
+   ============================================================ */
 
-/* --- 📝 ESTRUCTURA DEL FORMULARIO --- */
+/* --- 🛠️ PROTECCIÓN Y ESTRUCTURA DE CABECERA (NO TOCAR) --- */
+.main-header {
+    box-sizing: border-box;
+    flex-shrink: 0; /* Impide que el contenido colapse o empuje el header */
+}
+
+.main-header * {
+    box-sizing: border-box;
+}
+
+/* Alineación exacta de la Identidad (Michelle Carvajal) */
+.nav-user-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transition: opacity 0.3s ease;
+}
+
+/* --- 🏗️ ESTRUCTURA GLOBAL Y CONTENEDOR --- */
+.container {
+    margin-top: 20px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- ✨ ANIMACIONES DE ENTRADA --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 🏗️ LAYOUT Y ENVOLVENTE --- */
+.settings-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 40px auto;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.settings-card {
+    padding: 0 !important; 
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--card-bg); /* Sincronizado con general.css */
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-main);
+}
+
+/* --- 🏷️ CABECERA DE AJUSTES --- */
+.settings-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 30px;
+    text-align: left;
+}
+
+.settings-header h2 { 
+    margin: 0; 
+    font-size: 1.5rem; 
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-header p { 
+    margin: 10px 0 0; 
+    opacity: 0.9; 
+    font-size: 0.9rem; 
+}
+
+/* --- 📝 FORMULARIO E INPUTS --- */
+.modern-form {
+    padding: 30px;
+}
+
+.form-section {
+    margin-bottom: 35px;
+}
+
+.form-section h3 {
+    font-size: 1rem;
+    color: var(--primary);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .form-group {
     margin-bottom: 20px;
 }
@@ -13,6 +109,7 @@
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
+    font-size: 0.85rem;
     color: var(--text-main);
 }
 
@@ -20,7 +117,26 @@
 .form-group textarea, 
 .form-group select {
     width: 100%;
-    /* El resto del diseño (bordes, colores) viene de general.css */
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 /* --- 💡 ELEMENTOS DE APOYO --- */
@@ -28,29 +144,64 @@
     display: block;
     margin-top: 5px;
     font-size: 0.85rem;
-    color: var(--text-muted);
-    opacity: 0.8;
+    color: #e67e22; 
+    font-weight: 500;
+    opacity: 0.9;
 }
 
-/* Separadores internos de la tarjeta */
-.separator {
-    margin: 25px 0;
-    border: 0;
-    border-top: 1px solid var(--border);
-}
-
-/* --- 🔘 BOTÓN DE GUARDADO --- */
+/* --- 🔘 BOTÓN INDUSTRIAL --- */
 #btn-guardar-ajustes {
-    margin-top: 10px;
-    width: 100%;
-    padding: 12px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-weight: 700;
     font-size: 1rem;
-    /* Hereda .btn-base de la matriz */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#btn-guardar-ajustes:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* --- 🛠️ SINCRONIZACIÓN MAGIC NAV (REFUERZO VISUAL) --- */
+
+/* Forzado de visibilidad para el texto de la opción activa en Ajustes */
+.nav-menu .list.active .text {
+    opacity: 1 !important;
+    transform: translateY(0px) !important;
+    color: white;
+}
+
+/* Refuerzo visual del indicador en la posición 5 */
+.nav-menu .list.active ~ .indicator {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Forzado de legibilidad general en el header */
+.main-header i, .nav-menu .text {
+    color: white !important;
 }
 
 /* --- 📱 ADAPTABILIDAD --- */
-@media (max-width: 600px) {
-    .container {
-        padding: 10px;
+@media (max-width: 650px) {
+    .form-grid { 
+        grid-template-columns: 1fr; 
+    }
+    .settings-wrapper { 
+        margin: 20px 10px; 
+    }
+    .modern-form { 
+        padding: 20px; 
     }
 }

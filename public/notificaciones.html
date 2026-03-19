@@ -8,7 +8,8 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/general.css"> 
-    <link rel="stylesheet" href="css/index.css"> <link rel="stylesheet" href="css/notificaciones.css">
+    <link rel="stylesheet" href="css/index.css"> 
+    <link rel="stylesheet" href="css/notificaciones.css">
     <link rel="stylesheet" href="css/buscar.css"> 
 </head>
 <body>
@@ -22,30 +23,50 @@
 
         <nav class="main-nav">
             <ul class="nav-menu">
+                <!-- 1. MURO -->
                 <li class="list">
-                    <a href="index.html" title="Muro">
+                    <a href="index.html">
                         <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
                     </a>
                 </li>
+                
+                <!-- 2. MENSAJES -->
                 <li class="list">
-                    <a href="mensajes.html" title="Mensajes">
+                    <a href="mensajes.html">
                         <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="text">Mensajes</span>
                     </a>
                 </li>
+                
+                <!-- 3. AVISOS (🎯 POSICIÓN ACTIVA) -->
                 <li class="list active">
-                    <a href="notificaciones.html" title="Notificaciones">
+                    <a href="notificaciones.html">
                         <span class="icon">
                             <i class="fa-solid fa-bell"></i>
                             <span id="contador-notificaciones" class="badge-notif">0</span>
                         </span>
+                        <span class="text">Avisos</span>
                     </a>
                 </li>
+                
+                <!-- 4. TEMA -->
                 <li class="list">
-                    <button id="btn-tema" class="btn-icon-toggle"><i class="fa-solid fa-moon"></i></button>
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon"></i></span>
+                        <span class="text">Tema</span>
+                    </button>
                 </li>
+                
+                <!-- 5. SALIR -->
                 <li class="list">
-                    <a href="#" onclick="cerrarSesionTotal()"><i class="fa-solid fa-right-from-bracket"></i></a>
+                    <a href="#" onclick="cerrarSesionTotal()">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
                 </li>
+
+                <!-- INDICADOR MAGNÉTICO (SIN ESPACIOS PARA PRECISIÓN CSS) -->
                 <div class="indicator"></div>
             </ul>
         </nav>
@@ -71,5 +92,15 @@
     <script src="js/usuario_global.js"></script>
     <script src="js/buscar.js"></script>
     <script src="js/notificaciones.js"></script>
+
+    <script>
+        function cerrarSesionTotal() {
+            if(confirm("¿Deseas cerrar sesión de forma segura?")) {
+                localStorage.clear(); 
+                sessionStorage.clear();
+                window.location.href = '/auth.html'; 
+            }
+        }
+    </script>
 </body>
 </html>

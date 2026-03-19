@@ -2,88 +2,161 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración - Facebook Local</title>
+    
+    <!-- Seguridad y Estilos -->
     <script src="js/guardia.js"></script>
-    <link rel="stylesheet" href="css/general.css"> <link rel="stylesheet" href="css/ajustes.css">  </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/ajustes.css">
+    <link rel="stylesheet" href="css/buscar.css">
+</head>
 <body>
     <header class="main-header">
-        <div class="logo"><h1>Facebook Local</h1></div>
-        <nav>
-            <a href="index.html">Muro</a>
-            <a href="perfil.html" id="nav-nombre">Mi Perfil</a> 
-            <a href="mensajes.html">Mensajes</a>
-            <a href="ajustes.html" class="active">Ajustes</a>
-            <a href="#" id="btn-salir" class="nav-logout">Cerrar Sesión</a>
-            <button id="btn-tema" class="btn-base">🌙</button>
+        <div class="logo"><h1>FL</h1></div>
+
+        <div class="buscador-contenedor">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar...">
+            <div id="resultados-busqueda"></div>
+        </div>
+
+        <nav class="main-nav">
+            <ul class="nav-menu">
+                <li class="list">
+                    <a href="index.html">
+                        <span class="icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="text">Muro</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="mensajes.html">
+                        <span class="icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="text">Mensajes</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="notificaciones.html">
+                        <span class="icon">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="contador-notificaciones" class="badge-notif">0</span>
+                        </span>
+                        <span class="text">Avisos</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <a href="baul.html">
+                        <span class="icon"><i class="fa-solid fa-box-open"></i></span>
+                        <span class="text">Baúl</span>
+                    </a>
+                </li>
+                <li class="list active">
+                    <a href="ajustes.html">
+                        <span class="icon"><i class="fa-solid fa-sliders"></i></span>
+                        <span class="text">Ajustes</span>
+                    </a>
+                </li>
+                <li class="list">
+                    <button id="btn-tema" class="btn-icon-toggle">
+                        <span class="icon"><i class="fa-solid fa-moon" id="theme-icon"></i></span>
+                    </button>
+                </li>
+                <li class="list">
+                    <a href="#" onclick="cerrarSesionTotal()">
+                        <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="text">Salir</span>
+                    </a>
+                </li><div class="indicator"></div>
+            </ul>
+
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
+                <i class="fa-solid fa-user"></i>
+                <span id="user-name-text">Michelle Carvajal</span> 
+            </a> 
         </nav>
     </header>
 
     <main class="container">
-        <div class="card">
-            <h2>Ajustes de Cuenta y Perfil</h2>
-            <p>Modifica tu información personal y preferencias de seguridad.</p>
-            
-            <hr class="separator">
-            
-            <form id="form-ajustes">
+        <div class="settings-wrapper">
+            <div class="card settings-card">
+                <div class="settings-header">
+                    <h2><i class="fa-solid fa-user-gear"></i> Ajustes de Identidad</h2>
+                    <p>Gestiona tu presencia en la red y parámetros de seguridad.</p>
+                </div>
                 
-                <div class="form-group">
-                    <label for="edit-nombre">Nombre:</label>
-                    <input type="text" id="edit-nombre" placeholder="Tu nombre" required>
-                </div>
+                <form id="form-ajustes" class="modern-form">
+                    <section class="form-section">
+                        <h3><i class="fa-solid fa-id-card"></i> Información Básica</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="edit-nombre">Nombre</label>
+                                <input type="text" id="edit-nombre" placeholder="Tu nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-apellido">Apellido</label>
+                                <input type="text" id="edit-apellido" placeholder="Tu apellido" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-bio">Biografía Profesional</label>
+                            <textarea id="edit-bio" rows="3" placeholder="Cuéntanos sobre ti..."></textarea>
+                        </div>
+                    </section>
 
-                <div class="form-group">
-                    <label for="edit-apellido">Apellido:</label>
-                    <input type="text" id="edit-apellido" placeholder="Tu apellido" required>
-                </div>
+                    <section class="form-section">
+                        <h3><i class="fa-solid fa-shield-halved"></i> Seguridad y Apariencia</h3>
+                        <div class="form-group">
+                            <label for="edit-password">Nueva Contraseña</label>
+                            <input type="password" id="edit-password" placeholder="••••••••••••">
+                            <small class="form-help">
+                                <i class="fa-solid fa-triangle-exclamation"></i> 
+                                <strong>Regla del Arquitecto:</strong> Exactamente 12 caracteres para actualizar.
+                            </small>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="adj-foto-url">URL del Avatar</label>
+                                <input type="text" id="adj-foto-url" placeholder="https://link-a-tu-foto.jpg">
+                            </div>
+                            <div class="form-group">
+                                <label for="adj-tema">Interfaz</label>
+                                <select id="adj-tema">
+                                    <option value="claro">☀️ Modo Claro</option>
+                                    <option value="oscuro">🌙 Modo Oscuro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
 
-                <div class="form-group">
-                    <label for="edit-bio">Biografía (BIO):</label>
-                    <textarea id="edit-bio" rows="3" placeholder="Cuéntanos sobre ti..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-password">Nueva Contraseña:</label>
-                    <input type="password" id="edit-password" placeholder="Dejar en blanco para no cambiar">
-                    <small class="form-help">
-                        La regla del Arquitecto exige 12 caracteres si deseas actualizarla.
-                    </small>
-                </div>
-
-                <hr class="separator">
-
-                <div class="form-group">
-                    <label for="adj-foto-url">URL de Foto de Perfil:</label>
-                    <input type="text" id="adj-foto-url" placeholder="https://ejemplo.com/foto.jpg">
-                </div>
-
-                <div class="form-group">
-                    <label for="adj-tema">Tema del Sistema:</label>
-                    <select id="adj-tema">
-                        <option value="claro">☀️ Modo Claro</option>
-                        <option value="oscuro">🌙 Modo Oscuro</option>
-                    </select>
-                </div>
-
-                <button type="submit" id="btn-guardar-ajustes" class="btn-base">
-                    Guardar Cambios Permanentes ✅
-                </button>
-            </form>
+                    <button type="submit" id="btn-guardar-ajustes" class="btn-primary-industrial">
+                        <span>Guardar Cambios Permanentes</span>
+                        <i class="fa-solid fa-floppy-disk"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </main>
 
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
+    <script src="js/buscar.js"></script>
+    <script src="js/notificaciones.js"></script>
     <script src="js/ajustes.js"></script>
 
     <script>
-        document.getElementById('btn-salir').addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-                localStorage.removeItem('usuarioId');
-                window.location.href = '/';
+        function irAMiPerfil() {
+            const miId = localStorage.getItem('usuarioId');
+            if(miId) window.location.href = `perfil.html?id=${miId}`;
+            else window.location.href = '/auth.html';
+        }
+
+        function cerrarSesionTotal() {
+            if(confirm("¿Deseas cerrar sesión de forma segura?")) {
+                localStorage.clear(); 
+                sessionStorage.clear();
+                window.location.href = '/auth.html'; 
             }
-        });
+        }
     </script>
 </body>
 </html>
