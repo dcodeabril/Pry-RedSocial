@@ -29,18 +29,27 @@ if (inputBusqueda) {
                 listaResultados.classList.remove('results-hidden');
                 
                 listaResultados.innerHTML = usuarios.map(u => {
-                    // 🎨 LÓGICA DE IDENTIDAD: Iniciales o Foto (Con blindaje anti-errores)
-                    const inicial = u.nombre ? u.nombre.charAt(0).toUpperCase() : '?';
+                    // 🧠 MOTOR DE IDENTIDAD DINÁMICA REFORZADO
+                    const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim();
+                    const iniciales = nombreCompleto.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2) || '?';
                     
-                    const avatarHtml = u.foto_url 
-                        ? `<img src="/img/${u.foto_url}" class="search-result-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
-                        : `<div class="search-avatar-initial">${inicial}</div>`;
+                    // 🛡️ ESCUDO ANTI-404: Si es "default", "null" o vacío, forzamos iniciales.
+                    const tieneFotoReal = u.foto_url && 
+                                         u.foto_url !== 'default.png' && 
+                                         u.foto_url !== 'null' && 
+                                         u.foto_url !== '' && 
+                                         !u.foto_url.includes('default');
+
+                    // Renderizado inteligente con plan de rescate (onerror)
+                    const avatarHtml = tieneFotoReal
+                        ? `<img src="/img/${u.foto_url}" class="search-result-avatar" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"search-avatar-initial\">${iniciales}</div>';">`
+                        : `<div class="search-avatar-initial">${iniciales}</div>`;
 
                     return `
                         <div class="search-result-item" 
                              onclick="window.location.href='perfil.html?id=${u.usuario_id}'">
                             
-                            ${avatarHtml}
+                            <div class="search-avatar-wrapper">${avatarHtml}</div>
                             
                             <div class="search-result-info">
                                 <span class="search-result-name">

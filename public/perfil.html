@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/general.css"> 
     <link rel="stylesheet" href="css/perfil.css"> 
+    <link rel="stylesheet" href="css/buscar.css"> <!-- 🛠️ Asegura el formato del buscador -->
 </head>
 <body>
     <header class="main-header">
@@ -69,8 +70,9 @@
                 <div class="indicator"></div>
             </ul>
 
+            <!-- 🛠️ CAMBIO: Identidad Dinámica en Nav -->
             <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
-                <i class="fa-solid fa-user"></i>
+                <div id="user-avatar-nav" class="avatar-dinamico-nav"></div>
                 <span id="user-name-text">Cargando...</span> 
             </a> 
         </nav>
@@ -78,7 +80,8 @@
 
     <main class="container">
         <section class="profile-card">
-            <div class="profile-avatar-wrapper">
+            <!-- 🛠️ CAMBIO: ID de contenedor para lógica dinámica en perfil.js -->
+            <div id="profile-avatar-container" class="profile-avatar-wrapper">
                 <img id="perf-foto" src="img/default.png" alt="Foto de perfil">
             </div>
             <div class="profile-info-content">
@@ -133,9 +136,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const nombre = localStorage.getItem('nombre');
+            const foto = localStorage.getItem('foto');
+            
             if(nombre) {
-                const nameText = document.getElementById('user-name-text');
-                if (nameText) nameText.innerText = nombre;
+                document.getElementById('user-name-text').innerText = nombre;
+
+                // --- 🧠 LÓGICA DE AVATAR NAV ---
+                const avatarNav = document.getElementById('user-avatar-nav');
+                if (avatarNav) {
+                    if (foto && foto !== 'null' && foto !== '' && !foto.includes('default')) {
+                        avatarNav.innerHTML = `<img src="${foto}" alt="Perfil" class="img-avatar-nav">`;
+                    } else {
+                        const iniciales = nombre.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2);
+                        avatarNav.innerHTML = `<span class="iniciales-text" style="color:white; font-weight:800; font-size:0.8rem;">${iniciales}</span>`;
+                    }
+                }
             }
         });
 

@@ -55,4 +55,18 @@ async function cargarIdentidadGlobal() {
     }
 }
 
+// --- 3. 🚀 REGISTRO DEL SERVICE WORKER (Lógica del Yeti) ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Usamos './sw.js' para asegurar que busque en la misma carpeta del proyecto
+        navigator.serviceWorker.register('./sw.js')
+            .then((registro) => {
+                console.log('✅ Service Worker del Yeti activo en:', registro.scope);
+            })
+            .catch((error) => {
+                console.error('🚨 Error al registrar el Service Worker:', error);
+            });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', cargarIdentidadGlobal);

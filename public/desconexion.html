@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sin Conexión - Facebook Local</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/desconexion.css">
+</head>
+<body>
+    <svg id="yetiSVG" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 600 470">
+        <linearGradient id="flashlightGrad" x1="126.5842" x2="90.5842" y1="176.5625" y2="213.5625" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#333" />
+            <stop offset="1" stop-color="#333" />
+        </linearGradient>
+        <path fill="#24658F" d="M0 0h600v470H0z" />
+        
+        <!-- Almohada y fondo del Yeti -->
+        <g id="pillow">
+            <path fill="#09334F" d="M241.3 124.6c-52.9 28.6-112.6 48-181.8 54.4-40.9 6.8-64.6-82.3-31.9-106.6C84 43.8 144.8 26.2 209.4 18c32.8 13 48.5 75.3 31.9 106.6z" />
+            <path fill="none" stroke="#001726" stroke-width="2.5" d="M52.8 91.3c10 7.4 25.4 50.7 16.1 65.8" />
+        </g>
+
+        <g id="yeti">
+            <path id="bodyBG" fill="#67B1E0" d="M80.9 291.4l-17.1-72.8c-6.3-27 10.4-54 37.4-60.3l93.1-29.6c26.5-8.1 54.6 6.8 62.7 33.3l21.9 71.5" />
+            <path class="hlFur" fill="#FFF" d="M67.1 232.7c15.6-8.7 27.7-23.7 38-38.7 5.5-8 10.9-16.4 18.3-22.7 13.1-11.2 31.3-14.8 48.6-15" />
+            <path class="hlSkin" fill="#DDF1FA" d="M169.1 70.4l7.3 23.4c9.4 26.8-1.8 45-20 50.7s-37.8-5.1-45.8-30.1L103.3 91" />
+            <g id="eyes">
+                <g id="eyeL"><circle cx="135.9" cy="105.3" r="3.5" fill="#265D85" /></g>
+                <g id="eyeR"><circle cx="163.2" cy="96.3" r="3.5" fill="#265D85" /></g>
+            </g>
+            <g id="armL">
+                <path fill="#67B1E0" d="M50.9 156.7c-12 35.8-7.8 69.6 8.3 101.9 12.1 22.7 37 14.1 39.5-11.8v-65l-47.8-25.1z" />
+            </g>
+        </g>
+
+        <!-- Manta y linterna -->
+        <g id="blanket">
+            <path fill="#09334F" d="M0 281.6c5.3-9.2 11.5-17.9 20.7-22.8 10.3-5.5 22.5-5.5 33.7-8.8 21.8-6.5 37.5-25.2 50.3-43.9s700 570 700 570H0V281.6z" />
+        </g>
+
+        <g id="flashlightFront">
+            <path fill="#1A1A1A" d="M83.9 181.4l4.6 26.4 34.6-33.6-24.5-6.2c-8.9-2.6-16.6 3.9-14.7 13.4z" />
+            <path fill="url(#flashlightGrad)" d="M99.1 183.7c-10.6 9.4-13.4 21.4-9 28.5 4.3 6.8 18 3 28.6-6.4s14.9-23.7 8.8-29z" />
+        </g>
+    </svg>
+
+    <svg id="lightSVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 470">
+        <filter id="white-glow">
+            <feGaussianBlur stdDeviation="8" result="blurred"></feGaussianBlur>
+            <feMerge><feMergeNode in="blurred"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+        </filter>
+        <g id="light" style="visibility: hidden;">
+            <path filter="url(#white-glow)" fill="#F8FFE8" opacity="0.5" d="M122.2 177.4c-5.2-1.6-13.6 2.1-20.6 8.3-7.7 6.8-11.4 16.8-9.3 22.1L421 1683h1534V733L122.2 177.4z" />
+        </g>
+    </svg>
+
+    <div class="content">
+        <h3>¿Hola? ¿Hay alguien ahí?</h3>
+        <p>Sabemos que da miedo, pero la página no responde. Tal vez solo fue un mal sueño de <span>conexión</span>.</p>
+        <button onclick="window.location.reload()" class="btn-reintentar">Intentar Reconectar</button>
+    </div>
+
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <script src="/desconexion.js"></script>
+</body>
+</html>

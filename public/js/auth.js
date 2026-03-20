@@ -85,3 +85,18 @@ document.getElementById('btn-registrar').addEventListener('click', async () => {
         alert("🚨 Error de conexión con el servidor.");
     }
 });
+
+// --- 🚀 REGISTRO DEL SERVICE WORKER (Lógica del Yeti) ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Usamos '/sw.js' para que el servidor lo busque en la raíz principal
+        navigator.serviceWorker.register('/sw.js') 
+            .then((registro) => {
+                console.log('✅ Service Worker del Yeti activo en:', registro.scope);
+            })
+            .catch((error) => {
+                // Si sigue saliendo error aquí, es porque el archivo no está en la raíz
+                console.error('🚨 Error al registrar el Service Worker:', error);
+            });
+    });
+}

@@ -25,7 +25,7 @@ body {
     background-color: var(--header-bg) !important;
     color: var(--header-text);
     padding: 0 25px;
-    height: 65px; /* Mantenido según tu diseño original */
+    height: 65px; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -41,6 +41,14 @@ body {
     font-weight: 900;
     margin: 0;
     letter-spacing: -1px;
+}
+
+/* --- 🛠️ CORRECCIÓN BUSCADOR EN HEADER AZUL --- */
+#resultados-busqueda {
+    background: var(--card-bg, #ffffff) !important; /* Forzamos fondo para que no sea azul */
+    color: var(--text-main) !important;
+    border: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
 }
 
 /* --- 🌟 NAVEGACIÓN MÁGICA (7 ITEMS - LOGICA ORIGINAL) --- */
@@ -124,7 +132,7 @@ body {
 .nav-menu .list:nth-child(6):hover ~ .indicator { transform: translateX(calc(70px * 5)); }
 .nav-menu .list:nth-child(7):hover ~ .indicator { transform: translateX(calc(70px * 6)); }
 
-/* --- 👤 BLOQUE NOMBRE DERECHA --- */
+/* --- 👤 BLOQUE NOMBRE DERECHA + AVATAR DINÁMICO --- */
 .nav-user-link {
     display: flex;
     align-items: center;
@@ -136,6 +144,30 @@ body {
     color: var(--header-text) !important;
     text-decoration: none !important;
     font-weight: 600;
+}
+
+.avatar-dinamico-nav {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatar-dinamico-nav .iniciales-text {
+    color: white !important;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.img-avatar-nav {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* --- ⚪ TARJETA DE PERFIL --- */
@@ -191,7 +223,6 @@ body {
 
 .btn-edit-profile:hover, .btn-admin-report:hover { background-color: var(--primary); color: white; }
 
-/* 🔵 SOLUCIÓN: Añadimos !important al fondo para vencer el reset global */
 .btn-vibrant {
     background-color: var(--primary) !important;
     color: white !important;

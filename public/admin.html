@@ -54,9 +54,10 @@
                 <div class="indicator"></div>
             </ul>
 
+            <!-- 🛠️ CAMBIO: Identidad Dinámica aplicada al Administrador -->
             <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
-                <i class="fa-solid fa-user-shield"></i>
-                <span id="user-name-text">Admin Michelle</span> 
+                <div id="user-avatar-nav" class="avatar-dinamico-nav"></div>
+                <span id="user-name-text">Cargando...</span> 
             </a> 
         </nav>
     </header>
@@ -112,5 +113,46 @@
     <script src="js/tema.js"></script>
     <script src="js/usuario_global.js"></script>
     <script src="js/admin.js"></script>
+
+    <!-- 🛠️ NUEVO SCRIPT: Resolución de errores y Avatar Dinámico -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nombre = localStorage.getItem('nombre');
+            const foto = localStorage.getItem('foto');
+            
+            if(nombre) {
+                document.getElementById('user-name-text').innerText = nombre;
+                
+                // --- 🧠 LÓGICA DE AVATAR NAV ---
+                const avatarNav = document.getElementById('user-avatar-nav');
+                if (avatarNav) {
+                    if (foto && foto !== 'null' && foto !== '' && !foto.includes('default')) {
+                        avatarNav.innerHTML = `<img src="${foto}" alt="Perfil" class="img-avatar-nav">`;
+                    } else {
+                        const iniciales = nombre.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2);
+                        avatarNav.innerHTML = `<span class="iniciales-text" style="color:white; font-weight:800; font-size:0.8rem;">${iniciales}</span>`;
+                    }
+                }
+            }
+        });
+
+        // 🚀 Solución al error de redirección
+        function irAMiPerfil() {
+            const miId = localStorage.getItem('usuarioId');
+            if(miId) {
+                window.location.href = `perfil.html?id=${miId}`;
+            } else {
+                window.location.href = '/auth.html';
+            }
+        }
+
+        function cerrarSesionTotal() {
+            if(confirm("¿Deseas cerrar sesión de forma segura?")) {
+                localStorage.clear(); 
+                sessionStorage.clear();
+                window.location.href = '/auth.html'; 
+            }
+        }
+    </script>
 </body>
 </html>

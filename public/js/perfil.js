@@ -26,15 +26,36 @@
                 if (nombreTxt) nombreTxt.innerText = `${datos.nombre} ${datos.apellido}`;
                 if (bioTxt) bioTxt.innerText = datos.bio || "¡Hola! Estoy usando Facebook Local.";
                 
-                if (fotoImg) {
-                    const rutaFoto = (datos.foto_url && datos.foto_url !== 'default.png') 
-                                    ? `/img/${datos.foto_url}` 
-                                    : '/img/default.png'; 
-                    fotoImg.src = rutaFoto;
+                // --- 🛡️ ESCUDO DE IDENTIDAD DINÁMICA (PERFIL) ---
+                const containerAvatar = document.getElementById('profile-avatar-container');
+                const nombreCompleto = `${datos.nombre || ''} ${datos.apellido || ''}`.trim();
+                const iniciales = nombreCompleto.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2) || '?';
+
+                const tieneFoto = datos.foto_url && 
+                                 datos.foto_url !== 'default.png' && 
+                                 datos.foto_url !== 'null' && 
+                                 datos.foto_url !== '' &&
+                                 !datos.foto_url.includes('default');
+
+                if (tieneFoto && fotoImg) {
+                    fotoImg.src = `/img/${datos.foto_url}`;
+                    fotoImg.style.display = 'block';
                     
-                    fotoImg.onerror = () => { 
-                        fotoImg.src = `https://ui-avatars.com/api/?name=${datos.nombre}&background=0D8ABC&color=fff`; 
+                    // Si la imagen real falla, rescatamos con iniciales industriales
+                    fotoImg.onerror = () => {
+                        if(containerAvatar) {
+                            containerAvatar.innerHTML = `
+                                <div class="avatar-dinamico-nav" style="width:100%; height:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                                    <span style="color:white; font-size:3.5rem; font-weight:800;">${iniciales}</span>
+                                </div>`;
+                        }
                     };
+                } else if (containerAvatar) {
+                    // No hay foto: Inyectamos el Avatar Dinámico Industrial directamente
+                    containerAvatar.innerHTML = `
+                        <div class="avatar-dinamico-nav" style="width:100%; height:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                            <span style="color:white; font-size:3.5rem; font-weight:800;">${iniciales}</span>
+                        </div>`;
                 }
 
                 // Iniciamos la construcción de la botonera

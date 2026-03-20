@@ -1,0 +1,15 @@
+{
+  "name": "Red Social Local",
+  "short_name": "RedSocial",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#67b1e0",
+  "theme_color": "#67b1e0",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
