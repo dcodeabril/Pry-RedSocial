@@ -88,17 +88,14 @@
     outline: none !important;
     color: #ffffff !important;
     appearance: none;
-    -webkit-appearance: none;
 }
 
-/* Ajuste de Precisión para el Botón de Eventos */
 .btn-nav-reset .icon i {
     color: #ffffff !important;
     font-size: 1.5rem;
     transition: 0.5s;
 }
 
-/* Forzado de color blanco para todos los iconos en el Nav */
 .nav-menu .list a .icon i,
 .nav-menu .list button .icon i,
 .nav-user-link i {
@@ -106,7 +103,6 @@
     opacity: 1 !important;
 }
 
-/* Contenedores de Iconos */
 .nav-menu .list .icon {
     position: relative;
     display: flex;
@@ -117,7 +113,6 @@
     height: 100%;
 }
 
-/* Texto de Hover */
 .nav-menu .list .text {
     position: absolute;
     color: #ffffff;
@@ -128,7 +123,7 @@
     transform: translateY(20px);
 }
 
-/* 🚀 ANIMACIONES DE HOVER (Sincronizadas para Link y Botón) */
+/* 🚀 ANIMACIONES DE HOVER */
 .nav-menu .list:hover .icon,
 .nav-menu .list:hover .btn-nav-reset .icon {
     transform: translateY(-35px);
@@ -138,24 +133,6 @@
 .nav-menu .list:hover .btn-nav-reset .text {
     opacity: 1;
     transform: translateY(12px);
-}
-
-/* --- 🔴 BADGE DE NOTIFICACIONES --- */
-.badge-notif {
-    position: absolute;
-    top: 5px;
-    right: -5px;
-    background-color: #EF4444;
-    color: white;
-    font-size: 0.65rem;
-    width: 18px; 
-    height: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    border: 2px solid var(--header-bg);
-    line-height: 1;
 }
 
 /* --- 🔵 EL INDICADOR (Círculo Mágico) --- */
@@ -172,9 +149,7 @@
     pointer-events: none;
 }
 
-.nav-menu:hover .indicator {
-    opacity: 1;
-}
+.nav-menu:hover .indicator { opacity: 1; }
 
 .nav-menu .list:nth-child(1):hover ~ .indicator { transform: translateX(calc(70px * 0)); }
 .nav-menu .list:nth-child(2):hover ~ .indicator { transform: translateX(calc(70px * 1)); }
@@ -184,31 +159,6 @@
 .nav-menu .list:nth-child(6):hover ~ .indicator { transform: translateX(calc(70px * 5)); }
 .nav-menu .list:nth-child(7):hover ~ .indicator { transform: translateX(calc(70px * 6)); }
 
-/* 🎨 EFECTO CURVE OUTSIDE */
-.indicator::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -22px;
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    border-top-right-radius: 20px;
-    box-shadow: 1px -10px 0 0 var(--header-bg);
-}
-
-.indicator::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -22px;
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    border-top-left-radius: 20px;
-    box-shadow: -1px -10px 0 0 var(--header-bg);
-}
-
 /* --- 👤 BLOQUE DE NOMBRE --- */
 .nav-user-link {
     display: flex;
@@ -216,23 +166,47 @@
     gap: 12px;
     padding: 0 15px !important;
     width: auto !important;
-    min-width: fit-content;
     background-color: rgba(255, 255, 255, 0.1) !important;
     border-radius: 12px;
     height: 45px;
     color: #ffffff !important;
     text-decoration: none;
-    flex-shrink: 0;
 }
 
 #user-name-text {
     font-size: 0.95rem;
     font-weight: 600;
-    white-space: nowrap;
 }
 
-/* --- 📱 RESPONSIVE --- */
-@media (max-width: 950px) {
-    .main-header { height: auto; flex-direction: column; padding: 10px; gap: 10px; }
-    .nav-user-link { order: -1; margin-bottom: 5px; }
+/* =============================================
+   🆕 SECCIÓN: AVATAR DINÁMICO (IDENTIDAD INDUSTRIAL)
+   ============================================= */
+
+.avatar-dinamico-nav {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    flex-shrink: 0;
 }
+
+.avatar-dinamico-nav .iniciales-text {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.img-avatar-nav {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- FIN ARCHIVO index.css --- */

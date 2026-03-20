@@ -78,8 +78,9 @@
                 <div class="indicator"></div>
             </ul>
 
+            <!-- 🛠️ AJUSTE: Avatar dinámico en lugar de icono estático -->
             <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link" title="Mi Perfil">
-                <i class="fa-solid fa-user"></i>
+                <div id="user-avatar-nav" class="avatar-dinamico-nav"></div>
                 <span id="user-name-text">Cargando...</span> 
             </a> 
         </nav>
@@ -115,6 +116,7 @@
         <section id="feed"></section>
     </main>
 
+    <!-- Modales (Llamada, Eventos, etc.) -->
     <div id="modal-videollamada" class="modal-video-overlay video-modal-hidden">
         <div class="video-container">
             <video id="remoteVideo" autoplay playsinline class="video-remote"></video>
@@ -187,11 +189,32 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const nombreUsuario = localStorage.getItem('nombre');
+            const fotoUsuario = localStorage.getItem('foto'); 
+
             if (nombreUsuario) {
                 const nameText = document.getElementById('user-name-text');
                 if (nameText) nameText.innerText = nombreUsuario;
+                
                 const postText = document.getElementById('post-contenido');
                 if (postText) postText.placeholder = `¿Qué estás pensando, ${nombreUsuario}?`;
+
+                // --- 🧠 LÓGICA DE AVATAR DINÁMICO ---
+                const avatarNav = document.getElementById('user-avatar-nav');
+                if (avatarNav) {
+                    if (fotoUsuario && fotoUsuario !== 'null' && fotoUsuario !== '') {
+                        avatarNav.innerHTML = `<img src="${fotoUsuario}" alt="Perfil" class="img-avatar-nav">`;
+                    } else {
+                        // Extraer iniciales de forma segura
+                        const iniciales = nombreUsuario
+                            .split(' ')
+                            .map(palabra => palabra[0])
+                            .join('')
+                            .toUpperCase()
+                            .substring(0, 2);
+                        
+                        avatarNav.innerHTML = `<span class="iniciales-text">${iniciales}</span>`;
+                    }
+                }
             }
         });
 

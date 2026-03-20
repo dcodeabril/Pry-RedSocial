@@ -2,6 +2,7 @@
    PROYECTO: FACEBOOK LOCAL
    SECCIÓN: GESTIÓN DE MURO (ESTILO VIBRANTE E INDUSTRIAL)
    ARCHIVO: publicaciones.css
+   ESTADO: REPARACIÓN ESTRUCTURAL GLOBAL (CLARO/OSCURO) 🛰️
    ============================================= */
 
 /* --- 📢 MENSAJES DE ESTADO --- */
@@ -16,7 +17,7 @@
     margin: 20px 0;
 }
 
-/* --- ✍️ ÁREA DE CREACIÓN DE PUBLICACIONES (ESTILO MODERNO) --- */
+/* --- ✍️ ÁREA DE CREACIÓN DE PUBLICACIONES --- */
 .create-post {
     padding: 20px;
     background: var(--bg-card, #fff);
@@ -48,7 +49,7 @@
     margin-top: 10px;
 }
 
-/* 🌎 MEJORA DEL SELECTOR DE PRIVACIDAD */
+/* 🌎 SELECTOR DE PRIVACIDAD */
 .post-privacy-selector select {
     background: #f0f2f5;
     border: none;
@@ -60,7 +61,7 @@
     cursor: pointer;
     transition: background 0.2s;
     outline: none;
-    appearance: none; /* Quita la flecha fea de sistema */
+    appearance: none; 
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 10px center;
@@ -68,11 +69,7 @@
     padding-right: 35px;
 }
 
-.post-privacy-selector select:hover {
-    background: #e4e6eb;
-}
-
-/* 🚀 EL BOTÓN DE PUBLICAR VIBRANTE */
+/* 🚀 BOTÓN PUBLICAR */
 #btn-publicar {
     background: linear-gradient(135deg, #1877f2, #0056b3);
     color: white;
@@ -86,16 +83,6 @@
     transition: all 0.2s ease;
 }
 
-#btn-publicar:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(24, 119, 242, 0.4);
-    filter: brightness(1.1);
-}
-
-#btn-publicar:active {
-    transform: translateY(0);
-}
-
 /* --- 🃏 TARJETA DE PUBLICACIÓN (POST CARD) --- */
 .post-card {
     background: var(--bg-card, #fff);
@@ -104,23 +91,7 @@
     margin-bottom: 25px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border-color, #e0e0e0);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 1s ease;
-}
-
-.post-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-/* Resaltado dinámico */
-.post-highlight {
-    animation: highlight-pulse 2s ease-out forwards;
-    border: 2px solid var(--primary, #1877f2) !important;
-}
-
-@keyframes highlight-pulse {
-    0% { background-color: #fff9c4; } 
-    100% { background-color: var(--bg-card, #fff); }
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* --- 👤 CABECERA DEL POST --- */
@@ -143,33 +114,15 @@
     padding: 2px;
 }
 
-.post-user-meta {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
 .post-user-meta strong {
     font-size: 1.05rem;
     color: var(--text-color, #1c1e21);
-}
-
-.post-share-tag {
-    color: var(--primary, #1877f2);
-    font-size: 0.85rem;
-    font-weight: 700;
 }
 
 .post-timestamp {
     font-size: 0.8rem;
     color: var(--text-muted, #65676b);
     margin-top: 2px;
-}
-
-.post-privacy-icon {
-    font-size: 0.95rem;
-    opacity: 0.6;
-    cursor: help;
 }
 
 /* --- 📝 CONTENIDO DEL POST --- */
@@ -181,111 +134,98 @@
     word-wrap: break-word;
 }
 
-/* --- 🔄 ESTILOS DE "COMPARTIDO" --- */
-.post-shared-comment {
-    margin-bottom: 15px;
-    font-weight: 500;
-    font-size: 1.1rem;
-    color: var(--text-color, #050505);
-}
-
-.shared-box {
-    border: 1px solid var(--border-color, #dddfe2);
-    border-radius: 12px;
-    padding: 18px;
-    background: rgba(0, 0, 0, 0.02);
-    margin-top: 10px;
-    border-left: 5px solid var(--primary, #1877f2);
-}
-
-.shared-box-header {
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.shared-box-author {
-    color: var(--text-muted, #65676b);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.shared-box-content {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: var(--text-color, #050505);
-    opacity: 0.9;
-}
-
-/* --- 🦶 PIE DE PUBLICACIÓN Y ACCIONES --- */
+/* --- 🦶 PIE DE PUBLICACIÓN (REPARACIÓN ESTRUCTURAL GLOBAL) --- */
 .post-footer-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-color, #ebedf0);
-    flex-wrap: wrap;
-    gap: 15px;
+    display: flex !important;
+    flex-direction: row !important; /* Fuerza horizontalidad */
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-top: 15px !important;
+    border-top: 1px solid var(--border-color, #ebedf0) !important;
+    gap: 10px;
+    flex-wrap: nowrap; /* Evita que los botones salten de línea */
 }
 
 .post-btn-group {
-    display: flex;
+    display: flex !important;
+    flex-direction: row !important; /* Alinea Me gusta, Comentar, etc. */
     gap: 10px;
+    align-items: center;
 }
 
 .btn-secundario {
     background: var(--bg-hover, #f0f2f5);
     border: 1px solid transparent;
-    padding: 8px 16px;
+    padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #4b4f56;
     transition: all 0.2s ease;
-    display: flex;
+    display: flex !important; 
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    white-space: nowrap;
 }
 
 .btn-secundario:hover {
     background: #e4e6eb;
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
-.btn-share-alt { color: var(--primary, #1877f2) !important; }
-.btn-save-alt { color: #ffc107 !important; }
-.btn-report-alt { color: #ffa500 !important; font-size: 0.85rem !important; }
-.btn-delete-alt { color: #dc3545 !important; font-size: 0.85rem !important; }
+/* ============================================================
+   🌓 SECCIÓN: ACCIÓN CAMBIO MODO OSCURO (SINCRONIZACIÓN)
+   ============================================================ */
 
-/* --- 🌓 COMPATIBILIDAD CON TEMA OSCURO --- */
-body.dark-theme .create-post,
-body.dark-theme .post-card {
-    background: #242526;
-    border-color: #3e4042;
-    color: #e4e6eb;
+body.dark-mode .create-post,
+body.dark-mode .post-card {
+    background: var(--card-bg) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 }
 
-body.dark-theme #post-contenido { color: #fff; }
-
-body.dark-theme .post-privacy-selector select {
-    background: #3a3b3c;
-    color: #e4e6eb;
+body.dark-mode .post-footer-container {
+    border-top: 1px solid var(--border) !important;
 }
 
-body.dark-theme .post-user-meta strong,
-body.dark-theme .post-body,
-body.dark-theme .shared-box-content {
-    color: #fff;
+/* Visibilidad de Textos en Oscuridad */
+body.dark-mode .post-user-meta strong,
+body.dark-mode .post-body,
+body.dark-mode .shared-box-content,
+body.dark-mode .post-shared-comment {
+    color: var(--text-main) !important;
 }
 
-body.dark-theme .shared-box {
-    background: rgba(255, 255, 255, 0.03);
+body.dark-mode .post-timestamp,
+body.dark-mode .shared-box-author {
+    color: var(--text-muted) !important;
 }
 
-body.dark-theme .btn-secundario {
-    background: #3a3b3c;
-    color: #b0b3b8;
+body.dark-mode #post-contenido {
+    color: var(--text-main) !important;
 }
 
-body.dark-theme .btn-secundario:hover { background: #4e4f50; }
+/* Estilo de Botones Nocturnos */
+body.dark-mode .btn-secundario {
+    background: var(--bg-input) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border) !important;
+}
+
+body.dark-mode .btn-secundario:hover {
+    background: var(--primary-dark) !important;
+    color: white !important;
+}
+
+body.dark-mode .post-privacy-selector select {
+    background: var(--bg-input) !important;
+    color: var(--text-main) !important;
+}
+
+body.dark-mode .shared-box {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: var(--border) !important;
+}
+
+/* --- FIN ACCIÓN MODO OSCURO --- */

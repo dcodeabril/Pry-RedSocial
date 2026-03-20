@@ -50,6 +50,12 @@
                 </li>
                 <div class="indicator"></div>
             </ul>
+
+            <!-- 🛠️ IDENTIDAD DINÁMICA: Avatar del usuario actual en la Nav -->
+            <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link" title="Mi Perfil">
+                <div id="user-avatar-nav" class="avatar-dinamico-nav"></div>
+                <span id="user-name-text">Cargando...</span> 
+            </a> 
         </nav>
     </header>
 
@@ -71,6 +77,40 @@
     <script src="js/usuario_global.js"></script>
     <script src="js/baul.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nombre = localStorage.getItem('nombre');
+            const foto = localStorage.getItem('foto');
+            
+            if (nombre) {
+                // Actualizar nombre en la nav
+                const nameText = document.getElementById('user-name-text');
+                if (nameText) nameText.innerText = nombre;
+
+                // --- 🧠 LÓGICA DE AVATAR DINÁMICO ---
+                const avatarNav = document.getElementById('user-avatar-nav');
+                if (avatarNav) {
+                    if (foto && foto !== 'null' && foto !== '') {
+                        avatarNav.innerHTML = `<img src="${foto}" alt="Perfil" class="img-avatar-nav">`;
+                    } else {
+                        // Extraer iniciales de forma segura
+                        const iniciales = nombre.split(' ')
+                            .map(p => p[0])
+                            .join('')
+                            .toUpperCase()
+                            .substring(0, 2);
+                        
+                        avatarNav.innerHTML = `<span class="iniciales-text">${iniciales}</span>`;
+                    }
+                }
+            }
+        });
+
+        function irAMiPerfil() {
+            const miId = localStorage.getItem('usuarioId');
+            if(miId) window.location.href = `perfil.html?id=${miId}`;
+            else window.location.href = '/auth.html';
+        }
+
         function cerrarSesionTotal() {
             if(confirm("¿Deseas cerrar el baúl y salir de forma segura?")) {
                 localStorage.clear();

@@ -1,8 +1,8 @@
 /* =============================================
-   PROYECTO: RED SOCIAL
-   SECCIÓN: BAÚL DE TESOROS (GOLDEN INDUSTRIAL)
-   ARCHIVO: baul.css
-   ============================================= */
+    PROYECTO: RED SOCIAL
+    SECCIÓN: BAÚL DE TESOROS (GOLDEN INDUSTRIAL)
+    ARCHIVO: baul.css
+    ============================================= */
 
 /* --- 🏛️ CABECERA DEL BAÚL --- */
 .baul-header {
@@ -62,6 +62,18 @@
     border-radius: 50%; 
     object-fit: cover;
     border: 2px solid #ffc107;
+    /* 🛠️ Ajuste para iniciales dinámicas */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 🧠 ESTILO PARA INICIALES EN EL BAÚL */
+.avatar-dinamico-nav.tesoro-avatar .iniciales-text {
+    color: white;
+    font-weight: 800;
+    font-size: 1.1rem;
 }
 
 .tesoro-user-info strong {
@@ -126,10 +138,16 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 🌓 MODO OSCURO */
-body.dark-theme .tesoro-card {
-    background: #242526;
+/* 🌓 MODO OSCURO (Sincronizado con el estándar industrial) */
+body.dark-mode .tesoro-card {
+    background-color: var(--card-bg) !important;
 }
-body.dark-theme .tesoro-footer {
-    border-color: #3e4042;
+
+body.dark-mode .tesoro-footer {
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .tesoro-user-info strong,
+body.dark-mode .tesoro-body {
+    color: var(--text-main) !important;
 }

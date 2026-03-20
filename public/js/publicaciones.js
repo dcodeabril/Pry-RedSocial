@@ -35,6 +35,14 @@
                 div.className = 'post-card card'; 
                 div.id = `post-${post.id}`; 
 
+                // --- 🧠 LÓGICA DE AVATAR DINÁMICO (SRAEL UI) ---
+                const iniciales = (post.nombre.charAt(0) + post.apellido.charAt(0)).toUpperCase();
+                const avatarUI = (post.foto_url && post.foto_url !== 'default.png' && post.foto_url !== 'null')
+                    ? `<img src="/img/${post.foto_url}" class="post-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
+                    : `<div class="avatar-dinamico-nav post-avatar" style="width: 45px; height: 45px; margin-right: 15px; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--primary-dark));">
+                           <span class="iniciales-text" style="font-size: 1.1rem; color: white; font-weight: 800;">${iniciales}</span>
+                       </div>`;
+
                 const esCompartido = post.tipo === 'compartido';
                 
                 // --- 🧱 CONSTRUCCIÓN DINÁMICA DEL CONTENIDO ---
@@ -69,9 +77,7 @@
 
                 div.innerHTML = `
                     <div class="post-header-container">
-                        <img src="/img/${post.foto_url || 'default.png'}" 
-                             class="post-avatar" 
-                             onerror="this.onerror=null; this.src='/img/default.png';">
+                        ${avatarUI}
                         <div class="post-user-meta">
                             <strong>${post.nombre} ${post.apellido}</strong>
                             ${esCompartido ? '<span class="post-share-tag"><i class="fa-solid fa-share-nodes"></i> compartió</span>' : ''}
@@ -156,12 +162,10 @@
 
     // --- 3. 🌍 FUNCIONES GLOBALES ---
 
-    // 💾 GUARDAR POST EN BAÚL (DIRECCIÓN CORREGIDA)
     window.guardarPost = async function(postId) {
         if (!miId) return alert("Inicia sesión para guardar tesoros.");
         
         try {
-            // 🚀 URL SINCRONIZADA CON EL SERVIDOR INDUSTRIAL
             const res = await fetch('/api/publicaciones/baul/guardar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

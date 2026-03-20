@@ -1,40 +1,42 @@
 /* =============================================
    PROYECTO: FACEBOOK LOCAL
-   SECCIÓN: SISTEMA DE MENSAJERÍA (INDUSTRIAL + DARK MODE PRO)
+   SECCIÓN: SISTEMA DE MENSAJERÍA (INDUSTRIAL)
    ARCHIVO: mensajes.css
+   ESTADO: FULL SYNC (CLARO/OSCURO) + AVATAR DINÁMICO 🛰️
    ============================================= */
 
-/* --- 📱 ESTRUCTURA GENERAL (Modo Claro por Defecto) --- */
+/* --- 📱 ESTRUCTURA GENERAL --- */
 .chat-layout {
     display: flex;
     height: calc(100vh - 110px); 
     gap: 0;
     margin-top: 15px;
-    background: var(--bg-card, #fff);
-    border-radius: 15px;
+    background: var(--card-bg);
+    border-radius: var(--radius-main);
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border: 1px solid var(--border-color, #e0e0e0);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
 }
 
 /* --- 👥 SIDEBAR DE CONTACTOS --- */
 .sidebar-amigos {
     width: 30%;
     min-width: 280px;
-    border-right: 1px solid var(--border-color, #f0f2f5);
-    background: #f9fafb;
+    border-right: 1px solid var(--border);
+    background: var(--bg-page);
     display: flex;
     flex-direction: column;
 }
 
 .sidebar-header {
     padding: 20px;
-    border-bottom: 1px solid var(--border-color, #eee);
+    border-bottom: 1px solid var(--border);
 }
 
 .sidebar-header h3 {
     margin: 0;
-    color: var(--primary, #1877f2);
+    color: var(--primary);
     font-size: 1.1rem;
     display: flex;
     align-items: center;
@@ -45,15 +47,15 @@
     padding: 15px;
     transition: all 0.2s ease;
     cursor: pointer;
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    border-bottom: 1px solid var(--border);
     list-style: none;
 }
 
-.amigo-item:hover { background: #f0f2f5; }
+.amigo-item:hover { background: var(--bg-input); }
 
 .amigo-item-activo {
-    background: #e7f3ff !important;
-    border-left: 4px solid var(--primary, #1877f2);
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-left: 4px solid var(--primary);
 }
 
 .amigo-item-content {
@@ -64,9 +66,7 @@
 
 /* --- 🟢 ESTADOS DE CONEXIÓN REAL-TIME --- */
 .status-online { color: #28a745 !important; font-weight: 700; }
-.status-offline { color: #adb5bd !important; font-weight: 400; opacity: 0.7; }
-
-.amigo-info-mini small { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; }
+.status-offline { color: var(--text-muted) !important; font-weight: 400; opacity: 0.7; }
 
 .status-online i { animation: pulse-green 2s infinite; }
 @keyframes pulse-green {
@@ -75,47 +75,53 @@
     100% { opacity: 1; transform: scale(1); }
 }
 
-/* 🎨 Avatares e Iniciales */
+/* --- 🧠 IDENTIDAD DINÁMICA (AVATAR) --- */
 .amigo-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+
+/* Sincronizado con index.css e Identidad Global */
 .amigo-avatar-initial {
-    width: 42px; height: 42px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary, #1877f2), #0056b3);
-    color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;
-    font-size: 1.1rem;
+    width: 42px; 
+    height: 42px; 
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 800; /* Forzado industrial para legibilidad */
+    font-size: 1rem;
+    box-shadow: var(--shadow-sm);
 }
 
-.amigo-info-mini { display: flex; flex-direction: column; }
-.amigo-info-mini strong { font-size: 0.95rem; color: var(--text-color, #1c1e21); }
+.amigo-info-mini strong { font-size: 0.95rem; color: var(--text-main); }
 
 /* --- 💬 VENTANA DE CONVERSACIÓN --- */
 .chat-window {
     width: 70%;
     display: flex;
     flex-direction: column;
-    background: white;
+    background: var(--card-bg);
 }
 
 #chat-header {
     padding: 15px 25px;
-    border-bottom: 1px solid var(--border-color, #eee);
+    border-bottom: 1px solid var(--border);
     min-height: 65px;
     display: flex;
     align-items: center;
 }
 
-.chat-header-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-
 .btn-call-trigger {
-    background: #f0f2f5; border: none; padding: 10px 15px; border-radius: 10px;
-    color: var(--primary, #1877f2); cursor: pointer; transition: 0.2s;
+    background: var(--bg-input); border: none; padding: 10px 15px; border-radius: 10px;
+    color: var(--primary); cursor: pointer; transition: 0.2s;
 }
 
-.btn-call-trigger:hover { background: var(--primary); color: white; transform: scale(1.1); }
+.btn-call-trigger:hover { background: var(--primary); color: white; transform: scale(1.05); }
 
 /* 🎈 BURBUJAS DE MENSAJE */
 .mensajes-lista {
     flex-grow: 1; padding: 20px; overflow-y: auto;
-    background: #f0f2f5; display: flex; flex-direction: column; gap: 12px;
+    background: var(--bg-page); display: flex; flex-direction: column; gap: 12px;
 }
 
 .msg-row { display: flex; width: 100%; }
@@ -124,139 +130,85 @@
 
 .msg-bubble {
     max-width: 70%; padding: 10px 15px; border-radius: 18px;
-    position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    position: relative; box-shadow: var(--shadow-sm);
 }
 
 .msg-row-me .msg-bubble {
-    background: var(--primary, #1877f2); color: white; border-bottom-right-radius: 4px;
+    background: var(--primary); color: white; border-bottom-right-radius: 4px;
 }
 
 .msg-row-them .msg-bubble {
-    background: white; color: #050505; border-bottom-left-radius: 4px; border: 1px solid #dddfe2;
+    background: var(--card-bg); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border);
 }
 
 .msg-time { font-size: 0.65rem; opacity: 0.7; display: block; margin-top: 5px; text-align: right; }
 
 /* ⌨️ ENTRADA DE TEXTO */
 .chat-input-container {
-    padding: 20px; display: flex; gap: 10px; background: white;
-    border-top: 1px solid var(--border-color, #eee);
+    padding: 20px; display: flex; gap: 10px; background: var(--card-bg);
+    border-top: 1px solid var(--border);
 }
 
 #input-msj {
-    flex-grow: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #ddd;
-    background: #f0f2f5; outline: none; font-size: 1rem;
+    flex-grow: 1; padding: 12px 20px; border-radius: 25px; 
+    border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; 
+    color: var(--text-main) !important;
+    outline: none; font-size: 1rem;
 }
 
-/* =============================================
-   🌙 REFUERZO MAESTRO: MODO OSCURO (ULTRA-ESPECÍFICO)
-   ============================================= */
+/* ============================================================
+   🌓 SECCIÓN: ACCIÓN CAMBIO MODO OSCURO (REFUERZO INDUSTRIAL)
+   ============================================================ */
 
-/* 1. Reset de Fondos Principales (Fuerza Bruta) */
-body.dark-theme .chat-layout,
-body.dark-theme .sidebar-amigos,
-body.dark-theme .chat-window,
-body.dark-theme .card.chat-window {
-    background-color: #1c1e21 !important; /* Gris casi negro */
-    border-color: #3e4042 !important;
-    color: #e4e6eb !important;
+body.dark-mode .chat-layout,
+body.dark-mode .sidebar-amigos,
+body.dark-mode .chat-window {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border) !important;
 }
 
-/* 2. Sidebar y Lista de Contactos */
-body.dark-theme .sidebar-amigos {
-    background-color: #1c1e21 !important;
-    border-right: 1px solid #3e4042 !important;
+body.dark-mode .sidebar-header,
+body.dark-mode #chat-header {
+    background-color: var(--card-bg) !important;
+    border-bottom: 1px solid var(--border) !important;
 }
 
-body.dark-theme .sidebar-header {
-    background-color: #242526 !important;
-    border-bottom: 1px solid #3e4042 !important;
+body.dark-mode .amigo-item {
+    border-bottom: 1px solid var(--border) !important;
 }
 
-body.dark-theme .sidebar-header h3 {
-    color: #e4e6eb !important;
+body.dark-mode .amigo-item:hover {
+    background-color: var(--bg-input) !important;
 }
 
-body.dark-theme .amigo-item {
-    background: transparent !important;
-    border-bottom: 1px solid #303031 !important;
+body.dark-mode .amigo-info-mini strong {
+    color: var(--text-main) !important;
 }
 
-body.dark-theme .amigo-item:hover {
-    background-color: #3a3b3c !important;
+body.dark-mode .mensajes-lista {
+    background-color: var(--bg-page) !important;
 }
 
-body.dark-theme .amigo-info-mini strong {
-    color: #e4e6eb !important;
+body.dark-mode .msg-row-them .msg-bubble {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border) !important;
 }
 
-body.dark-theme .status-offline { 
-    color: #6c757d !important; 
-}
-
-/* 3. Ventana de Chat Seleccionado */
-body.dark-theme #chat-header,
-body.dark-theme .chat-header-active {
-    background-color: #242526 !important;
-    border-bottom: 1px solid #3e4042 !important;
-    color: #e4e6eb !important;
-}
-
-body.dark-theme .chat-header-empty {
-    color: #b0b3b8 !important;
-}
-
-/* 4. Área Central de Mensajes (El Feed) */
-body.dark-theme .mensajes-lista {
-    background-color: #18191a !important; /* Fondo más profundo */
-    border: none !important;
-}
-
-body.dark-theme .msg-row-them .msg-bubble {
-    background-color: #3a3b3c !important;
-    color: #e4e6eb !important;
-    border: 1px solid #4e4f50 !important;
-}
-
-body.dark-theme .msg-row-me .msg-bubble {
-    background-color: #0078ff !important;
+body.dark-mode .msg-row-me .msg-bubble {
+    background-color: var(--primary) !important;
     color: #ffffff !important;
 }
 
-body.dark-theme .msg-time { 
-    color: #b0b3b8 !important; 
+body.dark-mode .chat-input-container {
+    background-color: var(--card-bg) !important;
+    border-top: 1px solid var(--border) !important;
 }
 
-body.dark-theme .msg-vacio {
-    color: #b0b3b8 !important;
+body.dark-mode .btn-call-trigger {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
 }
 
-/* 5. Contenedor del Input Inferior */
-body.dark-theme .chat-input-container {
-    background-color: #242526 !important;
-    border-top: 1px solid #3e4042 !important;
-}
-
-body.dark-theme #input-msj {
-    background-color: #3a3b3c !important;
-    border: 1px solid #4e4f50 !important;
-    color: #ffffff !important;
-}
-
-body.dark-theme #input-msj::placeholder {
-    color: #b0b3b8;
-}
-
-/* 6. Botones e Iconos */
-body.dark-theme .btn-vibrant {
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-body.dark-theme .btn-call-trigger {
-    background-color: #3a3b3c !important;
-    color: #e4e6eb !important;
-}
-
-body.dark-theme .amigos-vacio { 
-    color: #b0b3b8 !important; 
-}
+/* --- FIN ACCIÓN MODO OSCURO --- */

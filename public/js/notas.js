@@ -30,12 +30,17 @@ async function cargarNotas() {
             // 🛠️ SINCRONIZACIÓN DE CLASES INDUSTRIALES
             div.className = `nota-item ${esMia ? 'nota-item-mia' : ''}`;
             
-            // 🎨 LÓGICA DE AVATAR: Iniciales o Imagen (Parche anti-bucle incluido)
-            const inicial = nota.nombre ? nota.nombre.charAt(0).toUpperCase() : '?';
+            // 🧠 LÓGICA DE AVATAR DINÁMICO (Sincronizada con Identidad Global)
+            // Extraemos hasta 2 iniciales (Ej: Michelle Carvajal -> MC)
+            const iniciales = nota.nombre 
+                ? nota.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+                : '?';
             
-            const avatarHtml = nota.foto_url 
+            const avatarHtml = (nota.foto_url && nota.foto_url !== 'default.png' && nota.foto_url !== 'null' && nota.foto_url !== '')
                 ? `<img src="/img/${nota.foto_url}" class="nota-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
-                : `<div class="nota-avatar-initial">${inicial}</div>`;
+                : `<div class="avatar-dinamico-nav nota-avatar" style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                       <span class="iniciales-text" style="font-size: 0.9rem; color: white; font-weight: 800;">${iniciales}</span>
+                   </div>`;
 
             div.innerHTML = `
                 <div class="nota-texto-preview" title="${nota.contenido}">

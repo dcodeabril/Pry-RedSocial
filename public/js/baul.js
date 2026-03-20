@@ -1,6 +1,6 @@
 // =============================================
 // PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
-// ROL: ARQUITECTO (GESTIÓN DE TESOROS SPA)
+// ROL: ARQUITECTO (GESTIÓN DE TESOROS SPA - DINÁMICO)
 // ARCHIVO: js/baul.js
 // =============================================
 
@@ -31,9 +31,27 @@ async function cargarTesoros() {
             const div = document.createElement('div');
             div.className = 'post-card card tesoro-card';
 
+            // 🧠 MOTOR DE IDENTIDAD DINÁMICA (CONEXIÓN GLOBAL)
+            const nombreCompleto = `${post.nombre || ''} ${post.apellido || ''}`.trim();
+            const iniciales = nombreCompleto.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2) || '?';
+            
+            // 🛡️ ESCUDO ANTI-404: Si es "default", "null" o vacío, forzamos iniciales.
+            const tieneFotoReal = post.foto_url && 
+                                 post.foto_url !== 'default.png' && 
+                                 post.foto_url !== 'null' && 
+                                 post.foto_url !== '' && 
+                                 !post.foto_url.includes('default');
+
+            // Renderizado inteligente con plan de rescate
+            const avatarUI = tieneFotoReal
+                ? `<img src="/img/${post.foto_url}" class="tesoro-avatar" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"avatar-dinamico-nav tesoro-avatar\" style=\"width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #ffc107; flex-shrink: 0;\"><span class=\"iniciales-text\" style=\"color: white; font-weight: 800; font-size: 1.1rem;\">${iniciales}</span></div>';">`
+                : `<div class="avatar-dinamico-nav tesoro-avatar" style="width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #ffc107; flex-shrink: 0;">
+                       <span class="iniciales-text" style="font-size: 1.1rem; color: white; font-weight: 800;">${iniciales}</span>
+                   </div>`;
+
             div.innerHTML = `
                 <div class="tesoro-header">
-                    <img src="${post.foto_url || 'img/default.png'}" class="tesoro-avatar">
+                    <div class="avatar-wrapper-baul">${avatarUI}</div>
                     <div class="tesoro-user-info">
                         <strong>${post.nombre} ${post.apellido}</strong>
                         <small class="tesoro-info-small">
@@ -58,30 +76,15 @@ async function cargarTesoros() {
 
     } catch (err) {
         console.error("🚨 Error al cargar el baúl:", err);
-        baulFeed.innerHTML = `
-            <div class="card error-card">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <p>No pudimos abrir el baúl. Verifica tu conexión.</p>
-            </div>`;
     }
 }
 
-// 🗑️ Función para quitar una publicación del baúl
 async function quitarDeBaul(postId) {
     if(!confirm("¿Deseas quitar este tesoro de tu baúl?")) return;
-
     try {
-        const res = await fetch(`/api/publicaciones/baul/${postId}?usuario_id=${miId}`, {
-            method: 'DELETE'
-        });
-
-        if (res.ok) {
-            cargarTesoros(); // Recargar la lista
-        }
-    } catch (err) {
-        console.error("🚨 Error al quitar tesoro:", err);
-    }
+        const res = await fetch(`/api/publicaciones/baul/${postId}?usuario_id=${miId}`, { method: 'DELETE' });
+        if (res.ok) cargarTesoros();
+    } catch (err) { console.error("🚨 Error al quitar tesoro:", err); }
 }
 
-// Inicializar al cargar
 document.addEventListener('DOMContentLoaded', cargarTesoros);

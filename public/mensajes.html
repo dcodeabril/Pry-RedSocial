@@ -60,8 +60,9 @@
                 <div class="indicator"></div>
             </ul>
 
+            <!-- 🛠️ AJUSTE: Avatar dinámico en lugar de icono estático -->
             <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
-                <i class="fa-solid fa-user"></i>
+                <div id="user-avatar-nav" class="avatar-dinamico-nav"></div>
                 <span id="user-name-text">Cargando...</span> 
             </a> 
         </nav>
@@ -124,7 +125,28 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const nombre = localStorage.getItem('nombre');
-            if (nombre) document.getElementById('user-name-text').innerText = nombre;
+            const foto = localStorage.getItem('foto');
+            
+            if (nombre) {
+                document.getElementById('user-name-text').innerText = nombre;
+
+                // --- 🧠 LÓGICA DE AVATAR PROPIO DINÁMICO ---
+                const avatarNav = document.getElementById('user-avatar-nav');
+                if (avatarNav) {
+                    if (foto && foto !== 'null' && foto !== '') {
+                        avatarNav.innerHTML = `<img src="${foto}" alt="Perfil" class="img-avatar-nav">`;
+                    } else {
+                        // Extraer iniciales (Ej: Michelle Carvajal -> MC)
+                        const iniciales = nombre.split(' ')
+                            .map(p => p[0])
+                            .join('')
+                            .toUpperCase()
+                            .substring(0, 2);
+                        
+                        avatarNav.innerHTML = `<span class="iniciales-text">${iniciales}</span>`;
+                    }
+                }
+            }
         });
 
         function irAMiPerfil() {

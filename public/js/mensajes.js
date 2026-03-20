@@ -24,11 +24,10 @@ if (miId) {
 }
 
 // 📡 2. ESCUCHAR LISTA DE CONECTADOS
-// Cada vez que alguien entra o sale, el servidor nos avisa
 socket.on('usuarios-online', (ids) => {
     usuariosOnline = ids.map(id => id.toString());
     console.log("Usuarios en línea actualizados:", usuariosOnline);
-    cargarListaAmigos(); // Refrescamos la lista para actualizar los puntos verdes
+    cargarListaAmigos(); 
 });
 
 // --- 👥 3. CARGAR LISTA DE CONTACTOS ---
@@ -44,13 +43,16 @@ async function cargarListaAmigos() {
         }
 
         listaAmigos.innerHTML = amigos.map(a => {
-            // 🎨 Lógica de identidad
-            const inicial = a.nombre ? a.nombre.charAt(0).toUpperCase() : '?';
-            const avatarHtml = a.foto_url 
+            // 🧠 LÓGICA DE IDENTIDAD DINÁMICA (MC STYLE)
+            const iniciales = (a.nombre + " " + (a.apellido || "")).trim().split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2);
+            
+            const avatarHtml = (a.foto_url && a.foto_url !== 'default.png' && a.foto_url !== 'null' && a.foto_url !== '')
                 ? `<img src="/img/${a.foto_url}" class="amigo-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
-                : `<div class="amigo-avatar-initial">${inicial}</div>`;
+                : `<div class="avatar-dinamico-nav amigo-avatar" style="width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0;">
+                       <span class="iniciales-text" style="font-size: 1rem; color: white; font-weight: 800;">${iniciales}</span>
+                   </div>`;
 
-            // 🟢 VALIDACIÓN REAL-TIME: ¿Está en la lista de sockets?
+            // 🟢 VALIDACIÓN REAL-TIME
             const estaOnline = usuariosOnline.includes(a.usuario_id.toString());
             const statusClase = estaOnline ? 'status-online' : 'status-offline';
             const statusTexto = estaOnline ? 'En línea' : 'Desconectado';
@@ -96,7 +98,6 @@ window.seleccionarAmigo = function(id, nombreCompleto) {
         </div>
     `;
     
-    // Resaltar visualmente
     document.querySelectorAll('.amigo-item').forEach(el => el.classList.remove('amigo-item-activo'));
     const itemActivo = document.getElementById(`item-amigo-${id}`);
     if (itemActivo) itemActivo.classList.add('amigo-item-activo');

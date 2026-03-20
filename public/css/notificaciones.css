@@ -1,26 +1,25 @@
-/* =============================================
+/* ============================================================
    PROYECTO: FACEBOOK LOCAL
    SECCIÓN: CENTRO DE NOTIFICACIONES (INDUSTRIAL & VIBRANTE)
    ARCHIVO: notificaciones.css
-   ESTADO: REPARACIÓN DE NAVEGACIÓN COMPLETA ✅
-   ============================================= */
+   ============================================================ */
 
-/* --- 🔔 CONTENEDOR DE ALERTAS --- */
+/* --- 🔔 CONTENEDOR PRINCIPAL --- */
 .notif-container { 
     max-width: 700px; 
     margin: 25px auto; 
-    border-radius: 15px;
+    border-radius: var(--radius-main);
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    background: var(--bg-card, #fff);
+    box-shadow: var(--shadow-md);
+    background: var(--card-bg);
     animation: slideUp 0.4s ease;
-    border: 1px solid var(--border-color, #e0e0e0);
+    border: 1px solid var(--border);
 }
 
 .header-notif { 
     padding: 20px;
-    background: var(--bg-card, #fff);
-    border-bottom: 1px solid var(--border-color, #eee);
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between; 
     align-items: center; 
@@ -28,180 +27,127 @@
 
 .header-notif h2 { 
     font-size: 1.4rem; 
-    color: var(--text-color, #1c1e21); 
+    color: var(--text-main); 
     margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+/* --- 🔘 BOTÓN MARCAR TODO (ESTILO INDUSTRIAL) --- */
+.notif-btn-mark-all {
+    background: var(--bg-input);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notif-btn-mark-all:hover {
+    background: var(--primary);
+    color: white !important;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
 /* --- 📩 ÍTEMS DE NOTIFICACIÓN --- */
 .notif-item { 
     display: flex; 
     padding: 15px 20px; 
-    border-bottom: 1px solid var(--border-color, #f0f2f5); 
+    border-bottom: 1px solid var(--border); 
     transition: all 0.2s ease; 
     cursor: pointer;
-    position: relative;
     align-items: center;
     text-decoration: none;
     color: inherit;
 }
 
 .notif-item:hover { 
-    background: var(--bg-hover, #f9fafb); 
+    background: var(--bg-input); 
 }
 
 .notif-item.no-leido { 
-    background-color: rgba(24, 119, 242, 0.05); 
+    background-color: rgba(59, 130, 246, 0.05); 
 }
 
-/* 🎨 Iniciales Sincronizadas (Identidad Industrial) */
+/* 🎨 AVATARES E INICIALES */
 .notif-avatar-initial {
-    width: 50px; 
-    height: 50px; 
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary, #1877f2), #0056b3);
-    color: white; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    font-weight: bold; 
-    font-size: 1.2rem; 
-    flex-shrink: 0; 
-    margin-right: 15px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 1.2rem; flex-shrink: 0; margin-right: 15px;
 }
 
 .notif-avatar { 
-    width: 50px; 
-    height: 50px; 
-    border-radius: 50%; 
-    margin-right: 15px; 
-    object-fit: cover; 
-    border: 1px solid var(--border-color, #ddd);
+    width: 50px; height: 50px; border-radius: 50%; 
+    margin-right: 15px; object-fit: cover; 
+    border: 1px solid var(--border);
 }
 
 .notif-content { flex-grow: 1; }
 
-.notif-text { 
-    font-size: 0.95rem; 
-    line-height: 1.4; 
-    color: var(--text-color, #050505); 
-}
+.notif-text { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
+.notif-text strong { font-weight: 700; color: var(--text-main); }
+.notif-time { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
 
-.notif-text strong { 
-    color: var(--text-color, #1c1e21); 
-    font-weight: 700;
-}
-
-.notif-time { 
-    font-size: 0.8rem; 
-    color: var(--text-muted, #65676b); 
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* --- 🛠️ ACCIONES --- */
-.notif-actions {
-    margin-top: 12px; 
-    display: flex; 
-    gap: 10px;
-}
-
+/* --- 🛠️ ACCIONES Y ESTADOS --- */
 .notif-btn-delete {
-    background: transparent; 
-    border: none; 
-    color: #bcc0c4;
-    cursor: pointer; 
-    padding: 10px; 
-    transition: all 0.2s;
-    font-size: 1.1rem;
+    background: transparent; border: none; color: var(--text-muted);
+    cursor: pointer; padding: 10px; transition: 0.2s; font-size: 1.1rem;
 }
 
-.notif-btn-delete:hover { 
-    color: #dc3545; 
-    transform: scale(1.1); 
-}
+.notif-btn-delete:hover { color: #dc3545; transform: scale(1.1); }
 
-.notif-empty {
-    padding: 40px 20px; 
-    text-align: center; 
-    color: var(--text-muted, #65676b);
-    font-style: italic;
-}
+.notif-empty { padding: 40px 20px; text-align: center; color: var(--text-muted); font-style: italic; }
 
-/* --- 🔵 INDICADORES Y BADGES --- */
-.status-dot { 
-    width: 10px; 
-    height: 10px; 
-    background: var(--primary, #1877f2); 
-    border-radius: 50%; 
-    margin: 0 15px; 
-    flex-shrink: 0; 
-}
-
-.badge-hidden { display: none !important; }
-.badge-visible { display: flex !important; }
-
-/* --- 🛰️ REACONDICIONAMIENTO DE MAGIC NAV (ESCUDO SELECCIONADO) --- */
-
-/* 🛠️ Reparación: Solo forzamos la visibilidad del texto en el elemento activo */
-.main-header .nav-menu .list.active .text {
-    display: block !important;
-    opacity: 1 !important;
-    transform: translateY(0px) !important;
-    color: white !important;
-    visibility: visible !important;
-}
-
-/* Ajuste milimétrico para el Badge de Notificaciones */
+/* --- 🛰️ MAGIC NAV BADGE --- */
 .badge-notif {
-    position: absolute !important;
-    top: -5px !important;
-    right: -2px !important; /* Ajustado para no chocar con el borde del icono */
-    z-index: 25;
-    background: #ff3b30;
-    color: white;
-    font-size: 0.7rem;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--header-bg);
-    font-weight: bold;
+    position: absolute !important; top: -5px !important; right: -2px !important;
+    background: #ff3b30; color: white; font-size: 0.7rem;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--header-bg); font-weight: bold; z-index: 25;
 }
 
-/* --- 🎬 ANIMACIONES --- */
+/* ============================================================
+   🌓 SECCIÓN: ACCIÓN CAMBIO MODO OSCURO (REFUERZO ESTRUCTURAL)
+   ============================================================ */
+
+body.dark-mode .notif-container,
+body.dark-mode .header-notif { 
+    background: var(--card-bg) !important;
+    border-color: var(--border) !important;
+}
+
+/* Botón Marcar Todo en Oscuro */
+body.dark-mode .notif-btn-mark-all {
+    background: var(--bg-input) !important;
+    border-color: var(--border) !important;
+    color: var(--text-main) !important;
+}
+
+body.dark-mode .notif-btn-mark-all:hover {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+body.dark-mode .notif-item { border-bottom-color: var(--border) !important; }
+body.dark-mode .notif-item:hover { background: var(--bg-input) !important; }
+body.dark-mode .notif-text { color: var(--text-main) !important; }
+body.dark-mode .notif-text strong { color: #ffffff !important; }
+body.dark-mode .notif-time { color: var(--text-muted) !important; }
+
+/* --- FIN ACCIÓN --- */
+
 @keyframes slideUp {
     from { transform: translateY(15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
-
-/* --- 🌓 MODO OSCURO REFORZADO --- */
-body.dark-theme .notif-container { 
-    background: #242526; 
-    border-color: #3e4042; 
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-
-body.dark-theme .header-notif { 
-    background: #242526; 
-    border-bottom-color: #3e4042; 
-}
-
-body.dark-theme .header-notif h2 { color: #fff; }
-
-body.dark-theme .notif-item { border-bottom-color: #3e4042; }
-
-body.dark-theme .notif-item:hover { background: #3a3b3c; }
-
-body.dark-theme .notif-item.no-leido { background: rgba(24, 119, 242, 0.1); }
-
-body.dark-theme .notif-text { color: #e4e6eb; }
-body.dark-theme .notif-text strong { color: #fff; }
-body.dark-theme .notif-time { color: #b0b3b8; }
