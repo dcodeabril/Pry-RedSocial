@@ -8,95 +8,73 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/base_datos');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
 
-// --- 1. REGISTRO MAESTRO (Con Hashing de Contraseña) ---
+// --- 🏗️ CONFIGURACIÓN LOCAL DE MULTER (Subida de Avatares) ---
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/perfiles/'); 
+    },
+    filename: function (req, file, cb) {
+        const userId = req.params.id;
+        const extension = path.extname(file.originalname);
+        cb(null, `avatar_${userId}_${Date.now()}${extension}`);
+    }
+});
+const upload = multer({ storage: storage });
+
+// --- 1. REGISTRO MAESTRO ---
 router.post('/registro', async (req, res) => {
     const { email, password } = req.body;
-
     if (password.length !== 12) {
         return res.status(400).json({ error: "La contraseña debe tener exactamente 12 caracteres." });
     }
-
     try {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-
         const [resultado] = await db.query(
             'INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)',
             [email, hashedPassword, 'usuario'] 
         );
-        
         const nuevoId = resultado.insertId;
-
         await db.query(
             'INSERT INTO perfiles (usuario_id, nombre, apellido) VALUES (?, ?, ?)',
             [nuevoId, 'Nuevo', 'Usuario']
         );
-
-        // ✅ ACTUALIZACIÓN: Lizbeth Ríos da la bienvenida oficial
         const saludo = `¡Hola! Soy Lizbeth Ríos, la Arquitecta de esta red social. ¡Bienvenida/o a bordo!`;
         await db.query(
             'INSERT INTO mensajes (emisor_id, receptor_id, contenido) VALUES (?, ?, ?)',
             [1, nuevoId, saludo]
         );
-
-        res.status(201).json({ 
-            mensaje: "¡Cuenta creada con éxito! Ya puedes iniciar sesión.", 
-            id: nuevoId 
-        });
-
+        res.status(201).json({ mensaje: "¡Cuenta creada con éxito!", id: nuevoId });
     } catch (err) {
-        console.error("🚨 Error en registro:", err);
         res.status(500).json({ error: "Error al registrar usuario." });
     }
 });
 
-// --- 2. LOGIN DE USUARIOS (Con Verificación de Hash) ---
+// --- 2. LOGIN DE USUARIOS ---
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
     try {
         const query = `
             SELECT u.id, u.email, u.password, u.rol, u.estado, p.nombre 
             FROM usuarios u
             JOIN perfiles p ON u.id = p.usuario_id
             WHERE u.email = ?`;
-            
         const [usuarios] = await db.query(query, [email]);
-
-        if (usuarios.length === 0) {
-            return res.status(401).json({ error: "El correo no está registrado." });
-        }
-
+        if (usuarios.length === 0) return res.status(401).json({ error: "No registrado." });
         const usuario = usuarios[0];
-
-        if (usuario.estado === 'suspendido') {
-            return res.status(403).json({ 
-                error: "Acceso denegado. Tu cuenta se encuentra suspendida. 🚫" 
-            });
-        }
-
+        if (usuario.estado === 'suspendido') return res.status(403).json({ error: "Cuenta suspendida. 🚫" });
         const coinciden = await bcrypt.compare(password, usuario.password);
-
-        if (!coinciden) {
-            return res.status(401).json({ error: "Contraseña incorrecta." });
-        }
-
-        res.json({ 
-            mensaje: "¡Bienvenido de nuevo!", 
-            usuarioId: usuario.id,
-            nombre: usuario.nombre,
-            rol: usuario.rol, 
-            email: usuario.email 
-        });
-
+        if (!coinciden) return res.status(401).json({ error: "Contraseña incorrecta." });
+        res.json({ usuarioId: usuario.id, nombre: usuario.nombre, rol: usuario.rol, email: usuario.email });
     } catch (err) {
-        console.error("🚨 Error en login:", err);
-        res.status(500).json({ error: "Error en el servidor al intentar entrar." });
+        res.status(500).json({ error: "Error en el servidor." });
     }
 });
 
-// --- 3. OBTENER AJUSTES (Privado) ---
+// --- 3. OBTENER AJUSTES ---
 router.get('/ajustes/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -105,45 +83,47 @@ router.get('/ajustes/:id', async (req, res) => {
             FROM usuarios u 
             JOIN perfiles p ON u.id = p.usuario_id 
             WHERE u.id = ?`;
-        
         const [rows] = await db.query(query, [id]);
-        
         if (rows.length > 0) res.json(rows[0]);
-        else res.status(404).json({ error: "Usuario no encontrado" });
-    } catch (err) {
-        res.status(500).json({ error: "Error al obtener los datos" });
-    }
+        else res.status(404).json({ error: "No encontrado" });
+    } catch (err) { res.status(500).json({ error: "Error al obtener datos" }); }
 });
 
-// --- 4. ACTUALIZAR AJUSTES ---
-router.put('/actualizar-ajustes/:id', async (req, res) => {
+// --- 4. ACTUALIZAR AJUSTES (Híbrido: Campos + Foto) ---
+router.put('/actualizar-ajustes/:id', upload.single('foto_perfil'), async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, bio, foto_url, tema, password } = req.body;
+    const { nombre, apellido, bio, tema, password } = req.body;
+    let fotoUrl = req.file ? req.file.filename : null; 
 
     try {
-        if (password) {
-            if (password.length !== 12) {
-                return res.status(400).json({ error: "La contraseña debe ser de 12 caracteres." });
-            }
+        if (password && password.length === 12) {
             const hashedNewPassword = await bcrypt.hash(password, 10);
             await db.query('UPDATE usuarios SET password = ?, preferencia_tema = ? WHERE id = ?', [hashedNewPassword, tema, id]);
         } else {
             await db.query('UPDATE usuarios SET preferencia_tema = ? WHERE id = ?', [tema, id]);
         }
 
-        await db.query(
-            `UPDATE perfiles SET nombre = ?, apellido = ?, bio = ?, foto_url = ? WHERE usuario_id = ?`,
-            [nombre, apellido, bio, foto_url, id]
-        );
+        let queryPerfil = "UPDATE perfiles SET nombre = ?, apellido = ?, bio = ?";
+        let paramsPerfil = [nombre, apellido, bio];
 
-        res.json({ mensaje: "¡Perfil y ajustes actualizados correctamente! ✅" });
+        if (fotoUrl) {
+            queryPerfil += ", foto_url = ?";
+            paramsPerfil.push(fotoUrl);
+        }
+
+        queryPerfil += " WHERE usuario_id = ?";
+        paramsPerfil.push(id);
+        
+        await db.query(queryPerfil, paramsPerfil);
+
+        res.json({ mensaje: "¡Perfil actualizado correctamente! ✅", foto_url: fotoUrl });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error crítico al guardar cambios." });
     }
 });
 
-// --- 🔍 5. BUSCADOR PREDICTIVO (#13) ---
+// --- 🔍 5. BUSCADOR PREDICTIVO ---
 router.get('/buscar', async (req, res) => {
     const { q } = req.query;
     if (!q || q.length < 2) return res.json([]);
@@ -155,46 +135,52 @@ router.get('/buscar', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Error en el buscador" }); }
 });
 
-// --- 👤 6. OBTENER PERFIL PÚBLICO ---
+// --- 👤 6. OBTENER PERFIL PÚBLICO (ACTUALIZADO: JOIN ROBUSTO) ---
 router.get('/perfil/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const query = `SELECT u.id, u.email, p.nombre, p.apellido, p.bio, p.foto_url FROM usuarios u JOIN perfiles p ON u.id = p.usuario_id WHERE u.id = ?`;
+        // Usamos LEFT JOIN para evitar el 404 si la tabla 'perfiles' tiene inconsistencias
+        const query = `
+            SELECT u.id, u.email, u.estado, p.nombre, p.apellido, p.bio, p.foto_url 
+            FROM usuarios u 
+            LEFT JOIN perfiles p ON u.id = p.usuario_id 
+            WHERE u.id = ?`;
         const [rows] = await db.query(query, [id]);
-        if (rows.length > 0) res.json(rows[0]);
-        else res.status(404).json({ error: "Usuario no encontrado" });
-    } catch (err) { res.status(500).json({ error: "Error en el servidor" }); }
+        
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: "Usuario no encontrado en la base de datos central." });
+        }
+    } catch (err) { 
+        console.error("🚨 Error en SQL Perfil:", err);
+        res.status(500).json({ error: "Error interno del servidor." }); 
+    }
 });
 
-// --- 🚫 7. SUSPENDER USUARIO (Lizbeth Ríos - ID: 1) ---
+// --- 🚫 7. SUSPENDER USUARIO ---
 router.patch('/suspendido/:id', async (req, res) => {
     const { id } = req.params;
     const { adminId } = req.body; 
-    // Mantenemos el 1 porque Lizbeth hereda ese ID
-    if (parseInt(adminId) !== 1) return res.status(403).json({ error: "Solo la Arquitecta Lizbeth tiene este poder." });
-
+    if (parseInt(adminId) !== 1) return res.status(403).json({ error: "No autorizado." });
     try {
         await db.query('UPDATE usuarios SET estado = "suspendido" WHERE id = ?', [id]);
-        res.json({ mensaje: "La cuenta ha sido suspendida correctamente. 🚫" });
-    } catch (err) { res.status(500).json({ error: "Error al actualizar estado." }); }
+        res.json({ mensaje: "Cuenta suspendida. 🚫" });
+    } catch (err) { res.status(500).json({ error: "Error." }); }
 });
 
-// --- 🔑 8. PROMOVER USUARIO CON CÓDIGO MAESTRO ---
+// --- 🔑 8. PROMOVER USUARIO ---
 router.patch('/promover', async (req, res) => {
     const { usuario_a_promover, codigo, admin_solicitante_id } = req.body;
     try {
-        // Mantenemos el 1 porque Lizbeth hereda ese ID
-        if (admin_solicitante_id != 1) return res.status(403).json({ error: "No autorizado. Solo Lizbeth autoriza ascensos. 🚫" });
-
+        if (admin_solicitante_id != 1) return res.status(403).json({ error: "No autorizado. 🚫" });
         const [busqueda] = await db.query('SELECT * FROM codigos_admin WHERE codigo = ? AND estado = "disponible"', [codigo]);
-        if (busqueda.length === 0) return res.status(403).json({ error: "Código inválido o usado. ❌" });
-
+        if (busqueda.length === 0) return res.status(403).json({ error: "Código inválido. ❌" });
         const codigoId = busqueda[0].id;
         await db.query('UPDATE usuarios SET rol = "admin" WHERE id = ?', [usuario_a_promover]);
         await db.query(`UPDATE codigos_admin SET estado = "usado", usuario_que_lo_uso = ?, fecha_uso = NOW() WHERE id = ?`, [usuario_a_promover, codigoId]);
-
-        res.json({ mensaje: "¡Usuario ascendido a Administrador por la Arquitecta! ⭐" });
-    } catch (err) { res.status(500).json({ error: "Error interno en ascenso." }); }
+        res.json({ mensaje: "¡Usuario ascendido! ⭐" });
+    } catch (err) { res.status(500).json({ error: "Error." }); }
 });
 
 module.exports = router;

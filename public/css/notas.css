@@ -8,23 +8,18 @@
 .notas-wrapper {
     padding: 15px 0;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color, #eee);
+    border-bottom: 1px solid var(--border);
 }
 
 #notas-dinamicas {
     display: flex;
     gap: 15px;
-}
-
-#lista-notas {
-    display: flex;
     overflow-x: auto;
-    gap: 15px;
     padding: 10px 5px;
     scrollbar-width: none; /* Firefox */
 }
 
-#lista-notas::-webkit-scrollbar {
+#notas-dinamicas::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
 }
 
@@ -52,16 +47,16 @@
 .nota-texto-preview {
     font-size: 0.7rem;
     padding: 6px 8px;
-    border: 1px solid var(--border-color, #ddd);
+    border: 1px solid var(--border);
     border-radius: 15px;
-    background: var(--bg-card, #fff);
+    background: var(--card-bg);
     max-width: 80px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    color: var(--text-color, #333);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-main);
     font-weight: 500;
     position: relative;
     z-index: 2;
@@ -76,14 +71,13 @@
     transform: translateX(-50%);
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 5px solid var(--bg-card, #fff);
+    border-top: 5px solid var(--card-bg);
 }
 
 /* --- ✨ ESTADOS DINÁMICOS (Es Mía) --- */
 .nota-item-mia .nota-texto-preview {
     border-color: #28a745; 
     background: #f0fff4;
-    font-weight: bold;
 }
 
 .nota-item-mia .nota-texto-preview::after {
@@ -95,44 +89,47 @@
     box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
 }
 
-/* --- 🖼️ BURBUJA Y AVATAR --- */
+/* --- 🖼️ BURBUJA Y AVATAR HÍBRIDO --- */
 .nota-burbuja {
     width: 65px; 
     height: 65px; 
     border-radius: 50%; 
-    border: 3px solid var(--primary, #1877f2); 
+    border: 3px solid var(--primary); 
     margin: 0 auto 8px; 
-    overflow: hidden; 
-    background: #f0f2f5;
+    overflow: hidden; /* 👈 CRÍTICO: Mantiene el círculo perfecto */
+    background: var(--bg-input);
     padding: 2px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Estilo para la foto real */
 .nota-avatar {
     width: 100%; 
     height: 100%; 
-    object-fit: cover;
+    object-fit: cover; /* Centra y escala la foto real */
     border-radius: 50%;
 }
 
-/* 🎨 Iniciales cuando no hay foto */
+/* Estilo para las iniciales dinámicas */
 .nota-avatar-initial {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--primary, #1877f2), #0056b3);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     border-radius: 50%;
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .nota-nombre {
     font-size: 0.75rem; 
-    color: var(--text-muted, #65676b);
+    color: var(--text-muted);
     font-weight: 600;
     display: block;
     margin-top: 4px;
@@ -141,23 +138,22 @@
 /* --- ➕ BOTÓN "TU NOTA" --- */
 .nota-plus-icon {
     font-size: 1.8rem;
-    color: var(--primary, #1877f2);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
 }
 
-/* --- 🌓 REPARACIÓN MODO OSCURO (NOTAS) --- */
+/* --- 🌓 REPARACIÓN MODO OSCURO (SYNC INDUSTRIAL) --- */
 body.dark-mode .notas-wrapper {
     border-bottom-color: var(--border);
 }
 
 body.dark-mode .nota-texto-preview {
-    background: var(--bg-input) !important; /* Gris industrial oscuro */
+    background: var(--bg-input) !important;
     border-color: var(--border) !important;
     color: var(--text-main) !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 body.dark-mode .nota-texto-preview::after {
@@ -169,13 +165,8 @@ body.dark-mode .nota-burbuja {
     border-color: var(--primary) !important;
 }
 
-body.dark-mode .nota-nombre {
-    color: var(--text-muted) !important; /* Texto claro para los nombres */
-}
-
-/* Nota propia (Verde) adaptada */
 body.dark-mode .nota-item-mia .nota-texto-preview {
-    background: #064e3b !important; /* Verde bosque profundo */
+    background: #064e3b !important;
     border-color: #059669 !important;
     color: #ecfdf5 !important;
 }

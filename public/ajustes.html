@@ -9,6 +9,7 @@
     <script src="js/guardia.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/general.css"> 
+    <link rel="stylesheet" href="css/usuario_global.css"> <!-- ✅ FIX: Control de Avatar Híbrido -->
     <link rel="stylesheet" href="css/ajustes.css">
     <link rel="stylesheet" href="css/buscar.css">
 </head>
@@ -70,6 +71,7 @@
             </ul>
 
             <a href="#" onclick="irAMiPerfil()" id="nav-nombre" class="nav-user-link">
+                <!-- El JS eliminará este icono e inyectará el Avatar Híbrido aquí -->
                 <i class="fa-solid fa-user"></i>
                 <span id="user-name-text">Michelle Carvajal</span> 
             </a> 
@@ -115,9 +117,11 @@
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="adj-foto-url">URL del Avatar</label>
-                                <input type="text" id="adj-foto-url" placeholder="https://link-a-tu-foto.jpg">
+                                <label for="adj-foto-archivo"><i class="fa-solid fa-camera"></i> Foto de Perfil</label>
+                                <input type="file" id="adj-foto-archivo" accept="image/*">
+                                <small class="form-help">Si no subes nada, se usará tu Avatar Dinámico.</small>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="adj-tema">Interfaz</label>
                                 <select id="adj-tema">

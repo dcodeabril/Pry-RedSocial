@@ -29,21 +29,27 @@ if (inputBusqueda) {
                 listaResultados.classList.remove('results-hidden');
                 
                 listaResultados.innerHTML = usuarios.map(u => {
-                    // 🧠 MOTOR DE IDENTIDAD DINÁMICA REFORZADO
+                    // 🧠 MOTOR DE IDENTIDAD HÍBRIDA (Sincronizado)
                     const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim();
-                    const iniciales = nombreCompleto.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2) || '?';
+                    const iniciales = (u.nombre.charAt(0) + (u.apellido ? u.apellido.charAt(0) : "")).toUpperCase();
                     
-                    // 🛡️ ESCUDO ANTI-404: Si es "default", "null" o vacío, forzamos iniciales.
+                    // 🛡️ REGLA HÍBRIDA: ¿Foto real o iniciales?
                     const tieneFotoReal = u.foto_url && 
-                                         u.foto_url !== 'default.png' && 
-                                         u.foto_url !== 'null' && 
-                                         u.foto_url !== '' && 
-                                         !u.foto_url.includes('default');
+                                          u.foto_url !== 'default.png' && 
+                                          u.foto_url !== 'null' && 
+                                          u.foto_url !== '' && 
+                                          !u.foto_url.includes('default');
 
-                    // Renderizado inteligente con plan de rescate (onerror)
-                    const avatarHtml = tieneFotoReal
-                        ? `<img src="/img/${u.foto_url}" class="search-result-avatar" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"search-avatar-initial\">${iniciales}</div>';">`
-                        : `<div class="search-avatar-initial">${iniciales}</div>`;
+                    // Generar el HTML del Avatar según disponibilidad
+                    let avatarHtml = '';
+                    if (tieneFotoReal) {
+                        // Forzamos la ruta a la carpeta de subidas
+                        avatarHtml = `<img src="/uploads/perfiles/${u.foto_url}" class="search-result-avatar" onerror="this.src='/img/default.png'">`;
+                    } else {
+                        // Sincronizado con generarColorPorNombre de usuario_global.js
+                        const colorFondo = typeof generarColorPorNombre === 'function' ? generarColorPorNombre(u.nombre) : '#3B82F6';
+                        avatarHtml = `<div class="search-avatar-initial" style="background-color: ${colorFondo}">${iniciales}</div>`;
+                    }
 
                     return `
                         <div class="search-result-item" 
@@ -52,12 +58,8 @@ if (inputBusqueda) {
                             <div class="search-avatar-wrapper">${avatarHtml}</div>
                             
                             <div class="search-result-info">
-                                <span class="search-result-name">
-                                    ${u.nombre} ${u.apellido}
-                                </span>
-                                <small class="search-result-bio">
-                                    ${u.bio || 'Usuario de Facebook Local'}
-                                </small>
+                                <span class="search-result-name">${u.nombre} ${u.apellido}</span>
+                                <small class="search-result-bio">${u.bio || 'Usuario de Facebook Local'}</small>
                             </div>
                         </div>
                     `;

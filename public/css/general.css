@@ -1,7 +1,7 @@
 /* ============================================================
-   PROYECTO: FACEBOOK LOCAL (SISTEMA DE DISEÑO GLOBAL)
-   ARCHIVO: general.css
-   ROL: INGENIERÍA DE PRECISIÓN E INTERACCIÓN DINÁMICA 🛰️
+    PROYECTO: FACEBOOK LOCAL (SISTEMA DE DISEÑO GLOBAL)
+    ARCHIVO: general.css
+    ROL: INGENIERÍA DE PRECISIÓN E INTERACCIÓN DINÁMICA 🛰️
    ============================================================ */
 
 :root {
@@ -36,7 +36,7 @@ body.dark-mode {
     --header-text: #F9FAFB;
 }
 
-/* --- 📋 ESTILOS BASE (RECALIBRADOS) --- */
+/* --- 📋 ESTILOS BASE --- */
 body {
     background-color: var(--bg-page);
     color: var(--text-main);
@@ -45,7 +45,6 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* 🛠️ AJUSTE: Se incluye 'button' para que herede el diseño industrial por defecto */
 textarea, input, select, button {
     background-color: var(--bg-input) !important;
     border: 1px solid var(--border) !important;
@@ -55,7 +54,6 @@ textarea, input, select, button {
     transition: all 0.3s ease;
 }
 
-/* Reset específico para que los botones tengan cursor de mano */
 button {
     cursor: pointer;
 }
@@ -67,7 +65,7 @@ button {
     box-shadow: var(--shadow-sm);
 }
 
-/* --- 🛰️ BARRA DE NAVEGACIÓN "MAGIC NAV" --- */
+/* --- 🛰️ BARRA DE NAVEGACIÓN "MAGIC NAV" (EFECTO ELEVACIÓN) --- */
 .main-header {
     background-color: var(--header-bg);
     height: 75px; 
@@ -111,93 +109,95 @@ button {
     z-index: 1;
 }
 
-/* 🛠️ AJUSTE: Se añade !important a background y border para proteger la Magic Nav del reset global */
 .nav-menu .list a, 
 .nav-menu .list button {
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    align-items: center; 
+    flex-direction: column; 
     width: 100%;
     height: 100%;
     text-decoration: none;
-    color: var(--header-text) !important;
     background: transparent !important;
     border: none !important;
     cursor: pointer;
-    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 10;
 }
 
-/* --- ✨ ANIMACIÓN DE TEXTO --- */
-.nav-menu .text {
-    position: absolute;
-    font-size: 0.65rem;
-    font-weight: 700;
-    opacity: 0; 
-    color: white !important; 
-    text-align: center;
-    width: 100%;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transform: translateY(10px); 
-    bottom: 8px; 
-    z-index: 20 !important;
-    pointer-events: none;
-    visibility: visible;
-}
-
-.nav-menu .list:hover .text,
-.nav-menu .list.active .text {
-    opacity: 1 !important;
-    transform: translateY(0px) !important;
-}
-
-/* --- 🎯 REFUERZO DE FEEDBACK HÁPTICO --- */
+/* Iconos: Centrados y listos para subir */
 .nav-menu .icon {
-    font-size: 1.3rem;
-    transition: 0.5s;
+    position: relative;
+    display: block;
+    font-size: 1.5rem;
+    color: var(--header-text);
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 2;
+}
+
+/* --- 🔔 BADGE DE NOTIFICACIONES (ESQUINA INFERIOR DERECHA) --- */
+.badge-notif {
+    position: absolute !important;
+    top: 42px !important;   /* Posicionado en la zona inferior del icono */
+    right: 15px !important; /* Desplazado a la derecha */
+    background: #ff4757; 
+    color: white !important;
+    font-size: 0.65rem;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--header-bg); 
+    z-index: 30;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Texto: Oculto abajo por defecto */
+.nav-menu .list .text {
+    position: absolute;
+    color: var(--header-text);
+    font-weight: 600;
+    font-size: 0.75rem;
+    transition: 0.5s;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    bottom: 2px; /* Ajuste para no interferir con el badge */
+}
+
+/* --- ✨ INTERACCIÓN MAGIC HOVER --- */
+.nav-menu .list:hover .icon {
+    transform: translateY(-32px);
+}
+
+.nav-menu .list:hover .text {
+    opacity: 1;
+    transform: translateY(0); /* Se ajusta a la base */
+}
+
+/* Indicador de fondo circular al hacer hover */
+.indicator {
+    position: absolute;
+    top: -35px;
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    border: 6px solid var(--header-bg);
+    transition: 0.5s;
+    opacity: 0;
     pointer-events: none;
 }
 
-.nav-menu .list.active a .icon,
-.nav-menu .list.active button .icon,
-.nav-menu .list:not(.active):hover a .icon,
-.nav-menu .list:not(.active):hover button .icon {
-    transform: translateY(-8px);
+.nav-menu .list:hover ~ .indicator {
+    opacity: 1;
 }
 
-.nav-menu .list.active:hover a .icon,
-.nav-menu .list.active:hover button .icon {
-    transform: translateY(-12px) scale(1.1); 
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* --- 🔑 EL INDICADOR --- */
-.indicator {
-    position: absolute !important; 
-    top: 50%;
-    left: 0;
-    width: 70px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.25);
-    border-radius: 12px;
-    z-index: 0;
-    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    pointer-events: none; 
-}
-
-/* 🎯 POSICIONES X */
-.nav-menu .list:nth-child(1).active ~ .indicator { transform: translate(0px, -50%); }
-.nav-menu .list:nth-child(2).active ~ .indicator { transform: translate(70px, -50%); }
-.nav-menu .list:nth-child(3).active ~ .indicator { transform: translate(140px, -50%); }
-.nav-menu .list:nth-child(4).active ~ .indicator { transform: translate(210px, -50%); }
-.nav-menu .list:nth-child(5).active ~ .indicator { transform: translate(280px, -50%); }
-.nav-menu .list:nth-child(6).active ~ .indicator { transform: translate(350px, -50%); }
-.nav-menu .list:nth-child(7).active ~ .indicator { transform: translate(420px, -50%); }
-
-/* --- 👤 IDENTIDAD DINÁMICA --- */
+/* --- 👤 REFUERZO DE IDENTIDAD --- */
 .nav-user-link {
     color: var(--header-text);
     text-decoration: none;
@@ -211,4 +211,31 @@ button {
     line-height: 1;
 }
 
-.nav-user-link i { font-size: 1.2rem; }
+.nav-user-link .avatar-hibrido {
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    flex-shrink: 0; 
+}
+
+.avatar-img-real {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; 
+}
+
+.avatar-dinamico-ui {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: bold;
+}

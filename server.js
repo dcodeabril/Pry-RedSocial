@@ -10,6 +10,7 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const bcrypt = require('bcrypt');
+const multer = require('multer'); // ✅ Agregado para subida de fotos
 require('dotenv').config();
 
 const app = express();
@@ -24,6 +25,23 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+// --- 🏗️ CONFIGURACIÓN DE ALMACENAMIENTO (MULTER) ---
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/perfiles/'); // Carpeta física de destino
+    },
+    filename: function (req, file, cb) {
+        // Renombrar: avatar_USUARIOID_TIMESTAMP.ext
+        const userId = req.params.id;
+        const extension = path.extname(file.originalname);
+        cb(null, `avatar_${userId}_${Date.now()}${extension}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+// Nota: Exportamos 'upload' si lo necesitas en otros archivos de rutas modulares
+module.exports = { upload }; 
+
 // --- 🚦 RASTREADOR DE MOVIMIENTOS (LOGS) ---
 app.use((req, res, next) => {
     const hora = new Date().toLocaleTimeString();
@@ -31,7 +49,10 @@ app.use((req, res, next) => {
     next();
 });
 
+// --- 🚪 ACCESO ESTÁTICO Y SUBIDAS ---
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// ✅ Servir la carpeta de subidas para que las fotos sean visibles en el navegador
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // --- 🗄️ CONEXIÓN A LA BASE DE DATOS ---
 const db = require('./db/base_datos');
@@ -104,7 +125,7 @@ io.on('connection', (socket) => {
     }
 });
 
-// --- 🚪 ACCESO ESTÁTICO ---
+// --- 🚪 ACCESO ESTÁTICO PRINCIPAL ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'auth.html')));
 
 app.get('/api/estado', (req, res) => {

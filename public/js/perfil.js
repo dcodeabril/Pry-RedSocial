@@ -11,13 +11,52 @@
 
     const nombreTxt = document.getElementById('perf-nombre-completo');
     const bioTxt = document.getElementById('perf-bio');
-    const fotoImg = document.getElementById('perf-foto');
     const contenedorPosts = document.getElementById('mis-posts');
     const zonaAcciones = document.getElementById('zona-acciones-perfil');
 
+    /**
+     * LÓGICA DE AVATAR HÍBRIDO (PERFIL PRINCIPAL)
+     */
+    function renderizarAvatarPerfil(datos) {
+        const contenedorAvatar = document.querySelector('.profile-avatar-wrapper');
+        if (!contenedorAvatar) return;
+
+        contenedorAvatar.innerHTML = '';
+        const wrapperHibrido = document.createElement('div');
+        wrapperHibrido.className = 'avatar-hibrido';
+
+        const fotoValida = datos.foto_url && 
+                           datos.foto_url !== 'default.png' && 
+                           datos.foto_url !== 'null' && 
+                           datos.foto_url !== '';
+
+        if (fotoValida) {
+            const img = document.createElement('img');
+            img.src = `/uploads/perfiles/${datos.foto_url}`;
+            img.className = 'avatar-img-real';
+            img.onerror = () => {
+                datos.foto_url = ''; 
+                renderizarAvatarPerfil(datos);
+            };
+            wrapperHibrido.appendChild(img);
+        } else {
+            const iniciales = (datos.nombre.charAt(0) + (datos.apellido ? datos.apellido.charAt(0) : "")).toUpperCase();
+            const div = document.createElement('div');
+            div.className = 'avatar-dinamico-ui';
+            div.innerHTML = `<span>${iniciales}</span>`;
+            
+            if (typeof generarColorPorNombre === 'function') {
+                div.style.backgroundColor = generarColorPorNombre(datos.nombre);
+            } else {
+                div.style.backgroundColor = '#3B82F6';
+            }
+            wrapperHibrido.appendChild(div);
+        }
+        contenedorAvatar.appendChild(wrapperHibrido);
+    }
+
     async function cargarDatosPerfil() {
         if (!idPerfilDestino) return;
-
         try {
             const response = await fetch(`/api/usuarios/perfil/${idPerfilDestino}`);
             const datos = await response.json();
@@ -25,40 +64,7 @@
             if (response.ok) {
                 if (nombreTxt) nombreTxt.innerText = `${datos.nombre} ${datos.apellido}`;
                 if (bioTxt) bioTxt.innerText = datos.bio || "¡Hola! Estoy usando Facebook Local.";
-                
-                // --- 🛡️ ESCUDO DE IDENTIDAD DINÁMICA (PERFIL) ---
-                const containerAvatar = document.getElementById('profile-avatar-container');
-                const nombreCompleto = `${datos.nombre || ''} ${datos.apellido || ''}`.trim();
-                const iniciales = nombreCompleto.split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2) || '?';
-
-                const tieneFoto = datos.foto_url && 
-                                 datos.foto_url !== 'default.png' && 
-                                 datos.foto_url !== 'null' && 
-                                 datos.foto_url !== '' &&
-                                 !datos.foto_url.includes('default');
-
-                if (tieneFoto && fotoImg) {
-                    fotoImg.src = `/img/${datos.foto_url}`;
-                    fotoImg.style.display = 'block';
-                    
-                    // Si la imagen real falla, rescatamos con iniciales industriales
-                    fotoImg.onerror = () => {
-                        if(containerAvatar) {
-                            containerAvatar.innerHTML = `
-                                <div class="avatar-dinamico-nav" style="width:100%; height:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; border-radius:50%;">
-                                    <span style="color:white; font-size:3.5rem; font-weight:800;">${iniciales}</span>
-                                </div>`;
-                        }
-                    };
-                } else if (containerAvatar) {
-                    // No hay foto: Inyectamos el Avatar Dinámico Industrial directamente
-                    containerAvatar.innerHTML = `
-                        <div class="avatar-dinamico-nav" style="width:100%; height:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; border-radius:50%;">
-                            <span style="color:white; font-size:3.5rem; font-weight:800;">${iniciales}</span>
-                        </div>`;
-                }
-
-                // Iniciamos la construcción de la botonera
+                renderizarAvatarPerfil(datos);
                 gestionarBotonesSociales();
             }
         } catch (error) {
@@ -68,10 +74,8 @@
 
     async function gestionarBotonesSociales() {
         if (!zonaAcciones) return;
-
         const rolUsuario = (localStorage.getItem('rol') || '').toLowerCase();
         
-        // 1. 🧱 BOTONES BASE (Visibles para todos: Normales y Admins)
         let htmlBotones = `
             <button onclick="window.location.href='ajustes.html'" class="btn-edit-profile">
                 <i class="fa-solid fa-pen"></i> Editar Perfil
@@ -81,7 +85,6 @@
             </button>
         `;
 
-        // 2. 🛡️ BOTÓN ADMIN (Solo si el rol es administrador)
         if (rolUsuario === 'admin') {
             htmlBotones += `
                 <button onclick="window.location.href='admin.html'" class="btn-admin-report">
@@ -90,67 +93,56 @@
             `;
         }
 
-        // 3. 🤝 LÓGICA DE AMISTAD (Solo si no es mi propio perfil)
         if (idPerfilDestino != idSesionActual) {
             try {
                 const res = await fetch(`/api/amistades/estado/${idSesionActual}/${idPerfilDestino}`);
                 const relacion = await res.json();
-
                 let botonAmistad = '';
-                
-                // Caso A: No hay relación previa
+
                 if (!relacion || relacion.vacio) {
+                    botonAmistad = `<button onclick="enviarSolicitudAmistad(${idPerfilDestino})" class="btn-edit-profile"><i class="fa-solid fa-user-plus"></i> Agregar Amigo</button>`;
+                } else if (relacion.estado === 'pendiente') {
+                    if (relacion.usuario_envia_id == idSesionActual) {
+                        botonAmistad = `<button class="btn-edit-profile" disabled style="opacity: 0.7;"><i class="fa-solid fa-clock"></i> Solicitud Enviada</button>`;
+                    } else {
+                        botonAmistad = `
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="responderSolicitudPerfil(${relacion.id}, 'aceptada')" class="btn-vibrant">
+                                    <i class="fa-solid fa-user-check"></i> Aceptar
+                                </button>
+                                <button onclick="responderSolicitudPerfil(${relacion.id}, 'rechazada')" class="btn-secundario">
+                                    <i class="fa-solid fa-user-xmark"></i> Rechazar
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else if (relacion.estado === 'aceptada') {
                     botonAmistad = `
-                        <button onclick="enviarSolicitudAmistad(${idPerfilDestino})" class="btn-edit-profile">
-                            <i class="fa-solid fa-user-plus"></i> Agregar Amigo
-                        </button>
-                    `;
-                } 
-                // Caso B: Solicitud en espera
-                else if (relacion.estado === 'pendiente') {
-                    botonAmistad = `
-                        <button class="btn-edit-profile" disabled style="opacity: 0.7;">
-                            <i class="fa-solid fa-clock"></i> Solicitud Enviada
-                        </button>
-                    `;
-                } 
-                // Caso C: Ya son amigos (Estilo verde)
-                else if (relacion.estado === 'aceptada') {
-                    botonAmistad = `
-                        <button class="btn-edit-profile" style="background-color: #e4e6eb; color: #28a745;">
-                            <i class="fa-solid fa-check-double"></i> Amigos
-                        </button>
-                    `;
+                        <button onclick="eliminarAmistad(${idPerfilDestino})" class="btn-secundario" style="color: #ff4757; border-color: #ff4757;">
+                            <i class="fa-solid fa-user-minus"></i> Eliminar Amigo
+                        </button>`;
                 }
-
-                // El botón de amistad se coloca primero en la fila
                 htmlBotones = botonAmistad + htmlBotones;
-
-            } catch (err) {
-                console.error("Error al consultar estado de amistad:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // Inyectamos todo el bloque final
         zonaAcciones.innerHTML = htmlBotones;
         cargarMuroUsuario();
     }
 
+    // --- 🔒 GESTIÓN DEL MURO CON FILTRO DE PRIVACIDAD ---
     async function cargarMuroUsuario() {
         if (!contenedorPosts) return;
-
         try {
-            const res = await fetch(`/api/publicaciones/usuario/${idPerfilDestino}`);
+            // 🎯 ACTUALIZACIÓN: Enviamos 'visitanteId' como parámetro en la URL
+            const res = await fetch(`/api/publicaciones/usuario/${idPerfilDestino}?visitanteId=${idSesionActual}`);
             const posts = await res.json();
-
-            if (posts.length === 0) {
-                contenedorPosts.innerHTML = `
-                    <div class="muro-vacio">
-                        <p>No hay historias para mostrar todavía.</p>
-                    </div>`;
+            
+            if (!Array.isArray(posts) || posts.length === 0) {
+                contenedorPosts.innerHTML = `<div class="muro-vacio"><p>No hay historias visibles para ti en este momento. 🔒</p></div>`;
                 return;
             }
-
+            
             contenedorPosts.innerHTML = posts.map(p => `
                 <div class="post-card">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f0f2f5; padding-bottom: 10px;">
@@ -158,14 +150,10 @@
                         <small style="color: var(--primary); font-weight: bold;">${p.privacidad.toUpperCase()}</small>
                     </div>
                     <p style="font-size: 1.1rem; color: #1c1e21; line-height: 1.5; margin: 0;">${p.contenido}</p>
-                </div>
-            `).join('');
-        } catch (err) {
-            console.error("Error al cargar posts:", err);
-        }
+                </div>`).join('');
+        } catch (err) { console.error(err); }
     }
 
-    // Funciones globales
     window.enviarSolicitudAmistad = async function(idDestino) {
         try {
             const res = await fetch('/api/amistades/solicitar', {
@@ -177,16 +165,30 @@
         } catch (err) { console.error(err); }
     };
 
-    window.bloquearEsteUsuario = async function(idABloquear) {
-        if (!confirm("¿Deseas bloquear a este usuario de forma permanente? 🚫")) return;
+    window.responderSolicitudPerfil = async function(idSolicitud, estado) {
         try {
-            const res = await fetch('/api/bloqueos/crear', {
-                method: 'POST',
+            const res = await fetch('/api/amistades/responder', {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario_id: idSesionActual, usuario_bloqueado_id: idABloquear })
+                body: JSON.stringify({ solicitud_id: idSolicitud, nuevo_estado: estado })
             });
-            if (res.ok) { window.location.href = 'index.html'; }
-        } catch (err) { console.error(err); }
+            if (res.ok) { location.reload(); }
+        } catch (err) { console.error("Error al responder desde perfil:", err); }
+    };
+
+    window.eliminarAmistad = async function(idDestino) {
+        if (!confirm("¿Estás seguro de que deseas eliminar a esta persona de tus amigos?")) return;
+        
+        try {
+            const res = await fetch(`/api/amistades/eliminar/${idSesionActual}/${idDestino}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                location.reload(); 
+            }
+        } catch (err) {
+            console.error("Error al eliminar amistad:", err);
+        }
     };
 
     document.addEventListener('DOMContentLoaded', cargarDatosPerfil);

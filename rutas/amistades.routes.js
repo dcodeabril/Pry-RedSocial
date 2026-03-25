@@ -101,7 +101,6 @@ router.patch('/responder', async (req, res) => {
 
     try {
         if (nuevo_estado === 'aceptada') {
-            // 1. Obtenemos datos para la notificación de retorno
             const [solicitud] = await db.query(
                 'SELECT usuario_envia_id, usuario_recibe_id FROM amistades WHERE id = ?', 
                 [solicitud_id]
@@ -112,10 +111,8 @@ router.patch('/responder', async (req, res) => {
             const emisorOriginal = solicitud[0].usuario_envia_id; 
             const receptorOriginal = solicitud[0].usuario_recibe_id; 
 
-            // 2. Actualizamos el estado
             await db.query('UPDATE amistades SET estado = "aceptada" WHERE id = ?', [solicitud_id]);
 
-            // 3. 🎯 Notificamos de vuelta al emisor original
             await db.query(
                 `INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id) 
                  VALUES (?, ?, 'confirmacion_amistad', ?)`,
@@ -159,6 +156,23 @@ router.get('/lista/:id', async (req, res) => {
         res.json(amigos);
     } catch (err) {
         res.status(500).json({ error: "Error al obtener la lista de contactos." });
+    }
+});
+
+// --- 6. ELIMINAR AMISTAD (DELETE) ---
+router.delete('/eliminar/:id1/:id2', async (req, res) => {
+    const { id1, id2 } = req.params;
+    try {
+        const query = `
+            DELETE FROM amistades 
+            WHERE (usuario_envia_id = ? AND usuario_recibe_id = ?) 
+               OR (usuario_envia_id = ? AND usuario_recibe_id = ?)`;
+        
+        await db.query(query, [id1, id2, id2, id1]);
+        res.json({ mensaje: "Vínculo eliminado correctamente. 💔" });
+    } catch (err) {
+        console.error("Error al eliminar amistad:", err);
+        res.status(500).json({ error: "No se pudo eliminar la amistad." });
     }
 });
 

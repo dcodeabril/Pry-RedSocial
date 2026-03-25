@@ -17,7 +17,7 @@ async function actualizarContadorNotificaciones() {
         if (badge) {
             if (data.total > 0) {
                 badge.innerText = data.total > 9 ? '9+' : data.total;
-                badge.style.display = 'flex'; // Estilo industrial
+                badge.style.display = 'flex'; 
             } else {
                 badge.style.display = 'none';
             }
@@ -25,13 +25,12 @@ async function actualizarContadorNotificaciones() {
     } catch (err) { console.error("🚨 Error en contador:", err); }
 }
 
-// --- 2. 📥 CARGAR HISTORIAL (notificaciones.html) ---
+// --- 2. 📥 CARGAR HISTORIAL (Sincronizado con Identidad Híbrida) ---
 async function cargarNotificaciones() {
     const lista = document.getElementById('lista-notificaciones');
     if (!miIdNoti || !lista) return; 
 
     try {
-        console.log("📡 Sincronizando alertas industriales...");
         const res = await fetch(`/api/notificaciones/${miIdNoti}`);
         const data = await res.json();
 
@@ -45,11 +44,24 @@ async function cargarNotificaciones() {
         }
 
         lista.innerHTML = data.map(n => {
-            // 🎨 Lógica de identidad: Foto o Iniciales
-            const inicial = n.nombre ? n.nombre.charAt(0).toUpperCase() : '?';
-            const avatarHtml = (n.foto_url && n.foto_url !== 'default.png')
-                ? `<img src="/img/${n.foto_url}" class="notif-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
-                : `<div class="notif-avatar-initial">${inicial}</div>`;
+            const iniciales = ((n.nombre ? n.nombre[0] : "") + (n.apellido ? n.apellido[0] : "")).toUpperCase() || "?";
+            
+            const tieneFoto = n.foto_url && 
+                              n.foto_url !== 'default.png' && 
+                              n.foto_url !== 'null' && 
+                              n.foto_url !== '';
+
+            let avatarHtml = "";
+
+            if (tieneFoto) {
+                avatarHtml = `<img src="/uploads/perfiles/${n.foto_url}" class="notif-avatar" onerror="this.src='/uploads/perfiles/default.png';">`;
+            } else {
+                let bgColor = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                if (typeof generarColorPorNombre === 'function') {
+                    bgColor = generarColorPorNombre(n.nombre || "User");
+                }
+                avatarHtml = `<div class="notif-avatar-initial" style="background: ${bgColor}">${iniciales}</div>`;
+            }
 
             let botonesAmistad = '';
             if (n.tipo === 'amistad' && !n.leido) {
@@ -61,9 +73,10 @@ async function cargarNotificaciones() {
                     </div>`;
             }
 
+            // 🎯 ACTUALIZACIÓN: Se agrega n.emisor_id a la llamada de manejarClicNotif
             return `
                 <div class="notif-item ${n.leido ? '' : 'no-leido'}" 
-                     onclick="manejarClicNotif(event, ${n.id}, '${n.tipo}', ${n.referencia_id})">
+                     onclick="manejarClicNotif(event, ${n.id}, '${n.tipo}', ${n.referencia_id}, ${n.emisor_id})">
                     
                     ${avatarHtml}
                     
@@ -88,10 +101,9 @@ async function cargarNotificaciones() {
     } catch (err) { console.error("🚨 Error al cargar historial:", err); }
 }
 
-// --- 3. 🚀 FUNCIÓN MAESTRA: REDIRECCIÓN ---
-window.irAContenido = async function(notiId, tipo, refId) {
+// --- 3. 🚀 FUNCIÓN MAESTRA: REDIRECCIÓN (CORREGIDA) ---
+window.irAContenido = async function(notiId, tipo, refId, emisorId) {
     try {
-        // Marcar como leída antes de saltar
         await fetch(`/api/notificaciones/leer/${notiId}`, { method: 'PUT' });
         
         let urlDestino = "index.html";
@@ -100,24 +112,23 @@ window.irAContenido = async function(notiId, tipo, refId) {
         else if (['reaccion', 'comentario', 'compartir'].includes(tipo)) {
             urlDestino = `index.html#post-${refId}`;
         }
+        // 🎯 CORRECCIÓN: Redirigir al perfil del emisor para tipos de amistad
         else if (tipo === 'amistad' || tipo === 'confirmacion_amistad') {
-            urlDestino = `perfil.html?id=${refId}`;
+            urlDestino = `perfil.html?id=${emisorId}`;
         }
 
         window.location.href = urlDestino;
         
-        // Parche de recarga si ya estamos en la página destino
         if (window.location.pathname.includes('index.html')) {
             setTimeout(() => location.reload(), 150); 
         }
-
     } catch (err) { console.error("Error al navegar:", err); }
 };
 
-// Evita que el clic en botones dispare la redirección del contenedor
-function manejarClicNotif(e, id, tipo, refId) {
+// 🎯 ACTUALIZACIÓN: Recibe y pasa el emisorId
+function manejarClicNotif(e, id, tipo, refId, emisorId) {
     if (e.target.closest('button')) return; 
-    irAContenido(id, tipo, refId);
+    irAContenido(id, tipo, refId, emisorId);
 }
 
 // --- 4. 🗣️ TRADUCTOR DE TIPOS ---
@@ -135,7 +146,7 @@ function interpretarTipo(tipo) {
 
 // --- 5. ACCIONES DE LIMPIEZA Y RESPUESTA ---
 window.borrarNotificacion = async function(e, id) {
-    e.stopPropagation(); // 🛡️ Bloquea la redirección
+    e.stopPropagation(); 
     if (!confirm("¿Eliminar este aviso de forma permanente?")) return;
     try {
         const res = await fetch(`/api/notificaciones/${id}`, { method: 'DELETE' });
@@ -144,7 +155,7 @@ window.borrarNotificacion = async function(e, id) {
 };
 
 window.responderSolicitud = async function(e, idRef, estado) {
-    e.stopPropagation(); // 🛡️ Bloquea la redirección
+    e.stopPropagation(); 
     try {
         const res = await fetch('/api/amistades/responder', {
             method: 'PATCH',
@@ -173,5 +184,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Sincronización automática del badge
 setInterval(actualizarContadorNotificaciones, 15000);

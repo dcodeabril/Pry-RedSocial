@@ -43,14 +43,22 @@ async function cargarListaAmigos() {
         }
 
         listaAmigos.innerHTML = amigos.map(a => {
-            // 🧠 LÓGICA DE IDENTIDAD DINÁMICA (MC STYLE)
-            const iniciales = (a.nombre + " " + (a.apellido || "")).trim().split(' ').map(p => p[0]).join('').toUpperCase().substring(0, 2);
+            // 🧠 LÓGICA DE IDENTIDAD DINÁMICA RECALIBRADA
+            const tieneFoto = a.foto_url && a.foto_url !== 'default.png' && a.foto_url !== 'null' && a.foto_url !== '';
+            const iniciales = (a.nombre[0] + (a.apellido ? a.apellido[0] : "")).toUpperCase();
+            const colorFondo = typeof generarColorPorNombre === 'function' ? generarColorPorNombre(a.nombre) : '#3B82F6';
             
-            const avatarHtml = (a.foto_url && a.foto_url !== 'default.png' && a.foto_url !== 'null' && a.foto_url !== '')
-                ? `<img src="/img/${a.foto_url}" class="amigo-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
-                : `<div class="avatar-dinamico-nav amigo-avatar" style="width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0;">
-                       <span class="iniciales-text" style="font-size: 1rem; color: white; font-weight: 800;">${iniciales}</span>
-                   </div>`;
+            let avatarHtml = "";
+
+            if (tieneFoto) {
+                // 🎯 RUTA CORRECTA + ONERROR DINÁMICO
+                avatarHtml = `<img src="/uploads/perfiles/${a.foto_url}" class="amigo-avatar" 
+                    onerror="this.parentElement.innerHTML='<div class=\\'avatar-dinamico-nav amigo-avatar\\' style=\\'width: 42px; height: 42px; background:${colorFondo}; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0;\\'><span class=\\'iniciales-text\\' style=\\'font-size: 1rem; color: white; font-weight: 800;\\'>${iniciales}</span></div>'">`;
+            } else {
+                avatarHtml = `<div class="avatar-dinamico-nav amigo-avatar" style="width: 42px; height: 42px; background: ${colorFondo}; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0;">
+                               <span class="iniciales-text" style="font-size: 1rem; color: white; font-weight: 800;">${iniciales}</span>
+                           </div>`;
+            }
 
             // 🟢 VALIDACIÓN REAL-TIME
             const estaOnline = usuariosOnline.includes(a.usuario_id.toString());
@@ -62,7 +70,7 @@ async function cargarListaAmigos() {
                     id="item-amigo-${a.usuario_id}" 
                     onclick="seleccionarAmigo(${a.usuario_id}, '${a.nombre} ${a.apellido}')">
                     <div class="amigo-item-content">
-                        ${avatarHtml}
+                        <div class="avatar-container-chat">${avatarHtml}</div>
                         <div class="amigo-info-mini">
                             <strong>${a.nombre} ${a.apellido}</strong>
                             <small class="${statusClase}">

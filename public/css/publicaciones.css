@@ -2,29 +2,29 @@
    PROYECTO: FACEBOOK LOCAL
    SECCIÓN: GESTIÓN DE MURO (ESTILO VIBRANTE E INDUSTRIAL)
    ARCHIVO: publicaciones.css
-   ESTADO: REPARACIÓN ESTRUCTURAL GLOBAL (CLARO/OSCURO) 🛰️
+   ESTADO: ACTUALIZADO (SISTEMA DE MODERACIÓN DE COMENTARIOS) 🛰️
    ============================================= */
 
 /* --- 📢 MENSAJES DE ESTADO --- */
 .muro-status-msg {
     text-align: center;
     padding: 30px;
-    color: var(--text-muted, #65676b);
+    color: var(--text-muted);
     font-style: italic;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 15px;
-    border: 1px dashed var(--border-color, #e0e0e0);
+    border: 1px dashed var(--border);
     margin: 20px 0;
 }
 
 /* --- ✍️ ÁREA DE CREACIÓN DE PUBLICACIONES --- */
 .create-post {
     padding: 20px;
-    background: var(--bg-card, #fff);
+    background: var(--card-bg);
     border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-sm);
     margin-bottom: 25px;
-    border: 1px solid var(--border-color, #e0e0e0);
+    border: 1px solid var(--border);
 }
 
 #post-contenido {
@@ -36,7 +36,7 @@
     resize: none;
     outline: none;
     background: transparent;
-    color: var(--text-color, #1c1e21);
+    color: var(--text-main);
     font-family: inherit;
 }
 
@@ -45,33 +45,24 @@
     justify-content: space-between;
     align-items: center;
     padding-top: 15px;
-    border-top: 1px solid #f0f2f5;
+    border-top: 1px solid var(--border);
     margin-top: 10px;
 }
 
-/* 🌎 SELECTOR DE PRIVACIDAD */
 .post-privacy-selector select {
-    background: #f0f2f5;
+    background: var(--bg-input);
     border: none;
     padding: 8px 15px;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #4b4f56;
+    color: var(--text-main);
     cursor: pointer;
-    transition: background 0.2s;
     outline: none;
-    appearance: none; 
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 1em;
-    padding-right: 35px;
 }
 
-/* 🚀 BOTÓN PUBLICAR */
 #btn-publicar {
-    background: linear-gradient(135deg, #1877f2, #0056b3);
+    background: var(--primary);
     color: white;
     border: none;
     padding: 10px 30px;
@@ -79,19 +70,18 @@
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(24, 119, 242, 0.3);
     transition: all 0.2s ease;
 }
 
 /* --- 🃏 TARJETA DE PUBLICACIÓN (POST CARD) --- */
 .post-card {
-    background: var(--bg-card, #fff);
+    background: var(--card-bg);
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--border-color, #e0e0e0);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: transform 0.2s ease;
 }
 
 /* --- 👤 CABECERA DEL POST --- */
@@ -101,7 +91,7 @@
     gap: 12px;
     margin-bottom: 15px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-color, #f0f2f5);
+    border-bottom: 1px solid var(--border);
 }
 
 .post-avatar {
@@ -109,123 +99,177 @@
     height: 45px;
     border-radius: 50%;
     object-fit: cover;
-    background: #f0f2f5;
-    border: 2px solid var(--primary, #1877f2);
+    background: var(--bg-input);
+    border: 2px solid var(--primary);
     padding: 2px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.post-user-meta strong {
-    font-size: 1.05rem;
-    color: var(--text-color, #1c1e21);
+.post-avatar-initial {
+    color: white;
+    font-weight: 800;
+    border: none; 
+    padding: 0;
 }
 
 .post-timestamp {
     font-size: 0.8rem;
-    color: var(--text-muted, #65676b);
-    margin-top: 2px;
+    color: var(--text-muted);
 }
 
 /* --- 📝 CONTENIDO DEL POST --- */
 .post-body {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: var(--text-color, #050505);
+    color: var(--text-main);
     margin-bottom: 15px;
-    word-wrap: break-word;
 }
 
-/* --- 🦶 PIE DE PUBLICACIÓN (REPARACIÓN ESTRUCTURAL GLOBAL) --- */
+/* --- 📊 ESTADÍSTICAS DEL POST --- */
+.post-stats {
+    display: flex;
+    gap: 15px;
+    padding: 10px 5px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.post-stats i { color: var(--primary); }
+
+/* --- 🦶 PIE DE PUBLICACIÓN (BOTONES) --- */
 .post-footer-container {
-    display: flex !important;
-    flex-direction: row !important; /* Fuerza horizontalidad */
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding-top: 15px !important;
-    border-top: 1px solid var(--border-color, #ebedf0) !important;
-    gap: 10px;
-    flex-wrap: nowrap; /* Evita que los botones salten de línea */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
 }
 
-.post-btn-group {
-    display: flex !important;
-    flex-direction: row !important; /* Alinea Me gusta, Comentar, etc. */
-    gap: 10px;
+.btn-interact {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
 }
+
+.btn-interact:hover:not(:disabled) { background: var(--bg-input); }
+
+.btn-interact:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.btn-interact.active-like { color: var(--primary); }
 
 .btn-secundario {
-    background: var(--bg-hover, #f0f2f5);
-    border: 1px solid transparent;
-    padding: 8px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.85rem;
+}
+
+/* --- 💬 SECCIÓN DE COMENTARIOS --- */
+.comments-section {
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.comments-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.comment-item {
+    position: relative; /* Para la posición de la X */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     font-size: 0.9rem;
-    color: #4b4f56;
-    transition: all 0.2s ease;
-    display: flex !important; 
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
+    padding: 8px 30px 8px 12px; /* Espacio extra a la derecha para la X */
+    background: var(--bg-input);
+    border-radius: 15px;
+    margin-bottom: 8px;
+    width: fit-content;
+    max-width: 90%;
+    color: var(--text-main);
+    border: 1px solid var(--border);
 }
 
-.btn-secundario:hover {
-    background: #e4e6eb;
-    transform: scale(1.03);
+/* ❌ BOTÓN ELIMINAR COMENTARIO */
+.btn-delete-comment {
+    position: absolute;
+    right: 8px;
+    top: 5px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
 }
 
-/* ============================================================
-   🌓 SECCIÓN: ACCIÓN CAMBIO MODO OSCURO (SINCRONIZACIÓN)
-   ============================================================ */
+.btn-delete-comment:hover {
+    color: #ff4757; /* Rojo vibrante al pasar el mouse */
+}
 
+.comment-input-area {
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+}
+
+.comment-input-area input {
+    flex: 1;
+    background: var(--bg-input) !important;
+    border-radius: 20px !important;
+    padding: 8px 15px !important;
+    font-size: 0.9rem;
+    border: 1px solid var(--border) !important;
+}
+
+.comment-input-area button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* --- 🌓 MODO OSCURO --- */
 body.dark-mode .create-post,
 body.dark-mode .post-card {
     background: var(--card-bg) !important;
     border-color: var(--border) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 }
 
-body.dark-mode .post-footer-container {
-    border-top: 1px solid var(--border) !important;
+body.dark-mode .comments-section {
+    background: rgba(255, 255, 255, 0.03);
 }
 
-/* Visibilidad de Textos en Oscuridad */
-body.dark-mode .post-user-meta strong,
-body.dark-mode .post-body,
-body.dark-mode .shared-box-content,
-body.dark-mode .post-shared-comment {
-    color: var(--text-main) !important;
+body.dark-mode .comment-item {
+    background: var(--bg-input);
 }
-
-body.dark-mode .post-timestamp,
-body.dark-mode .shared-box-author {
-    color: var(--text-muted) !important;
-}
-
-body.dark-mode #post-contenido {
-    color: var(--text-main) !important;
-}
-
-/* Estilo de Botones Nocturnos */
-body.dark-mode .btn-secundario {
-    background: var(--bg-input) !important;
-    color: var(--text-main) !important;
-    border: 1px solid var(--border) !important;
-}
-
-body.dark-mode .btn-secundario:hover {
-    background: var(--primary-dark) !important;
-    color: white !important;
-}
-
-body.dark-mode .post-privacy-selector select {
-    background: var(--bg-input) !important;
-    color: var(--text-main) !important;
-}
-
-body.dark-mode .shared-box {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border-color: var(--border) !important;
-}
-
-/* --- FIN ACCIÓN MODO OSCURO --- */

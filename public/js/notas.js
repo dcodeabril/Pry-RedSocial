@@ -30,17 +30,25 @@ async function cargarNotas() {
             // 🛠️ SINCRONIZACIÓN DE CLASES INDUSTRIALES
             div.className = `nota-item ${esMia ? 'nota-item-mia' : ''}`;
             
-            // 🧠 LÓGICA DE AVATAR DINÁMICO (Sincronizada con Identidad Global)
-            // Extraemos hasta 2 iniciales (Ej: Michelle Carvajal -> MC)
-            const iniciales = nota.nombre 
-                ? nota.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
-                : '?';
+            // 🧠 LÓGICA DE AVATAR HÍBRIDO (Sincronizada con Identidad Global)
+            const nombreParaColor = nota.nombre || 'Usuario';
+            const iniciales = nombreParaColor.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
             
-            const avatarHtml = (nota.foto_url && nota.foto_url !== 'default.png' && nota.foto_url !== 'null' && nota.foto_url !== '')
-                ? `<img src="/img/${nota.foto_url}" class="nota-avatar" onerror="this.onerror=null; this.src='/img/default.png';">`
-                : `<div class="avatar-dinamico-nav nota-avatar" style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                       <span class="iniciales-text" style="font-size: 0.9rem; color: white; font-weight: 800;">${iniciales}</span>
-                   </div>`;
+            // Verificación de foto real
+            const tieneFoto = nota.foto_url && nota.foto_url !== 'default.png' && nota.foto_url !== 'null' && nota.foto_url !== '';
+            
+            let avatarHtml = '';
+            if (tieneFoto) {
+                // Ruta absoluta a la carpeta de subidas para el perfil híbrido
+                avatarHtml = `<img src="/uploads/perfiles/${nota.foto_url}" class="nota-avatar" onerror="this.src='/img/default.png'">`;
+            } else {
+                // Respaldo dinámico con color calculado por nombre
+                const colorFondo = typeof generarColorPorNombre === 'function' ? generarColorPorNombre(nombreParaColor) : '#3B82F6';
+                avatarHtml = `
+                    <div class="nota-avatar-initial" style="background-color: ${colorFondo}; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                        <span style="font-size: 0.9rem; color: white; font-weight: 800;">${iniciales}</span>
+                    </div>`;
+            }
 
             div.innerHTML = `
                 <div class="nota-texto-preview" title="${nota.contenido}">
