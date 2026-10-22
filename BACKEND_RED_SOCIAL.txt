@@ -1,0 +1,1436 @@
+BACKEND - RED SOCIAL LOCAL
+Copia de consulta del código backend. Los archivos JavaScript siguen siendo la versión ejecutable.
+No incluye .env, node_modules ni datos privados. Variables necesarias: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME y PORT opcional.
+Para reconstruirlo, guarda cada sección con la ruta indicada e instala las dependencias de package.json.
+
+===== INICIO: package.json =====
+{
+  "name": "facebook-local",
+  "version": "1.0.0",
+  "description": "Proyecto local de 20 funcionalidades",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "multer": "^2.1.1",
+    "mysql2": "^3.20.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0"
+  }
+}
+
+===== FIN: package.json =====
+
+===== INICIO: server.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ADMINISTRACIÓN (TORRE DE CONTROL + ESTADO REAL-TIME)
+// ARCHIVO: server.js
+// =============================================
+
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
+require('dotenv').config();
+
+const app = express();
+const server = http.createServer(app);
+
+// --- 📡 CONFIGURACIÓN DE SOCKET.IO ---
+const io = new Server(server, {
+    cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
+// --- 🛠️ MIDDLEWARES ---
+app.use(cors());
+app.use(express.json());
+
+// --- 🚦 RASTREADOR DE MOVIMIENTOS (LOGS) ---
+app.use((req, res, next) => {
+    const hora = new Date().toLocaleTimeString();
+    console.log(`👤 [${hora}] MOVIMIENTO: ${req.method} en ${req.url}`);
+    next();
+});
+
+// --- 🚪 ACCESO ESTÁTICO Y SUBIDAS ---
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// ✅ Servir la carpeta de subidas para que las fotos sean visibles en el navegador
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// --- 🗄️ CONEXIÓN A LA BASE DE DATOS ---
+const db = require('./db/base_datos');
+
+// --- 🛣️ IMPORTACIÓN DE RUTAS MODULARES ---
+const rutas = {
+    usuarios: require('./rutas/usuarios.routes.js'),
+    seguridad: require('./rutas/seguridad.routes.js'),
+    admin: require('./rutas/admin.routes.js'),
+    publicaciones: require('./rutas/publicaciones.routes.js'),
+    amistades: require('./rutas/amistades.routes.js'),
+    chats: require('./rutas/chats.routes.js'),
+    bloqueos: require('./rutas/bloqueos.routes.js'),
+    notificaciones: require('./rutas/notificaciones.routes.js'),
+    eventos: require('./rutas/eventos.routes.js'),
+    reportes: require('./rutas/reportes.routes.js'),
+    notas: require('./rutas/notas.routes')
+};
+
+// Registro automático de rutas
+Object.keys(rutas).forEach(ruta => app.use(`/api/${ruta}`, rutas[ruta]));
+
+// --- 🟢 GESTIÓN DE ESTADOS ONLINE ---
+const socketsActivos = {};
+
+io.on('connection', (socket) => {
+    socket.on('join-room', (usuarioId) => {
+        const uidStr = usuarioId.toString();
+        socket.join(uidStr);
+        socketsActivos[socket.id] = uidStr;
+        console.log(`📡 [SOCKET] Usuario ${uidStr} conectado.`);
+        enviarListaOnline();
+    });
+
+    socket.on('iniciar-llamada', async ({ emisorId, receptorId, oferta }) => {
+        try {
+            const queryAmistad = `
+                SELECT id FROM amistades
+                WHERE ((usuario_envia_id = ? AND usuario_recibe_id = ?)
+                   OR (usuario_envia_id = ? AND usuario_recibe_id = ?))
+                AND estado = 'aceptada'`;
+            const [amistad] = await db.query(queryAmistad, [emisorId, receptorId, receptorId, emisorId]);
+            if (amistad.length > 0) {
+                io.to(receptorId.toString()).emit('llamada-entrante', { emisorId, oferta });
+            } else {
+                socket.emit('error-llamada', { mensaje: "Vínculo de amistad requerido. 🔒" });
+            }
+        } catch (error) {
+            console.error("🚨 [SOCKET ERROR]:", error.message);
+        }
+    });
+
+    socket.on('contestar-llamada', ({ receptorId, emisorId, respuesta }) => {
+        io.to(emisorId.toString()).emit('llamada-aceptada', { receptorId, respuesta });
+    });
+
+    socket.on('ice-candidate', ({ targetId, candidate }) => {
+        io.to(targetId.toString()).emit('ice-candidate', candidate);
+    });
+
+    socket.on('disconnect', () => {
+        delete socketsActivos[socket.id];
+        enviarListaOnline();
+    });
+
+    function enviarListaOnline() {
+        const listaIds = Object.values(socketsActivos);
+        const idsUnicos = [...new Set(listaIds)];
+        io.emit('usuarios-online', idsUnicos);
+    }
+});
+
+// --- 🚪 ACCESO ESTÁTICO PRINCIPAL ---
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'auth.html')));
+
+app.get('/api/estado', (req, res) => {
+    res.json({
+        proyecto: "Proyecto Red Social 🚀",
+        seguridad: "BCrypt + Real-Time Tracking 🟢",
+        monitoreo: `${Object.keys(socketsActivos).length} sockets activos`
+    });
+});
+
+// --- 🚀 ARRANQUE ---
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, async () => {
+    try {
+        await db.query('SELECT 1');
+        console.log(`
+        =================================================
+        📡 CENTRAL DE CONTROL - PROYECTO RED SOCIAL
+        🔗 URL: http://localhost:${PORT}
+        🗄️ DB: MySQL CONECTADO ✅
+        🟢 STATUS: RASTREADOR DE ESTADO ACTIVO
+        =================================================
+        `);
+    } catch (error) {
+        console.error("❌ ERROR CRÍTICO AL INICIAR:", error.message);
+    }
+});
+
+===== FIN: server.js =====
+
+===== INICIO: db/base_datos.js =====
+const mysql = require('mysql2/promise');
+require('dotenv').config(); // <-- ESTA LÍNEA ES VITAL AQUÍ TAMBIÉN
+
+const pool = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER,      // Si esto llega vacío, da el error que tienes
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+module.exports = pool;
+===== FIN: db/base_datos.js =====
+
+===== INICIO: rutas/admin.routes.js =====
+// rutas/admin.routes.js
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// Listar todos los usuarios para el panel de administración
+router.get('/usuarios', async (req, res) => {
+    try {
+        const [usuarios] = await db.query(
+            'SELECT id, email, rol, estado, fecha_registro FROM usuarios'
+        );
+        res.json(usuarios);
+    } catch (err) {
+        res.status(500).json({ error: "Error al obtener la lista de usuarios" });
+    }
+});
+
+// Cambiar estado del usuario (Activar/Suspender)
+router.patch('/usuarios/estado/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nuevo_estado } = req.body; // 'activo' o 'suspendido'
+
+    try {
+        await db.query('UPDATE usuarios SET estado = ? WHERE id = ?', [nuevo_estado, id]);
+        res.json({ mensaje: `Usuario ${id} marcado como ${nuevo_estado}` });
+    } catch (err) {
+        res.status(500).json({ error: "No se pudo cambiar el estado del usuario" });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/admin.routes.js =====
+
+===== INICIO: rutas/amistades.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (VÍNCULOS SOCIALES P3 + P4)
+// ARCHIVO: rutas/amistades.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- 1. CONSULTAR ESTADO DE AMISTAD (GET) ---
+router.get('/estado/:id1/:id2', async (req, res) => {
+    const { id1, id2 } = req.params;
+    try {
+        const query = `
+            SELECT * FROM amistades
+            WHERE (usuario_envia_id = ? AND usuario_recibe_id = ?)
+               OR (usuario_envia_id = ? AND usuario_recibe_id = ?)`;
+
+        const [rows] = await db.query(query, [id1, id2, id2, id1]);
+
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.json({ vacio: true });
+        }
+    } catch (err) {
+        console.error("🚨 Error al consultar estado:", err);
+        res.status(500).json({ error: "Error en la consulta de vínculos." });
+    }
+});
+
+// --- 2. ENVIAR SOLICITUD DE AMISTAD (POST) ---
+router.post('/solicitar', async (req, res) => {
+    const { usuario_envia_id, usuario_recibe_id } = req.body;
+
+    try {
+        const [bloqueo] = await db.query(
+            `SELECT * FROM bloqueos
+             WHERE (usuario_id = ? AND usuario_bloqueado_id = ?)
+                OR (usuario_id = ? AND usuario_bloqueado_id = ?)`,
+            [usuario_envia_id, usuario_recibe_id, usuario_recibe_id, usuario_envia_id]
+        );
+
+        if (bloqueo.length > 0) {
+            return res.status(403).json({ error: "No puedes interactuar debido a un bloqueo. 🚫" });
+        }
+
+        const [existente] = await db.query(
+            `SELECT * FROM amistades
+             WHERE (usuario_envia_id = ? AND usuario_recibe_id = ?)
+                OR (usuario_envia_id = ? AND usuario_recibe_id = ?)`,
+            [usuario_envia_id, usuario_recibe_id, usuario_recibe_id, usuario_envia_id]
+        );
+
+        if (existente.length > 0) {
+            return res.status(400).json({ error: "Ya existe una solicitud o amistad activa." });
+        }
+
+        const [resultado] = await db.query(
+            'INSERT INTO amistades (usuario_envia_id, usuario_recibe_id, estado) VALUES (?, ?, "pendiente")',
+            [usuario_envia_id, usuario_recibe_id]
+        );
+
+        const idDeLaAmistad = resultado.insertId;
+
+        await db.query(
+            `INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id)
+             VALUES (?, ?, 'amistad', ?)`,
+            [usuario_recibe_id, usuario_envia_id, idDeLaAmistad]
+        );
+
+        res.json({ mensaje: "Solicitud enviada y notificada con éxito ⏳" });
+
+    } catch (err) {
+        console.error("🚨 Error al solicitar amistad:", err);
+        res.status(500).json({ error: "Fallo técnico al procesar la solicitud." });
+    }
+});
+
+// --- 3. LISTAR SOLICITUDES PENDIENTES ---
+router.get('/pendientes/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT a.id as solicitud_id, p.nombre, p.apellido, p.foto_url, p.usuario_id as emisor_id
+            FROM amistades a
+            JOIN perfiles p ON a.usuario_envia_id = p.usuario_id
+            WHERE a.usuario_recibe_id = ? AND a.estado = 'pendiente'`;
+
+        const [solicitudes] = await db.query(query, [id]);
+        res.json(solicitudes);
+    } catch (err) {
+        res.status(500).json({ error: "Error al cargar solicitudes pendientes." });
+    }
+});
+
+// --- 4. RESPONDER A SOLICITUD (PATCH) [ACTUALIZADO] ---
+router.patch('/responder', async (req, res) => {
+    const { solicitud_id, nuevo_estado } = req.body;
+
+    try {
+        if (nuevo_estado === 'aceptada') {
+            const [solicitud] = await db.query(
+                'SELECT usuario_envia_id, usuario_recibe_id FROM amistades WHERE id = ?',
+                [solicitud_id]
+            );
+
+            if (solicitud.length === 0) return res.status(404).json({ error: "Solicitud no encontrada." });
+
+            const emisorOriginal = solicitud[0].usuario_envia_id;
+            const receptorOriginal = solicitud[0].usuario_recibe_id;
+
+            await db.query('UPDATE amistades SET estado = "aceptada" WHERE id = ?', [solicitud_id]);
+
+            await db.query(
+                `INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id)
+                 VALUES (?, ?, 'confirmacion_amistad', ?)`,
+                [emisorOriginal, receptorOriginal, solicitud_id]
+            );
+
+            res.json({ mensaje: "¡Ahora son amigos y hemos avisado al emisor! 🤝" });
+
+        } else {
+            await db.query('DELETE FROM amistades WHERE id = ?', [solicitud_id]);
+            res.json({ mensaje: "Solicitud eliminada." });
+        }
+    } catch (err) {
+        console.error("Error al responder:", err);
+        res.status(500).json({ error: "No se pudo actualizar el vínculo." });
+    }
+});
+
+// --- 5. LISTAR AMIGOS ACEPTADOS ---
+router.get('/lista/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT
+                CASE
+                    WHEN a.usuario_envia_id = ? THEN a.usuario_recibe_id
+                    ELSE a.usuario_envia_id
+                END AS usuario_id,
+                p.nombre, p.apellido, p.foto_url
+            FROM amistades a
+            JOIN perfiles p ON p.usuario_id = (
+                CASE
+                    WHEN a.usuario_envia_id = ? THEN a.usuario_recibe_id
+                    ELSE a.usuario_envia_id
+                END
+            )
+            WHERE (a.usuario_envia_id = ? OR a.usuario_recibe_id = ?)
+            AND a.estado = 'aceptada'`;
+
+        const [amigos] = await db.query(query, [id, id, id, id]);
+        res.json(amigos);
+    } catch (err) {
+        res.status(500).json({ error: "Error al obtener la lista de contactos." });
+    }
+});
+
+// --- 6. ELIMINAR AMISTAD (DELETE) ---
+router.delete('/eliminar/:id1/:id2', async (req, res) => {
+    const { id1, id2 } = req.params;
+    try {
+        const query = `
+            DELETE FROM amistades
+            WHERE (usuario_envia_id = ? AND usuario_recibe_id = ?)
+               OR (usuario_envia_id = ? AND usuario_recibe_id = ?)`;
+
+        await db.query(query, [id1, id2, id2, id1]);
+        res.json({ mensaje: "Vínculo eliminado correctamente. 💔" });
+    } catch (err) {
+        console.error("Error al eliminar amistad:", err);
+        res.status(500).json({ error: "No se pudo eliminar la amistad." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/amistades.routes.js =====
+
+===== INICIO: rutas/bloqueos.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (GESTIÓN DE PRIVACIDAD P4)
+// ARCHIVO: rutas/bloqueos.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- 1. EJECUTAR UN BLOQUEO (POST) ---
+// Acción: Crea el bloqueo y elimina la solicitud/amistad de la Tabla 7
+router.post('/crear', async (req, res) => {
+    const { usuario_id, usuario_bloqueado_id } = req.body;
+
+    // 🛡️ Validación de seguridad básica
+    if (usuario_id == usuario_bloqueado_id) {
+        return res.status(400).json({ error: "Operación no válida: No puedes bloquearte a ti mismo." });
+    }
+
+    try {
+        // A. Insertamos el bloqueo en la Tabla 8
+        await db.query(
+            'INSERT INTO bloqueos (usuario_id, usuario_bloqueado_id) VALUES (?, ?)',
+            [usuario_id, usuario_bloqueado_id]
+        );
+
+        // B. 🧹 LIMPIEZA AUTOMÁTICA (Persona 3): Eliminamos rastro en la tabla amistades
+        // Usamos los nombres reales: usuario_envia_id y usuario_recibe_id
+        const queryLimpieza = `
+            DELETE FROM amistades
+            WHERE (usuario_envia_id = ? AND usuario_recibe_id = ?)
+               OR (usuario_envia_id = ? AND usuario_recibe_id = ?)`;
+
+        await db.query(queryLimpieza, [usuario_id, usuario_bloqueado_id, usuario_bloqueado_id, usuario_id]);
+
+        res.status(201).json({ mensaje: "Usuario bloqueado y relación eliminada con éxito. 🚫" });
+    } catch (err) {
+        console.error("🚨 Error en proceso de bloqueo:", err);
+        res.status(500).json({ error: "Ya has bloqueado a este usuario o hubo un fallo en el servidor." });
+    }
+});
+
+// --- 2. LISTAR MIS BLOQUEADOS (GET) ---
+router.get('/lista/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT b.id as bloqueo_id, p.nombre, p.apellido, p.usuario_id
+            FROM bloqueos b
+            JOIN perfiles p ON b.usuario_bloqueado_id = p.usuario_id
+            WHERE b.usuario_id = ?
+            ORDER BY p.nombre ASC`;
+
+        const [rows] = await db.query(query, [id]);
+        res.json(rows);
+    } catch (err) {
+        console.error("🚨 Error al listar bloqueos:", err);
+        res.status(500).json({ error: "No se pudo obtener la lista de usuarios bloqueados." });
+    }
+});
+
+// --- 3. DESBLOQUEAR (DELETE) ---
+router.delete('/eliminar/:bloqueoId', async (req, res) => {
+    const { bloqueoId } = req.params;
+    try {
+        await db.query('DELETE FROM bloqueos WHERE id = ?', [bloqueoId]);
+        res.json({ mensaje: "Usuario desbloqueado correctamente. ✅" });
+    } catch (err) {
+        console.error("🚨 Error al desbloquear:", err);
+        res.status(500).json({ error: "No se pudo completar el desbloqueo." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/bloqueos.routes.js =====
+
+===== INICIO: rutas/chats.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (COMUNICACIÓN SEGURA P3 + P4)
+// ARCHIVO: rutas/chats.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- 1. OBTENER CONVERSACIÓN BILATERAL ---
+router.get('/conversacion/:id1/:id2', async (req, res) => {
+    const { id1, id2 } = req.params;
+    try {
+        const query = `
+            SELECT * FROM mensajes
+            WHERE (emisor_id = ? AND receptor_id = ?)
+               OR (emisor_id = ? AND receptor_id = ?)
+            ORDER BY fecha ASC`;
+
+        const [mensajes] = await db.query(query, [id1, id2, id2, id1]);
+        res.json(mensajes);
+    } catch (err) {
+        console.error("🚨 Error al cargar chat:", err);
+        res.status(500).json({ error: "Error al cargar la conversación." });
+    }
+});
+
+// --- 2. ENVIAR NUEVO MENSAJE (Con Escudo Anti-Bloqueos) ---
+router.post('/enviar', async (req, res) => {
+    const { emisor_id, receptor_id, contenido } = req.body;
+
+    if (!contenido) {
+        return res.status(400).json({ error: "El mensaje no puede estar vacío." });
+    }
+
+    try {
+        // 🛡️ PASO DE SEGURIDAD: Verificar si existe un bloqueo entre ambos (Sentido A o B)
+        const queryBloqueo = `
+            SELECT * FROM bloqueos
+            WHERE (usuario_id = ? AND usuario_bloqueado_id = ?)
+               OR (usuario_id = ? AND usuario_bloqueado_id = ?)`;
+
+        const [bloqueo] = await db.query(queryBloqueo, [emisor_id, receptor_id, receptor_id, emisor_id]);
+
+        if (bloqueo.length > 0) {
+            // Devolvemos 403 (Forbidden) para que el frontend sepa que es un bloqueo
+            return res.status(403).json({
+                error: "No puedes enviar mensajes debido a un bloqueo activo. 🚫"
+            });
+        }
+
+        // Si el camino está despejado, insertamos el mensaje
+        await db.query(
+            'INSERT INTO mensajes (emisor_id, receptor_id, contenido) VALUES (?, ?, ?)',
+            [emisor_id, receptor_id, contenido]
+        );
+
+        res.status(201).json({ mensaje: "Mensaje enviado con éxito ✅" });
+
+    } catch (err) {
+        console.error("🚨 Error técnico en Chat:", err);
+        res.status(500).json({ error: "No se pudo procesar el mensaje." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/chats.routes.js =====
+
+===== INICIO: rutas/eventos.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (GESTIÓN DE EVENTOS P4 + NOTIFICACIONES P5)
+// ARCHIVO: rutas/eventos.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- 1. OBTENER EVENTOS FUTUROS (Cartelera Dinámica) ---
+// Muestra solo los eventos que aún no han pasado
+router.get('/todos', async (req, res) => {
+    try {
+        const query = `
+            SELECT e.*, p.nombre, p.apellido
+            FROM eventos e
+            JOIN perfiles p ON e.creador_id = p.usuario_id
+            WHERE e.fecha_evento >= CURDATE()
+            ORDER BY e.fecha_evento ASC
+        `;
+        const [eventos] = await db.query(query);
+        res.json(eventos);
+    } catch (err) {
+        console.error("🚨 Error al listar eventos:", err);
+        res.status(500).json({ error: "No se pudieron cargar los eventos del servidor." });
+    }
+});
+
+// --- 2. 🚀 CREAR NUEVO EVENTO + NOTIFICAR AMIGOS ---
+router.post('/crear', async (req, res) => {
+    const { creador_id, titulo, descripcion, ubicacion, fecha_evento } = req.body;
+
+    if (!creador_id || !titulo || !fecha_evento) {
+        return res.status(400).json({ error: "Faltan datos obligatorios para el evento." });
+    }
+
+    try {
+        // 1️⃣ Insertamos el evento en la tabla 'eventos'
+        const queryEvento = `
+            INSERT INTO eventos (creador_id, titulo, descripcion, ubicacion, fecha_evento)
+            VALUES (?, ?, ?, ?, ?)
+        `;
+        const [result] = await db.query(queryEvento, [creador_id, titulo, descripcion, ubicacion, fecha_evento]);
+        const eventoId = result.insertId;
+
+        // 2️⃣ Buscamos a todos los amigos con estado 'aceptada' para avisarles
+        const queryAmigos = `
+            SELECT
+                CASE
+                    WHEN usuario_envia_id = ? THEN usuario_recibe_id
+                    ELSE usuario_envia_id
+                END AS amigo_id
+            FROM amistades
+            WHERE (usuario_envia_id = ? OR usuario_recibe_id = ?)
+            AND estado = 'aceptada'
+        `;
+        const [amigos] = await db.query(queryAmigos, [creador_id, creador_id, creador_id]);
+
+        // 3️⃣ Si hay amigos, generamos las notificaciones en masa
+        if (amigos.length > 0) {
+            const promesasNotis = amigos.map(amigo => {
+                return db.query(
+                    `INSERT INTO notificaciones (usuario_id, emisor_id, tipo, referencia_id) VALUES (?, ?, 'nuevo_evento', ?)`,
+                    [amigo.amigo_id, creador_id, eventoId]
+                );
+            });
+            await Promise.all(promesasNotis);
+            console.log(`📢 Agenda: Notificaciones enviadas a ${amigos.length} amigos.`);
+        }
+
+        res.status(201).json({
+            mensaje: "✅ Evento organizado y amigos notificados 📅",
+            id: eventoId
+        });
+
+    } catch (err) {
+        console.error("🚨 Error crítico en eventos:", err);
+        res.status(500).json({ error: "Error interno al procesar el evento." });
+    }
+});
+
+// --- 3. ELIMINAR UN EVENTO (Seguridad: Solo el creador puede) ---
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { usuario_id } = req.query; // Se pasa el ID de quien intenta borrar
+
+    try {
+        const [resultado] = await db.query(
+            'DELETE FROM eventos WHERE id = ? AND creador_id = ?',
+            [id, usuario_id]
+        );
+
+        if (resultado.affectedRows > 0) {
+            res.json({ mensaje: "Evento cancelado y eliminado correctamente 🗑️" });
+        } else {
+            res.status(403).json({ error: "No tienes permiso para borrar este evento o ya no existe." });
+        }
+    } catch (err) {
+        console.error("🚨 Error al borrar evento:", err);
+        res.status(500).json({ error: "Error interno al intentar eliminar." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/eventos.routes.js =====
+
+===== INICIO: rutas/notas.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (MOTOR DE NOTAS EFÍMERAS #15)
+// ARCHIVO: rutas/notas.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- ✅ 1. PUBLICAR O ACTUALIZAR NOTA (POST) ---
+// Mantenemos solo una nota activa por usuario para el pasillo superior
+router.post('/crear', async (req, res) => {
+    const { usuario_id, texto } = req.body; // 'texto' mapea a 'contenido' en la DB
+
+    if (!usuario_id || !texto) {
+        return res.status(400).json({ error: "Faltan datos (ID o contenido) para la nota." });
+    }
+
+    try {
+        // 🛡️ PASO A: Limpiar nota anterior (Política: 1 nota por usuario)
+        await db.query(
+            "DELETE FROM guardados_y_notas WHERE usuario_id = ? AND tipo_entrada = 'nota'",
+            [usuario_id]
+        );
+
+        // 📝 PASO B: Insertar la nueva nota efímera
+        const query = `
+            INSERT INTO guardados_y_notas (usuario_id, contenido, tipo_entrada, fecha)
+            VALUES (?, ?, 'nota', NOW())
+        `;
+        await db.query(query, [usuario_id, texto]);
+
+        res.json({ mensaje: "¡Nota actualizada con éxito! ✨" });
+    } catch (err) {
+        console.error("❌ Error al procesar nota:", err);
+        res.status(500).json({ error: "Error interno al guardar en la base de datos." });
+    }
+});
+
+// --- ✅ 2. OBTENER NOTAS DEL PASILLO (GET) ---
+// Trae notas propias y de amigos con estado 'aceptada'
+router.get('/activas/:usuario_id', async (req, res) => {
+    const { usuario_id } = req.params;
+
+    try {
+        const query = `
+            SELECT gn.id, gn.contenido, gn.fecha, p.nombre, p.apellido, p.foto_url, p.usuario_id
+            FROM guardados_y_notas gn
+            JOIN perfiles p ON gn.usuario_id = p.usuario_id
+            WHERE gn.tipo_entrada = 'nota'
+            AND (
+                gn.usuario_id = ?
+                OR gn.usuario_id IN (
+                    SELECT CASE
+                        WHEN usuario_envia_id = ? THEN usuario_recibe_id
+                        ELSE usuario_envia_id
+                    END
+                    FROM amistades
+                    WHERE (usuario_envia_id = ? OR usuario_recibe_id = ?)
+                    AND estado = 'aceptada'
+                )
+            )
+            ORDER BY gn.fecha DESC
+            LIMIT 15;
+        `;
+
+        const [results] = await db.query(query, [usuario_id, usuario_id, usuario_id, usuario_id]);
+        res.json(results);
+    } catch (err) {
+        console.error("❌ Error al obtener notas activas:", err);
+        res.status(500).json({ error: "No se pudieron cargar las notas del pasillo." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/notas.routes.js =====
+
+===== INICIO: rutas/notificaciones.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (CENTRO DE NOTIFICACIONES P4)
+// ARCHIVO: rutas/notificaciones.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- ✅ 1. CONTEO DE NO LEÍDAS ---
+// Importante: Esta ruta va antes de /:id para que Express no se confunda.
+router.get('/conteo/:usuario_id', async (req, res) => {
+    const { usuario_id } = req.params;
+    try {
+        const query = `
+            SELECT COUNT(*) as total
+            FROM notificaciones
+            WHERE usuario_id = ? AND leido = 0
+            AND emisor_id NOT IN (
+                SELECT usuario_bloqueado_id FROM bloqueos WHERE usuario_id = ?
+            )
+            AND emisor_id NOT IN (
+                SELECT usuario_id FROM bloqueos WHERE usuario_bloqueado_id = ?
+            )`;
+
+        const [results] = await db.query(query, [usuario_id, usuario_id, usuario_id]);
+        res.json(results[0] || { total: 0 });
+    } catch (err) {
+        console.error("❌ Error en el conteo:", err);
+        res.status(500).json({ error: "Error en el conteo de notificaciones." });
+    }
+});
+
+// --- ✅ 2. LISTADO HISTÓRICO ---
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT n.*, p.nombre, p.apellido, p.foto_url
+            FROM notificaciones n
+            JOIN perfiles p ON n.emisor_id = p.usuario_id
+            WHERE n.usuario_id = ?
+            AND n.emisor_id NOT IN (
+                SELECT usuario_bloqueado_id FROM bloqueos WHERE usuario_id = ?
+            )
+            AND n.emisor_id NOT IN (
+                SELECT usuario_id FROM bloqueos WHERE usuario_bloqueado_id = ?
+            )
+            ORDER BY n.fecha DESC LIMIT 30`;
+
+        const [alertas] = await db.query(query, [id, id, id]);
+        res.json(alertas);
+    } catch (err) {
+        console.error("❌ ERROR AL CARGAR NOTIFICACIONES:", err);
+        res.status(500).json({ error: "Error interno al obtener los avisos." });
+    }
+});
+
+// --- ✅ 3. MARCAR UNA COMO LEÍDA ---
+// Sincronizado con irAContenido() en notificaciones.js
+router.put('/leer/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('UPDATE notificaciones SET leido = 1 WHERE id = ?', [id]);
+        res.json({ mensaje: "Notificación marcada como leída ✅" });
+    } catch (err) {
+        console.error("❌ Error al marcar como leída:", err);
+        res.status(500).json({ error: "No se pudo actualizar la notificación." });
+    }
+});
+
+// --- ✅ 4. MARCAR TODAS COMO LEÍDAS ---
+router.put('/leer-todas/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('UPDATE notificaciones SET leido = 1 WHERE usuario_id = ?', [id]);
+        res.json({ mensaje: "Todas marcadas como leídas ✅" });
+    } catch (err) {
+        console.error("❌ Error al marcar todas:", err);
+        res.status(500).json({ error: "No se pudo actualizar el historial." });
+    }
+});
+
+// --- ✅ 5. ELIMINAR NOTIFICACIÓN ---
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('DELETE FROM notificaciones WHERE id = ?', [id]);
+        res.json({ mensaje: "Notificación eliminada 🗑️" });
+    } catch (err) {
+        console.error("❌ Error al borrar notificación:", err);
+        res.status(500).json({ error: "Error al intentar borrar el aviso." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/notificaciones.routes.js =====
+
+===== INICIO: rutas/publicaciones.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTA (GESTIÓN ESTRATÉGICA DE POSTS Y TESOROS)
+// ARCHIVO: rutas/publicaciones.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- [1] OBTENER EL MURO / FEED (SEGURIDAD DE JERAQUÍA TOTAL) ---
+router.get('/muro/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+    try {
+        // Consultamos el rol para saber si aplicamos restricciones o acceso total
+        const [u] = await db.query('SELECT rol FROM usuarios WHERE id = ?', [usuarioId]);
+        const esAdmin = u.length > 0 && u[0].rol === 'admin';
+
+        let query;
+        let params;
+
+        if (esAdmin) {
+            // ⭐ ADMIN: Ve todas las publicaciones de la red en su muro
+            query = `
+                SELECT p.*, perf.nombre, perf.apellido, perf.foto_url,
+                       p_orig.contenido AS contenido_original,
+                       perf_orig.nombre AS nombre_original, perf_orig.apellido AS apellido_original,
+                       (SELECT COUNT(*) FROM reacciones WHERE publicacion_id = p.id AND tipo = 'like') AS total_likes,
+                       (SELECT COUNT(*) FROM comentarios WHERE publicacion_id = p.id) AS total_comentarios,
+                       (SELECT COUNT(*) FROM reacciones WHERE publicacion_id = p.id AND usuario_id = ? AND tipo = 'like') AS reaccionado,
+                       'aceptada' AS estado_relacion
+                FROM publicaciones p
+                JOIN perfiles perf ON p.usuario_id = perf.usuario_id
+                LEFT JOIN publicaciones p_orig ON p.original_post_id = p_orig.id
+                LEFT JOIN perfiles perf_orig ON p_orig.usuario_id = perf_orig.usuario_id
+                ORDER BY p.fecha DESC`;
+            params = [usuarioId];
+        } else {
+            // 🛡️ USUARIO: Solo ve sus posts + posts PÚBLICOS de sus AMIGOS aceptados
+            query = `
+                SELECT p.*, perf.nombre, perf.apellido, perf.foto_url,
+                       p_orig.contenido AS contenido_original,
+                       perf_orig.nombre AS nombre_original, perf_orig.apellido AS apellido_original,
+                       (SELECT COUNT(*) FROM reacciones WHERE publicacion_id = p.id AND tipo = 'like') AS total_likes,
+                       (SELECT COUNT(*) FROM comentarios WHERE publicacion_id = p.id) AS total_comentarios,
+                       (SELECT COUNT(*) FROM reacciones WHERE publicacion_id = p.id AND usuario_id = ? AND tipo = 'like') AS reaccionado,
+                       'aceptada' AS estado_relacion
+                FROM publicaciones p
+                JOIN perfiles perf ON p.usuario_id = perf.usuario_id
+                LEFT JOIN publicaciones p_orig ON p.original_post_id = p_orig.id
+                LEFT JOIN perfiles perf_orig ON p_orig.usuario_id = perf_orig.usuario_id
+                WHERE p.usuario_id = ?
+                   OR (p.privacidad = 'publica' AND p.usuario_id IN (
+                       SELECT usuario_envia_id FROM amistades WHERE usuario_recibe_id = ? AND estado = 'aceptada'
+                       UNION
+                       SELECT usuario_recibe_id FROM amistades WHERE usuario_envia_id = ? AND estado = 'aceptada'
+                   ))
+                ORDER BY p.fecha DESC`;
+            params = [usuarioId, usuarioId, usuarioId, usuarioId];
+        }
+
+        const [posts] = await db.query(query, params);
+        res.json(posts);
+    } catch (err) {
+        console.error("🚨 Error en muro:", err);
+        res.status(500).json({ error: "No se pudo cargar el muro." });
+    }
+});
+
+// --- [2] OBTENER POSTS EN EL PERFIL (PROTOCOLO DE PRIVACIDAD TOTAL) ---
+router.get('/usuario/:perfilId', async (req, res) => {
+    const { perfilId } = req.params;
+    const vId = req.query.visitanteId;
+
+    const visitanteId = parseInt(vId);
+    const targetId = parseInt(perfilId);
+
+    try {
+        const [u] = await db.query('SELECT rol FROM usuarios WHERE id = ?', [visitanteId]);
+        const esAdmin = u.length > 0 && u[0].rol === 'admin';
+        const esDuenio = (visitanteId === targetId);
+
+        console.log(`🛡️ SEGURIDAD: Visitante ${visitanteId} -> Perfil ${targetId} | Admin: ${esAdmin}`);
+
+        if (esDuenio || esAdmin) {
+            const [posts] = await db.query('SELECT * FROM publicaciones WHERE usuario_id = ? ORDER BY id DESC', [targetId]);
+            return res.json(posts);
+        }
+
+        const [amistad] = await db.query(`
+            SELECT estado FROM amistades
+            WHERE ((usuario_envia_id = ? AND usuario_recibe_id = ?)
+               OR (usuario_envia_id = ? AND usuario_recibe_id = ?))
+            AND estado = 'aceptada' LIMIT 1`,
+            [visitanteId, targetId, targetId, visitanteId]
+        );
+
+        if (amistad.length === 0) {
+            console.log("🚫 ACCESO DENEGADO: No son amigos aceptados.");
+            return res.json([]);
+        }
+
+        const [postsAmigos] = await db.query(`
+            SELECT * FROM publicaciones
+            WHERE usuario_id = ? AND privacidad = 'publica'
+            ORDER BY id DESC`, [targetId]);
+
+        res.json(postsAmigos);
+
+    } catch (err) {
+        console.error("🚨 Error crítico de seguridad:", err);
+        res.status(500).json({ error: "Fallo en el protocolo de privacidad." });
+    }
+});
+
+// --- [3] COMPARTIR PUBLICACIÓN ---
+router.post('/compartir', async (req, res) => {
+    const { usuario_id, publicacion_id, comentario } = req.body;
+    try {
+        const query = `INSERT INTO publicaciones (usuario_id, contenido, tipo, original_post_id, privacidad) VALUES (?, ?, 'compartido', ?, 'publica')`;
+        await db.query(query, [usuario_id, comentario, publicacion_id]);
+        res.json({ mensaje: "¡Compartido con éxito! 🚀" });
+    } catch (err) { res.status(500).json({ error: "Error al compartir." }); }
+});
+
+// --- [4] CREAR NUEVA PUBLICACIÓN ---
+router.post('/crear', async (req, res) => {
+    const { usuario_id, contenido, privacidad } = req.body;
+    try {
+        await db.query('INSERT INTO publicaciones (usuario_id, contenido, privacidad, tipo) VALUES (?, ?, ?, "original")',
+        [usuario_id, contenido, privacidad || 'publica']);
+        res.status(201).json({ mensaje: "Publicación creada ✅" });
+    } catch (err) { res.status(500).json({ error: "Error al guardar." }); }
+});
+
+// --- [5] REACCIONAR (LIKE/TOGGLE) ---
+router.post('/reaccionar', async (req, res) => {
+    const { publicacion_id, usuario_id, tipo } = req.body;
+    try {
+        await db.query(`
+            INSERT INTO reacciones (publicacion_id, usuario_id, tipo)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE tipo = (CASE WHEN tipo = VALUES(tipo) THEN 'none' ELSE VALUES(tipo) END)`,
+        [publicacion_id, usuario_id, tipo]);
+        res.json({ mensaje: "Reacción procesada ✅" });
+    } catch (err) { res.status(500).json({ error: "Error en reacción." }); }
+});
+
+// --- [6] ELIMINAR PUBLICACIÓN ---
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { usuario_id } = req.query;
+    try {
+        const [u] = await db.query('SELECT rol FROM usuarios WHERE id = ?', [usuario_id]);
+        const esAdmin = u.length > 0 && u[0].rol === 'admin';
+
+        let queryBorrado;
+        let params;
+        if (esAdmin) {
+            queryBorrado = 'DELETE FROM publicaciones WHERE id = ?';
+            params = [id];
+        } else {
+            queryBorrado = 'DELETE FROM publicaciones WHERE id = ? AND usuario_id = ?';
+            params = [id, usuario_id];
+        }
+        const [resultado] = await db.query(queryBorrado, params);
+        if (resultado.affectedRows > 0) res.json({ mensaje: "Post eliminado 🗑️" });
+        else res.status(403).json({ error: "No tienes permiso." });
+    } catch (err) { res.status(500).json({ error: "Error al eliminar." }); }
+});
+
+// --- [7, 8, 9] BAÚL / TESOROS ---
+router.get('/baul/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+    try {
+        const query = `
+            SELECT p.*, pr.nombre, pr.apellido, pr.foto_url, b.fecha_guardado
+            FROM baul b
+            JOIN publicaciones p ON b.publicacion_id = p.id
+            LEFT JOIN perfiles pr ON p.usuario_id = pr.usuario_id
+            WHERE b.usuario_id = ?
+            ORDER BY b.fecha_guardado DESC`;
+        const [tesoros] = await db.query(query, [usuarioId]);
+        res.json(tesoros);
+    } catch (err) { res.status(500).json({ error: "Error al consultar el baúl" }); }
+});
+
+router.post('/baul/guardar', async (req, res) => {
+    const { usuario_id, publicacion_id } = req.body;
+    try {
+        await db.query("INSERT IGNORE INTO baul (usuario_id, publicacion_id) VALUES (?, ?)", [usuario_id, publicacion_id]);
+        res.json({ success: true, mensaje: "¡Tesoro guardado! 💾" });
+    } catch (err) { res.status(500).json({ error: "No se pudo guardar" }); }
+});
+
+router.delete('/baul/:postId', async (req, res) => {
+    const { postId } = req.params;
+    const { usuario_id } = req.query;
+    try {
+        await db.query("DELETE FROM baul WHERE publicacion_id = ? AND usuario_id = ?", [postId, usuario_id]);
+        res.json({ mensaje: "Tesoro eliminado" });
+    } catch (err) { res.status(500).json({ error: "Error al eliminar" }); }
+});
+
+// --- [10] OBTENER COMENTARIOS ---
+router.get('/comentarios/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT c.*, p.nombre, p.apellido
+            FROM comentarios c
+            JOIN perfiles p ON c.usuario_id = p.usuario_id
+            WHERE c.publicacion_id = ?
+            ORDER BY c.id ASC`;
+        const [rows] = await db.query(query, [id]);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: "Error en comentarios." }); }
+});
+
+// --- [11] COMENTAR ---
+router.post('/comentar', async (req, res) => {
+    const { publicacion_id, usuario_id, contenido } = req.body;
+    try {
+        await db.query('INSERT INTO comentarios (publicacion_id, usuario_id, contenido) VALUES (?, ?, ?)', [publicacion_id, usuario_id, contenido]);
+        res.json({ mensaje: "Comentario publicado ✅" });
+    } catch (err) { res.status(500).json({ error: "Error al comentar." }); }
+});
+
+// --- [12] ELIMINAR COMENTARIO ---
+router.delete('/comentario/:id', async (req, res) => {
+    const { id } = req.params;
+    const { usuario_id } = req.query;
+    try {
+        const [comentario] = await db.query(`
+            SELECT c.usuario_id AS comentario_autor_id, p.usuario_id AS post_autor_id
+            FROM comentarios c
+            JOIN publicaciones p ON c.publicacion_id = p.id
+            WHERE c.id = ?`, [id]);
+
+        if (comentario.length === 0) return res.status(404).json({ error: "No encontrado." });
+
+        const { comentario_autor_id, post_autor_id } = comentario[0];
+        const [u] = await db.query('SELECT rol FROM usuarios WHERE id = ?', [usuario_id]);
+        const esAdmin = u.length > 0 && u[0].rol === 'admin';
+
+        if (usuario_id == comentario_autor_id || usuario_id == post_autor_id || esAdmin) {
+            await db.query('DELETE FROM comentarios WHERE id = ?', [id]);
+            res.json({ mensaje: "Comentario eliminado" });
+        } else {
+            res.status(403).json({ error: "Sin permiso." });
+        }
+    } catch (err) { res.status(500).json({ error: "Error al eliminar comentario." }); }
+});
+
+module.exports = router;
+===== FIN: rutas/publicaciones.routes.js =====
+
+===== INICIO: rutas/reportes.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (MODERACIÓN Y JUSTICIA P4)
+// ARCHIVO: rutas/reportes.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+
+// --- 1. ENVIAR UNA DENUNCIA (POST) ---
+router.post('/crear', async (req, res) => {
+    const { denunciante_id, publicacion_id, motivo } = req.body;
+
+    if (!denunciante_id || !publicacion_id || !motivo) {
+        return res.status(400).json({ error: "Datos insuficientes para procesar el reporte." });
+    }
+
+    try {
+        await db.query(
+            'INSERT INTO reportes (denunciante_id, publicacion_id, motivo, estado) VALUES (?, ?, ?, "pendiente")',
+            [denunciante_id, publicacion_id, motivo]
+        );
+        res.status(201).json({ mensaje: "Denuncia recibida. El Arquitecto la revisará. 🚩" });
+    } catch (err) {
+        console.error("🚨 Error al insertar reporte:", err);
+        res.status(500).json({ error: "Error al registrar la denuncia." });
+    }
+});
+
+// --- 2. [ADMIN] LISTAR REPORTES PENDIENTES (GET) ---
+router.get('/admin/lista', async (req, res) => {
+    try {
+        const query = `
+            SELECT
+                r.id AS reporte_id,
+                r.motivo,
+                r.estado,
+                p.contenido AS post_contenido,
+                p.id AS post_id,
+                perf_den.nombre AS denunciante_nombre,
+                perf_den.apellido AS denunciante_apellido,
+                perf_autor.nombre AS autor_nombre,
+                perf_autor.apellido AS autor_apellido
+            FROM reportes r
+            JOIN publicaciones p ON r.publicacion_id = p.id
+            JOIN perfiles perf_den ON r.denunciante_id = perf_den.usuario_id
+            JOIN perfiles perf_autor ON p.usuario_id = perf_autor.usuario_id
+            WHERE r.estado = 'pendiente'
+            ORDER BY r.id DESC`; // ✅ CORREGIDO: Usamos r.id para evitar errores de columna de fecha
+
+        const [reportes] = await db.query(query);
+        res.json(reportes);
+    } catch (err) {
+        console.error("🚨 Error al cargar lista de justicia:", err);
+        res.status(500).json({ error: "Error al cargar la lista de moderación." });
+    }
+});
+
+// --- 3. [ADMIN] RESOLVER REPORTE (PATCH) ---
+router.patch('/admin/resolver/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('UPDATE reportes SET estado = "resuelto" WHERE id = ?', [id]);
+        res.json({ mensaje: "Caso cerrado con éxito ✅" });
+    } catch (err) {
+        console.error("🚨 Error al resolver reporte:", err);
+        res.status(500).json({ error: "No se pudo actualizar el reporte." });
+    }
+});
+
+module.exports = router;
+===== FIN: rutas/reportes.routes.js =====
+
+===== INICIO: rutas/seguridad.routes.js =====
+// rutas/seguridad.routes.js
+const express = require('express');
+const router = express.Router();
+const iniciarSesion = require('../servicios/autenticacion');
+
+// Conserva la ruta pública anterior con la misma validación BCrypt del acceso principal.
+router.post('/login', iniciarSesion);
+
+module.exports = router;
+
+===== FIN: rutas/seguridad.routes.js =====
+
+===== INICIO: rutas/usuarios.routes.js =====
+// =============================================
+// PROYECTO: FACEBOOK BÁSICO (VERSIÓN LOCAL)
+// ROL: ARQUITECTO (IDENTIDAD: LIZBETH RÍOS 👑)
+// ARCHIVO: rutas/usuarios.routes.js
+// =============================================
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db/base_datos');
+const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
+const iniciarSesion = require('../servicios/autenticacion');
+
+// --- 🏗️ CONFIGURACIÓN LOCAL DE MULTER (Subida de Avatares) ---
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/perfiles/');
+    },
+    filename: function (req, file, cb) {
+        const userId = req.params.id;
+        const extension = path.extname(file.originalname);
+        cb(null, `avatar_${userId}_${Date.now()}${extension}`);
+    }
+});
+const upload = multer({ storage: storage });
+
+// --- 1. REGISTRO MAESTRO ---
+router.post('/registro', async (req, res) => {
+    const { email, password } = req.body || {};
+    if (typeof email !== 'string' || !email.trim()) {
+        return res.status(400).json({ error: 'Ingresa un correo electrónico.' });
+    }
+    if (typeof password !== 'string' || password.length !== 12) {
+        return res.status(400).json({ error: "La contraseña debe tener exactamente 12 caracteres." });
+    }
+    try {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const [resultado] = await db.query(
+            'INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)',
+            [email, hashedPassword, 'usuario']
+        );
+        const nuevoId = resultado.insertId;
+        await db.query(
+            'INSERT INTO perfiles (usuario_id, nombre, apellido) VALUES (?, ?, ?)',
+            [nuevoId, 'Nuevo', 'Usuario']
+        );
+        const saludo = `¡Hola! Soy Lizbeth Ríos, la Arquitecta de esta red social. ¡Bienvenida/o a bordo!`;
+        await db.query(
+            'INSERT INTO mensajes (emisor_id, receptor_id, contenido) VALUES (?, ?, ?)',
+            [1, nuevoId, saludo]
+        );
+        res.status(201).json({ mensaje: "¡Cuenta creada con éxito!", id: nuevoId });
+    } catch (err) {
+        res.status(500).json({ error: "Error al registrar usuario." });
+    }
+});
+
+// --- 2. LOGIN DE USUARIOS ---
+router.post('/login', iniciarSesion);
+
+// --- 3. OBTENER AJUSTES ---
+router.get('/ajustes/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT u.email, u.rol, u.preferencia_tema, p.nombre, p.apellido, p.bio, p.foto_url
+            FROM usuarios u
+            JOIN perfiles p ON u.id = p.usuario_id
+            WHERE u.id = ?`;
+        const [rows] = await db.query(query, [id]);
+        if (rows.length > 0) res.json(rows[0]);
+        else res.status(404).json({ error: "No encontrado" });
+    } catch (err) { res.status(500).json({ error: "Error al obtener datos" }); }
+});
+
+// --- 4. ACTUALIZAR AJUSTES (Híbrido: Campos + Foto) ---
+router.put('/actualizar-ajustes/:id', upload.single('foto_perfil'), async (req, res) => {
+    const { id } = req.params;
+    const { nombre, apellido, bio, tema, password } = req.body;
+    let fotoUrl = req.file ? req.file.filename : null;
+
+    try {
+        if (password && password.length === 12) {
+            const hashedNewPassword = await bcrypt.hash(password, 10);
+            await db.query('UPDATE usuarios SET password = ?, preferencia_tema = ? WHERE id = ?', [hashedNewPassword, tema, id]);
+        } else {
+            await db.query('UPDATE usuarios SET preferencia_tema = ? WHERE id = ?', [tema, id]);
+        }
+
+        let queryPerfil = "UPDATE perfiles SET nombre = ?, apellido = ?, bio = ?";
+        let paramsPerfil = [nombre, apellido, bio];
+
+        if (fotoUrl) {
+            queryPerfil += ", foto_url = ?";
+            paramsPerfil.push(fotoUrl);
+        }
+
+        queryPerfil += " WHERE usuario_id = ?";
+        paramsPerfil.push(id);
+
+        await db.query(queryPerfil, paramsPerfil);
+
+        res.json({ mensaje: "¡Perfil actualizado correctamente! ✅", foto_url: fotoUrl });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error crítico al guardar cambios." });
+    }
+});
+
+// --- 🔍 5. BUSCADOR PREDICTIVO ---
+router.get('/buscar', async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json([]);
+    try {
+        const query = `SELECT usuario_id, nombre, apellido, foto_url, bio FROM perfiles WHERE nombre LIKE ? OR apellido LIKE ? LIMIT 5`;
+        const termino = `${q}%`;
+        const [resultados] = await db.query(query, [termino, termino]);
+        res.json(resultados);
+    } catch (err) { res.status(500).json({ error: "Error en el buscador" }); }
+});
+
+// --- 👤 6. OBTENER PERFIL PÚBLICO (ACTUALIZADO: JOIN ROBUSTO) ---
+router.get('/perfil/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Usamos LEFT JOIN para evitar el 404 si la tabla 'perfiles' tiene inconsistencias
+        const query = `
+            SELECT u.id, u.email, u.estado, p.nombre, p.apellido, p.bio, p.foto_url
+            FROM usuarios u
+            LEFT JOIN perfiles p ON u.id = p.usuario_id
+            WHERE u.id = ?`;
+        const [rows] = await db.query(query, [id]);
+
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: "Usuario no encontrado en la base de datos central." });
+        }
+    } catch (err) {
+        console.error("🚨 Error en SQL Perfil:", err);
+        res.status(500).json({ error: "Error interno del servidor." });
+    }
+});
+
+// --- 🚫 7. SUSPENDER USUARIO ---
+router.patch('/suspendido/:id', async (req, res) => {
+    const { id } = req.params;
+    const { adminId } = req.body;
+    if (parseInt(adminId) !== 1) return res.status(403).json({ error: "No autorizado." });
+    try {
+        await db.query('UPDATE usuarios SET estado = "suspendido" WHERE id = ?', [id]);
+        res.json({ mensaje: "Cuenta suspendida. 🚫" });
+    } catch (err) { res.status(500).json({ error: "Error." }); }
+});
+
+// --- 🔑 8. PROMOVER USUARIO ---
+router.patch('/promover', async (req, res) => {
+    const { usuario_a_promover, codigo, admin_solicitante_id } = req.body;
+    try {
+        if (admin_solicitante_id != 1) return res.status(403).json({ error: "No autorizado. 🚫" });
+        const [busqueda] = await db.query('SELECT * FROM codigos_admin WHERE codigo = ? AND estado = "disponible"', [codigo]);
+        if (busqueda.length === 0) return res.status(403).json({ error: "Código inválido. ❌" });
+        const codigoId = busqueda[0].id;
+        await db.query('UPDATE usuarios SET rol = "admin" WHERE id = ?', [usuario_a_promover]);
+        await db.query(`UPDATE codigos_admin SET estado = "usado", usuario_que_lo_uso = ?, fecha_uso = NOW() WHERE id = ?`, [usuario_a_promover, codigoId]);
+        res.json({ mensaje: "¡Usuario ascendido! ⭐" });
+    } catch (err) { res.status(500).json({ error: "Error." }); }
+});
+
+module.exports = router;
+
+===== FIN: rutas/usuarios.routes.js =====
+
+===== INICIO: servicios/autenticacion.js =====
+const bcrypt = require('bcrypt');
+const db = require('../db/base_datos');
+
+async function iniciarSesion(req, res) {
+    const { email, password } = req.body || {};
+
+    if (typeof email !== 'string' || !email.trim() || typeof password !== 'string' || !password) {
+        return res.status(400).json({ error: 'Ingresa tu correo y contraseña.' });
+    }
+
+    try {
+        const [usuarios] = await db.query(`
+            SELECT u.id, u.email, u.password, u.rol, u.estado, p.nombre
+            FROM usuarios u
+            JOIN perfiles p ON u.id = p.usuario_id
+            WHERE u.email = ?`, [email]);
+
+        if (usuarios.length === 0) return res.status(401).json({ error: 'No registrado.' });
+
+        const usuario = usuarios[0];
+        if (usuario.estado === 'suspendido') {
+            return res.status(403).json({ error: 'Cuenta suspendida. 🚫' });
+        }
+
+        const coinciden = await bcrypt.compare(password, usuario.password);
+        if (!coinciden) return res.status(401).json({ error: 'Contraseña incorrecta.' });
+
+        return res.json({
+            usuarioId: usuario.id,
+            nombre: usuario.nombre,
+            rol: usuario.rol,
+            email: usuario.email
+        });
+    } catch (err) {
+        console.error('Error al iniciar sesión:', err);
+        return res.status(500).json({ error: 'Error en el servidor.' });
+    }
+}
+
+module.exports = iniciarSesion;
+
+===== FIN: servicios/autenticacion.js =====
+
+===== INICIO: herramientas/migrar_contrasenas.js =====
+// Ejecutar manualmente solo después de respaldar la base de datos.
+// Reutiliza las variables DB_* cargadas por db/base_datos.js.
+const bcrypt = require('bcrypt');
+const db = require('../db/base_datos');
+
+async function migrarContrasenas() {
+    const [usuarios] = await db.query('SELECT id, password FROM usuarios');
+    let actualizados = 0;
+
+    for (const usuario of usuarios) {
+        if (typeof usuario.password !== 'string' || /^\$2[aby]\$/.test(usuario.password)) continue;
+
+        const hash = await bcrypt.hash(usuario.password, 10);
+        await db.query('UPDATE usuarios SET password = ? WHERE id = ?', [hash, usuario.id]);
+        actualizados++;
+    }
+
+    console.log(`Migración terminada. Contraseñas actualizadas: ${actualizados}.`);
+}
+
+migrarContrasenas()
+    .catch((error) => {
+        console.error('Error durante la migración:', error);
+        process.exitCode = 1;
+    })
+    .finally(() => db.end());
+
+===== FIN: herramientas/migrar_contrasenas.js =====

@@ -9,8 +9,6 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
-const bcrypt = require('bcrypt');
-const multer = require('multer'); // ✅ Agregado para subida de fotos
 require('dotenv').config();
 
 const app = express();
@@ -24,23 +22,6 @@ const io = new Server(server, {
 // --- 🛠️ MIDDLEWARES ---
 app.use(cors());
 app.use(express.json());
-
-// --- 🏗️ CONFIGURACIÓN DE ALMACENAMIENTO (MULTER) ---
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/perfiles/'); // Carpeta física de destino
-    },
-    filename: function (req, file, cb) {
-        // Renombrar: avatar_USUARIOID_TIMESTAMP.ext
-        const userId = req.params.id;
-        const extension = path.extname(file.originalname);
-        cb(null, `avatar_${userId}_${Date.now()}${extension}`);
-    }
-});
-
-const upload = multer({ storage: storage });
-// Nota: Exportamos 'upload' si lo necesitas en otros archivos de rutas modulares
-module.exports = { upload }; 
 
 // --- 🚦 RASTREADOR DE MOVIMIENTOS (LOGS) ---
 app.use((req, res, next) => {

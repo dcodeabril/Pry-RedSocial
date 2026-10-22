@@ -10,6 +10,7 @@ const db = require('../db/base_datos');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
+const iniciarSesion = require('../servicios/autenticacion');
 
 // --- 🏗️ CONFIGURACIÓN LOCAL DE MULTER (Subida de Avatares) ---
 const storage = multer.diskStorage({
@@ -26,8 +27,11 @@ const upload = multer({ storage: storage });
 
 // --- 1. REGISTRO MAESTRO ---
 router.post('/registro', async (req, res) => {
-    const { email, password } = req.body;
-    if (password.length !== 12) {
+    const { email, password } = req.body || {};
+    if (typeof email !== 'string' || !email.trim()) {
+        return res.status(400).json({ error: 'Ingresa un correo electrónico.' });
+    }
+    if (typeof password !== 'string' || password.length !== 12) {
         return res.status(400).json({ error: "La contraseña debe tener exactamente 12 caracteres." });
     }
     try {
@@ -54,25 +58,7 @@ router.post('/registro', async (req, res) => {
 });
 
 // --- 2. LOGIN DE USUARIOS ---
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const query = `
-            SELECT u.id, u.email, u.password, u.rol, u.estado, p.nombre 
-            FROM usuarios u
-            JOIN perfiles p ON u.id = p.usuario_id
-            WHERE u.email = ?`;
-        const [usuarios] = await db.query(query, [email]);
-        if (usuarios.length === 0) return res.status(401).json({ error: "No registrado." });
-        const usuario = usuarios[0];
-        if (usuario.estado === 'suspendido') return res.status(403).json({ error: "Cuenta suspendida. 🚫" });
-        const coinciden = await bcrypt.compare(password, usuario.password);
-        if (!coinciden) return res.status(401).json({ error: "Contraseña incorrecta." });
-        res.json({ usuarioId: usuario.id, nombre: usuario.nombre, rol: usuario.rol, email: usuario.email });
-    } catch (err) {
-        res.status(500).json({ error: "Error en el servidor." });
-    }
-});
+router.post('/login', iniciarSesion);
 
 // --- 3. OBTENER AJUSTES ---
 router.get('/ajustes/:id', async (req, res) => {
